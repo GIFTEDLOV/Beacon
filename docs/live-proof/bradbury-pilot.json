@@ -1,0 +1,94 @@
+{
+  "status": "FAILED_PREDEPLOYMENT",
+  "network": "testnet-bradbury",
+  "chain_id": 4221,
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "source_sha256": "ab77fd8f762acb86a7d49fbc822bf4b474beec9aeb940789bb672b33d521b8c3",
+  "contract_frozen": true,
+  "public_method_surface": {
+    "writes": ["submit_asset", "evaluate_asset", "challenge_asset", "reassess_asset"],
+    "views": ["asset", "assets", "asset_ids", "asset_count", "current_passport", "passport_by_version", "passport_history", "challenge_records"]
+  },
+  "fee_economics": {
+    "classification": "A_INTENTIONAL_TESTNET_CONTRACT_RETAINED_FEE",
+    "submission_fee_gen": "1",
+    "challenge_fee_gen": "0.25",
+    "destination_behavior": "Successful payable calls retain value in the contract. No refund, withdrawal, transfer, or burn-equivalent method exists in Beacon V1.",
+    "reverted_call_behavior": "GenLayer value-transfer semantics apply; Beacon defines no refund path.",
+    "limitation": "Fixed non-refundable Testnet V1 anti-spam fees are intentionally retained indefinitely unless a future contract version adds an explicitly supported recovery policy."
+  },
+  "deployer": {
+    "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    "balance_before_gen": "13.061279210588273344",
+    "balance_after_gen": "13.060462001704950244"
+  },
+  "objective_sources": {
+    "primary": "CoinGecko /api/v3/coins/{market_identifier}",
+    "secondary": "CoinPaprika /v1/tickers/{secondary_market_identifier}",
+    "usdc_market_identifier": "usd-coin",
+    "usdc_secondary_market_identifier": "usdc-usd-coin",
+    "preflight": "Both exact endpoints returned HTTP 200 with matching USDC identity, USD price, volume, market-cap, and freshness fields."
+  },
+  "semantic_sources": {
+    "issuer": "https://developers.circle.com/circle-mint",
+    "redemption": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+    "reserve_backing": "https://developers.circle.com/stablecoins/what-is-usdc",
+    "security": "https://developers.circle.com/cctp/references/technical-guide",
+    "governance": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
+    "preflight": "All five exact server-rendered official Circle pages returned HTTP 200 and role-relevant content over the external read-only network."
+  },
+  "demo_asset": {
+    "name": "USD Coin",
+    "symbol": "USDC",
+    "chain": "ethereum",
+    "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "target_currency": "USD",
+    "market_identifier": "usd-coin",
+    "secondary_market_identifier": "usdc-usd-coin"
+  },
+  "deployment": {
+    "attempted": true,
+    "tx_hash": "0xb9fa2e251735360738761d80cb9d9fcd264a31fc9d1050b266c166bd60df1e95",
+    "status": "MINED_REVERTED",
+    "execution": "EVM_REVERTED",
+    "receipt_status": "0x0",
+    "block_number": "0x135b99a",
+    "gas_limit": "5000000",
+    "gas_used": "0x481995",
+    "contract_address": null,
+    "consensus_event_found": false
+  },
+  "initial_state": {
+    "status": "NOT_READ_NO_DEPLOYMENT",
+    "asset_count": null,
+    "asset_ids": null,
+    "assets": null
+  },
+  "submit": null,
+  "evaluate": null,
+  "challenge": null,
+  "reassess": null,
+  "failed_attempts": [
+    {
+      "type": "DEPLOYMENT",
+      "method": "SDK_ESTIMATE_FALLBACK",
+      "status": "NOT_MINED",
+      "error": "eth_estimateGas returned BlockPubdataLimitReached; SDK fallback gas 200000 then failed with intrinsic gas too low.",
+      "consensus_hash": null
+    },
+    {
+      "type": "DEPLOYMENT",
+      "method": "EXPLICIT_GAS_RAW_TRANSACTION",
+      "status": "MINED_REVERTED",
+      "tx_hash": "0xb9fa2e251735360738761d80cb9d9fcd264a31fc9d1050b266c166bd60df1e95",
+      "receipt_status": "0x0",
+      "contract_address": null
+    }
+  ],
+  "live_proof_status": "FAIL",
+  "release_blocker": "The sole mined deployment attempt reverted on Bradbury after consuming 0x481995 gas and did not create a contract. No second deployment was broadcast under the one-deployment gate.",
+  "known_limitations": [
+    "Validator receipt evidence will be reported only when the finalized receipt exposes it.",
+    "No submit, evaluate, challenge, or reassess transaction was broadcast because deployment did not finalize successfully."
+  ]
+}
