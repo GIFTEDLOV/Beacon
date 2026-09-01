@@ -48,6 +48,7 @@
   },
   "deployment": {
     "attempted": true,
+    "classification": "FAILED_EVM_PRE_CONSENSUS_BLOCK_PUBDATA_LIMIT",
     "tx_hash": "0xb9fa2e251735360738761d80cb9d9fcd264a31fc9d1050b266c166bd60df1e95",
     "status": "MINED_REVERTED",
     "execution": "EVM_REVERTED",
@@ -68,6 +69,33 @@
   "evaluate": null,
   "challenge": null,
   "reassess": null,
+  "compact_candidate": {
+    "source_sha256": "523db0f2b2f640b912e819e28145ed5dd33a2c50631380465a9ed8baef50a955",
+    "source_bytes": 42870,
+    "serialized_payload_bytes": 42878,
+    "outer_calldata_bytes": 43108,
+    "target_outer_calldata_bytes": 43200,
+    "schema": "12 methods / 4 writes / 8 views; init() has no args",
+    "gen_call_deploy_simulation": "PASS",
+    "eth_estimate_gas": "0x208d738",
+    "deployment_client": "genlayer CLI 0.39.1 with bundled genlayer-js 1.1.8",
+    "deployment_route": "configured Bradbury client initialization followed by client.deployContract({ code, args: [] })"
+  },
+  "pubdata_probe": {
+    "method": "eth_estimateGas with source-shaped high-entropy payloads",
+    "largest_observed_passing_outer_calldata_bytes": 52836,
+    "smallest_observed_failing_outer_calldata_bytes": 53508,
+    "target_outer_calldata_bytes": 43200,
+    "failure": "BlockPubdataLimitReached"
+  },
+  "retry_attempt": {
+    "attempted": true,
+    "submitted": false,
+    "tx_hash": null,
+    "status": "NOT_SUBMITTED",
+    "failure_layer": "PRE_BROADCAST_RPC",
+    "error": "Supported CLI deploy path failed at eth_getTransactionCount with a Bradbury ConnectTimeoutError before signing/broadcast. No retry transaction hash was returned."
+  },
   "failed_attempts": [
     {
       "type": "DEPLOYMENT",
@@ -79,16 +107,18 @@
     {
       "type": "DEPLOYMENT",
       "method": "EXPLICIT_GAS_RAW_TRANSACTION",
+      "classification": "FAILED_EVM_PRE_CONSENSUS_BLOCK_PUBDATA_LIMIT",
       "status": "MINED_REVERTED",
       "tx_hash": "0xb9fa2e251735360738761d80cb9d9fcd264a31fc9d1050b266c166bd60df1e95",
       "receipt_status": "0x0",
       "contract_address": null
     }
   ],
-  "live_proof_status": "FAIL",
-  "release_blocker": "The sole mined deployment attempt reverted on Bradbury after consuming 0x481995 gas and did not create a contract. No second deployment was broadcast under the one-deployment gate.",
+  "live_proof_status": "PARTIAL",
+  "release_blocker": "The compact candidate passed all local and non-broadcast payload gates, but the single supported Bradbury retry failed before signing/broadcast at eth_getTransactionCount with a connection timeout. No contract exists and no retry hash was returned.",
   "known_limitations": [
     "Validator receipt evidence will be reported only when the finalized receipt exposes it.",
-    "No submit, evaluate, challenge, or reassess transaction was broadcast because deployment did not finalize successfully."
+    "No submit, evaluate, challenge, or reassess transaction was broadcast because deployment did not finalize successfully.",
+    "The compact source candidate is not source-parity-proven against a deployed contract because the authorized retry did not broadcast."
   ]
 }
