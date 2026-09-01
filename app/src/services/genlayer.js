@@ -30,11 +30,10 @@ export function createGenLayerClient(account = getAccount()) {
   return createClient({
     chain: simulator,
     ...(account ? { account } : {}),
-    ...(import.meta.env.VITE_GENLAYER_RPC
+    ...(import.meta.env?.VITE_GENLAYER_RPC
       ? { endpoint: import.meta.env.VITE_GENLAYER_RPC }
       : {}),
   });
 }
 
 export const account = getAccount();
-export const client = createGenLayerClient(account);

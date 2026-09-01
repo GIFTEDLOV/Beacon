@@ -88,3 +88,39 @@ test("does not read expected state after non-successful finality", async () => {
   );
   assert.equal(expectedReads, 0);
 });
+
+test("wallet rejection never persists a hash and never retries", async () => {
+  let broadcasts = 0;
+  let persisted = 0;
+  await assert.rejects(executeWriteLifecycle({
+    readPrecondition: async () => {},
+    broadcast: async () => { broadcasts += 1; throw new Error("User rejected wallet confirmation"); },
+    persistHash: async () => { persisted += 1; },
+    reconcile: async () => successReceipt,
+    readExpectedState: async () => ({}),
+  }), /User rejected/);
+  assert.equal(broadcasts, 1);
+  assert.equal(persisted, 0);
+});
+
+test("wrong-network broadcast failure does not rebroadcast", async () => {
+  let broadcasts = 0;
+  await assert.rejects(executeWriteLifecycle({
+    readPrecondition: async () => {},
+    broadcast: async () => { broadcasts += 1; throw new Error("Wrong network"); },
+    persistHash: async () => {}, reconcile: async () => successReceipt, readExpectedState: async () => ({}),
+  }), /Wrong network/);
+  assert.equal(broadcasts, 1);
+});
+
+test("persist failure retains the returned hash for explicit recovery", async () => {
+  let broadcasts = 0;
+  await assert.rejects(executeWriteLifecycle({
+    readPrecondition: async () => {},
+    broadcast: async () => { broadcasts += 1; return "0xpersist"; },
+    persistHash: async () => { throw new Error("local storage unavailable"); },
+    reconcile: async () => successReceipt,
+    readExpectedState: async () => ({}),
+  }), (error) => error instanceof LifecycleError && error.phase === "persist" && error.hash === "0xpersist");
+  assert.equal(broadcasts, 1);
+});

@@ -1,227 +1,77 @@
 <template>
   <div class="shell">
     <header class="topbar">
-      <button class="wordmark" @click="navigate('landing')">
-        <span class="wordmark-mark">B</span><span>BEACON</span>
-      </button>
-      <nav class="nav" aria-label="Primary navigation">
-        <button :class="navClass('registry')" @click="navigate('registry')">Registry</button>
-        <button :class="navClass('submit')" @click="navigate('submit')">Submit asset</button>
-        <button :class="navClass('challenge')" @click="navigate('challenge')">Challenge</button>
-        <button :class="navClass('proof')" @click="navigate('proof')">Live proof</button>
-      </nav>
-      <div class="network-chip"><span class="status-dot"></span>{{ configured ? 'Contract configured' : 'Read-only shell' }}</div>
+      <button class="wordmark" aria-label="Beacon home" @click="navigate('/')"><span class="wordmark-mark">B</span><span>BEACON</span></button>
+      <nav class="nav" aria-label="Primary navigation"><button :class="navClass('registry')" @click="navigate('/assets')">Registry</button><button :class="navClass('submit')" @click="navigate('/submit')">Submit asset</button><button :class="navClass('proof')" @click="navigate('/proof')">Public proof</button></nav>
+      <div class="network-chip"><span class="status-dot"></span>{{ configured ? 'Contract configured' : 'Local read-only shell' }}</div>
     </header>
 
     <main>
-      <section v-if="route === 'landing'" class="hero page-width">
-        <div class="eyebrow">Collateral admission protocol / v0.1</div>
-        <h1>Evidence before exposure.</h1>
-        <p class="hero-copy">Beacon turns independent evidence review into a bounded collateral passport. Validators classify risk. The contract determines the only permitted LTV tier.</p>
-        <div class="hero-actions">
-          <button class="button button-dark" @click="navigate('registry')">Open registry</button>
-          <button class="button button-quiet" @click="navigate('proof')">Inspect live proof -></button>
-        </div>
-        <div class="protocol-strip">
-          <div><strong>8000</strong><span>CORE max LTV bps</span></div>
-          <div><strong>6500</strong><span>STANDARD max LTV bps</span></div>
-          <div><strong>2000</strong><span>WATCH max LTV bps</span></div>
-          <div><strong>0</strong><span>REJECT max LTV bps</span></div>
-        </div>
-        <div class="content-grid landing-grid">
-          <article class="explanatory-card">
-            <span class="label">Protocol specification</span>
-            <h2>Policy is deterministic.</h2>
-            <p>A passport is bounded to peg, liquidity, redemption, backing, admin/governance, security, dependency, and confidence fields. No validator supplies an LTV number.</p>
-          </article>
-          <article class="explanatory-card ruled">
-            <span class="label">Lifecycle</span>
-            <h2>Versioned by design.</h2>
-            <p>SUBMITTED -> EVALUATED -> verdict. A challenge moves the current verdict to CHALLENGED; reassessment writes a new passport version without deleting history.</p>
-          </article>
-        </div>
+      <section v-if="route.name === 'landing'" class="hero page-width">
+        <div class="eyebrow">Collateral admission protocol / versioned risk passports</div>
+        <h1>Know what deserves to back leverage.</h1>
+        <p class="hero-copy">GenLayer validators independently inspect peg, liquidity, redemption, backing, security and governance evidence. Beacon turns the consensus result into a versioned collateral passport and deterministic maximum LTV.</p>
+        <div class="hero-actions"><button class="button button-dark" @click="navigate('/assets')">Explore collateral</button><button class="button button-quiet" @click="navigate('/submit')">Submit asset <span aria-hidden="true">→</span></button></div>
+        <div class="protocol-strip" aria-label="Deterministic LTV tiers"><div><strong>8000</strong><span>CORE max LTV bps</span></div><div><strong>6500</strong><span>STANDARD max LTV bps</span></div><div><strong>2000</strong><span>WATCH max LTV bps</span></div><div><strong>0</strong><span>REJECT max LTV bps</span></div></div>
+        <div class="section-intro"><span class="label">Registry preview</span><span>Contract-derived when configured</span></div>
+        <div v-if="!configured" class="preview-empty">Configure <code>VITE_CONTRACT_ADDRESS</code> to surface live collateral records.</div><div v-else-if="loading" class="preview-empty">Reading live registry…</div><div v-else-if="assets.length === 0" class="preview-empty">No assets have been submitted to this Beacon contract.</div>
+        <div v-else class="preview-list"><button v-for="item in assets.slice(0, 3)" :key="item.asset_id" class="preview-row" @click="openDetail(item.asset_id)"><span><strong>{{ item.name }}</strong><small>{{ item.symbol }} · {{ item.chain }}</small></span><Badge :value="displayState(item.passport).label" /><span class="row-arrow" aria-hidden="true">↗</span></button></div>
+        <div class="content-grid landing-grid"><article class="explanatory-card"><span class="label">How Beacon decides</span><h2>Evidence is classified. Policy is fixed.</h2><p>Validators never choose an LTV. Objective fields are normalized and cross-checked; semantic evidence produces only a bounded risk passport. The contract maps that passport through deterministic safety caps.</p></article><article class="explanatory-card ruled"><span class="label">Versioned governance</span><h2>Every challenge leaves a trail.</h2><p>A submitted asset becomes evaluated, challenged or reassessed without deleting prior passports. Public proof distinguishes on-chain state, validator-derived fields and external evidence.</p></article><article class="explanatory-card"><span class="label">GenLayer role</span><h2>Independent eyes on external evidence.</h2><p>Validators independently fetch the submitted evidence and rerun the bounded semantic rubric. Consensus supplies structured facts; Beacon’s contract remains the policy authority.</p></article><article class="explanatory-card"><span class="label">Trust model</span><h2>Untrusted sources, explicit limits.</h2><p>Source provenance, objective coverage, safety caps and evaluation failures are visible. A favorable business verdict is never allowed to erase a conflict or missing evidence state.</p></article></div>
       </section>
 
-      <section v-else-if="route === 'registry'" class="page-width page-section">
-        <PageHeading eyebrow="Live contract surface" title="Collateral registry" copy="Only values read from the configured Beacon contract appear here." />
-        <div v-if="!configured" class="notice warning">Set VITE_CONTRACT_ADDRESS to read live registry state.</div>
-        <div v-else-if="loading" class="empty-state">Reading contract state...</div>
-        <div v-else-if="error" class="notice error">{{ error }}</div>
-        <div v-else-if="assets.length === 0" class="empty-state">No submitted assets in this contract.</div>
-        <div v-else class="registry-table" role="table" aria-label="Collateral registry">
-          <div class="table-row table-head" role="row"><span>Asset</span><span>Chain / identifier</span><span>Verdict</span><span>Max LTV</span></div>
-          <button v-for="item in assets" :key="item.asset_id" class="table-row table-body" @click="openDetail(item.asset_id)">
-            <span><strong>{{ item.name }}</strong><small>{{ item.symbol }} / {{ item.asset_id }}</small></span>
-            <span>{{ item.chain }}<small>{{ item.token_address }}</small></span>
-            <span><Badge :value="item.current_verdict || item.status" /></span>
-            <span class="ltv">{{ item.current_ltv_bps }} <small>bps</small></span>
-          </button>
-        </div>
+      <section v-else-if="route.name === 'registry'" class="page-width page-section">
+        <PageHeading eyebrow="Live contract surface" title="Collateral registry" copy="A searchable view of Beacon asset records. No illustrative assets are inserted before deployment." />
+        <div v-if="!configured" class="notice warning">Set <code>VITE_CONTRACT_ADDRESS</code> to read the live registry.</div>
+        <template v-else><div class="registry-meta"><span><strong>{{ liveCount }}</strong> asset IDs returned by <code>asset_count()</code></span><span class="source-tag on-chain">ON-CHAIN</span></div><div class="registry-controls"><label class="search-field"><span class="sr-only">Search assets</span><input v-model="search" type="search" placeholder="Search asset, symbol, chain or ID" /></label><label class="filter-field"><span class="sr-only">Filter verdict</span><select v-model="filter"><option v-for="option in filterOptions" :key="option" :value="option">{{ option === 'ALL' ? 'All states' : option.replaceAll('_', ' ') }}</option></select></label></div><div v-if="loading" class="empty-state">Reading asset IDs and current passports…</div><div v-else-if="error" class="notice error">{{ error }}</div><div v-else-if="filteredAssets.length === 0" class="empty-state">{{ assets.length ? 'No assets match this view.' : 'No submitted assets in this contract yet.' }}</div><div v-else class="registry-table-wrap"><table class="registry-table"><caption class="sr-only">Beacon collateral registry</caption><thead><tr><th>Asset</th><th>Chain</th><th>Verdict</th><th>Max LTV</th><th>Peg</th><th>Liquidity</th><th>Redemption</th><th>Security</th><th>Version</th><th>Last evaluated</th></tr></thead><tbody><tr v-for="item in filteredAssets" :key="item.asset_id" tabindex="0" @click="openDetail(item.asset_id)" @keydown.enter="openDetail(item.asset_id)"><td><button class="table-link" @click.stop="openDetail(item.asset_id)"><strong>{{ item.name }}</strong><small>{{ item.symbol }} · {{ item.asset_id }}</small></button></td><td>{{ item.chain }}<small class="address">{{ item.token_address }}</small></td><td><Badge :value="displayState(item.passport).label" /></td><td class="ltv">{{ item.passport?.max_ltv_bps ?? 0 }}<small>bps</small></td><td>{{ item.passport?.peg_risk || '—' }}</td><td>{{ item.passport?.liquidity_risk || '—' }}</td><td>{{ item.passport?.redemption_risk || '—' }}</td><td>{{ item.passport?.security_risk || '—' }}</td><td>v{{ item.passport?.version || 0 }}</td><td>{{ item.passport?.evaluated_at || item.passport?.market_timestamp || '—' }}</td></tr></tbody></table></div></template>
       </section>
 
-      <section v-else-if="route === 'detail'" class="page-width page-section">
-        <button class="back-link" @click="navigate('registry')">Back to registry</button>
-        <PageHeading eyebrow="Live contract surface" :title="detailAsset?.name || 'Passport detail'" :copy="detailAsset ? `${detailAsset.symbol} / ${detailAsset.asset_id}` : 'Read a versioned passport from Beacon.'" />
-        <div v-if="loading" class="empty-state">Reading passport...</div>
-        <div v-else-if="error" class="notice error">{{ error }}</div>
-        <div v-else-if="!detailAsset" class="empty-state">Asset not found in the configured contract.</div>
-        <template v-else>
-          <div class="detail-banner">
-            <div><span class="label">Current verdict</span><Badge :value="detailAsset.current_verdict || detailAsset.status" /></div>
-            <div><span class="label">Maximum LTV</span><strong class="large-number">{{ detailAsset.current_ltv_bps }} <small>bps</small></strong></div>
-            <div><span class="label">Passport version</span><strong class="large-number">v{{ detailPassport?.version || 0 }}</strong></div>
-          </div>
-          <PassportGrid :passport="detailPassport" />
-          <div v-if="writeError" class="notice error">{{ writeError }}</div>
-          <div class="hero-actions">
-            <button v-if="detailAsset.lifecycle_status === 'SUBMITTED'" class="button button-dark" :disabled="writing" @click="evaluateAsset(detailAsset.asset_id)">{{ writing ? 'Broadcasting once...' : 'Evaluate asset' }}</button>
-            <button class="button button-dark" @click="navigate('challenge')">Challenge current version</button>
-            <button class="button button-quiet" @click="navigate('proof')">Open public proof</button>
-          </div>
+      <section v-else-if="route.name === 'detail'" class="page-width page-section">
+        <button class="back-link" @click="navigate('/assets')">← Back to registry</button>
+        <div v-if="!configured" class="notice warning">Set <code>VITE_CONTRACT_ADDRESS</code> to read this passport.</div><div v-else-if="loading" class="empty-state">Reading asset, current passport, version history and challenges…</div><div v-else-if="error" class="notice error">{{ error }}</div><div v-else-if="!detailAsset" class="empty-state">Asset not found in the configured Beacon contract.</div>
+        <template v-else><PageHeading eyebrow="Collateral passport / contract-derived" :title="detailAsset.name" :copy="`${detailAsset.symbol} · ${detailAsset.chain} · ${detailAsset.asset_id}`" /><div class="detail-banner"><div><span class="label">Current verdict</span><Badge :value="displayState(detailPassport).label" /><small v-if="detailPassport?.failure_state && detailPassport.failure_state !== 'NONE'" class="failure-note">Evaluation failed closed: {{ detailPassport.failure_state }}</small></div><div><span class="label">Maximum LTV</span><strong class="large-number">{{ detailPassport?.max_ltv_bps ?? 0 }} <small>bps</small></strong></div><div><span class="label">Current passport</span><strong class="large-number">v{{ detailPassport?.version || 0 }}</strong></div><div><span class="label">Confidence</span><strong class="large-number compact-number">{{ detailPassport?.confidence || '—' }}</strong></div></div><div class="state-legend"><span class="source-tag on-chain">ON-CHAIN</span> asset identity, verdict, LTV and version pointers <span class="source-tag validator">VALIDATOR-DERIVED</span> passport dimensions and failure status <span class="source-tag external">EXTERNAL EVIDENCE</span> linked source material</div>
+          <section class="panel"><div class="section-intro"><span class="label">Risk passport</span><span>Bounded contract fields</span></div><div v-if="detailPassport?.version" class="risk-grid"><div v-for="field in riskFields" :key="field.key" class="risk-cell"><small>{{ field.label }}</small><strong :class="riskClass(detailPassport[field.key])">{{ detailPassport[field.key] ?? 'UNKNOWN' }}</strong></div></div><div v-else class="empty-state">No finalized passport has been written yet.</div></section>
+          <div class="two-column"><section class="panel"><div class="section-intro"><span class="label">Objective evidence</span><span class="source-tag validator">VALIDATOR-DERIVED</span></div><dl class="facts"><div><dt>Coverage</dt><dd>{{ detailPassport?.objective_coverage || '—' }}</dd></div><div><dt>Primary</dt><dd>{{ detailPassport?.primary_source_status || '—' }}</dd></div><div><dt>Secondary</dt><dd>{{ detailPassport?.secondary_source_status || '—' }}</dd></div><div><dt>Peg deviation</dt><dd>{{ detailPassport?.peg_deviation_bps ?? '—' }} bps</dd></div><div><dt>Secondary deviation</dt><dd>{{ detailPassport?.secondary_peg_deviation_bps ?? '—' }} bps</dd></div><div><dt>Market timestamp</dt><dd>{{ detailPassport?.market_timestamp || '—' }}</dd></div></dl></section><section class="panel"><div class="section-intro"><span class="label">Policy trace</span><span class="source-tag on-chain">ON-CHAIN</span></div><dl class="facts"><div><dt>Safety cap</dt><dd>{{ detailPassport?.safety_cap || '—' }}</dd></div><div><dt>Policy basis</dt><dd>{{ detailPassport?.policy_basis || '—' }}</dd></div><div><dt>Failure state</dt><dd>{{ detailPassport?.failure_state || 'NOT_EVALUATED' }}</dd></div><div><dt>Evidence digest</dt><dd><code class="break-code">{{ detailPassport?.evidence_digest || '—' }}</code></dd></div><div><dt>Challenge trigger</dt><dd><code class="break-code">{{ detailPassport?.trigger_challenge_id || 'Initial evaluation' }}</code></dd></div></dl></section></div>
+          <section class="panel"><div class="section-intro"><span class="label">Semantic source provenance</span><span class="source-tag validator">VALIDATOR-DERIVED</span></div><div class="provenance-grid"><div v-for="field in provenanceFields" :key="field.key"><span>{{ field.label }}</span><strong>{{ detailPassport?.[field.key] || 'UNKNOWN' }}</strong></div></div></section><section class="panel"><div class="section-intro"><span class="label">Evidence sources</span><span class="source-tag external">EXTERNAL EVIDENCE / UNTRUSTED</span></div><div class="source-list"><a v-for="source in evidenceSources" :key="source.label" :href="source.url" target="_blank" rel="noreferrer noopener"><span>{{ source.label }}</span><code>{{ source.url }}</code><span aria-hidden="true">↗</span></a></div></section>
+          <div class="two-column"><section class="panel"><div class="section-intro"><span class="label">Passport history</span><span>Immutable versions</span></div><div v-if="historyRows.length" class="history-list"><div v-for="passport in historyRows" :key="passport.version" class="history-row"><span><strong>v{{ passport.version }}</strong><small>{{ passport.evaluated_at || passport.market_timestamp || 'timestamp unavailable' }}</small></span><Badge :value="displayState(passport).label" /><span>{{ passport.max_ltv_bps }} bps</span></div></div><div v-else class="empty-state">No passport history is available.</div></section><section class="panel"><div class="section-intro"><span class="label">Challenge history</span><span>Immutable records</span></div><div v-if="challengeRows.length" class="history-list"><div v-for="challenge in challengeRows" :key="challenge.challenge_id" class="challenge-row"><span><strong>{{ challenge.category }}</strong><small>v{{ challenge.target_version }} · {{ challenge.status }}</small></span><span>{{ challenge.reason }}</span></div></div><div v-else class="empty-state">No challenges recorded.</div></section></div>
+          <div v-if="writeError" class="notice error">{{ writeError }}</div><div class="hero-actions compact-actions"><button v-if="detailAsset.lifecycle_status === 'SUBMITTED'" class="button button-dark" :disabled="writing" @click="evaluateAsset(detailAsset.asset_id)">{{ writing ? 'Preparing evaluation…' : 'Evaluate asset' }}</button><button v-if="detailPassport?.version" class="button button-quiet" @click="navigate(`/assets/${encodeURIComponent(detailAsset.asset_id)}/challenge`)">Challenge current version</button><button class="button button-quiet" @click="navigate('/proof')">Open public proof</button></div>
         </template>
       </section>
 
-      <section v-else-if="route === 'submit'" class="page-width page-section form-section">
-        <PageHeading eyebrow="Write surface" title="Submit an asset" copy="Submission creates a SUBMITTED record. It does not grant collateral eligibility until evaluation is finalized." />
-        <form class="form-card" @submit.prevent="submitAsset">
-          <div class="form-grid">
-            <Field v-model="form.name" label="Name" required /><Field v-model="form.symbol" label="Symbol" required />
-            <Field v-model="form.chain" label="Chain" required /><Field v-model="form.token_address" label="Token address" required />
-            <Field v-model="form.target_currency" label="Target currency" required /><Field v-model="form.market_identifier" label="Market identifier" required />
-            <Field v-model="form.issuer_url" label="Issuer URL" type="url" required /><Field v-model="form.redemption_url" label="Redemption URL" type="url" required />
-            <Field v-model="form.reserve_backing_url" label="Reserve / backing URL" type="url" required /><Field v-model="form.security_url" label="Security URL" type="url" required />
-            <Field v-model="form.governance_url" label="Governance URL" type="url" required />
-          </div>
-          <p class="form-note">Submitted URLs are untrusted evidence. Beacon accepts HTTPS sources with public-looking hostnames, but does not treat issuer claims as authenticated.</p>
-          <div v-if="writeError" class="notice error">{{ writeError }}</div>
-          <button class="button button-dark" :disabled="writing">{{ writing ? 'Broadcasting once...' : 'Submit asset' }}</button>
-        </form>
-      </section>
+      <section v-else-if="route.name === 'submit'" class="page-width page-section form-section"><PageHeading eyebrow="Write surface" title="Submit an asset" copy="A guided registration flow for a persistent public collateral record. Submission does not grant collateral eligibility until evaluation completes." /><ol class="stepper" aria-label="Submission steps"><li v-for="(step, index) in submitSteps" :key="step" :class="{ active: submitStep === index + 1, complete: submitStep > index + 1 }"><span>{{ index + 1 }}</span>{{ step }}</li></ol><form v-if="submitStep < 5" class="form-card" @submit.prevent="advanceSubmit"><div v-if="submitStep === 1" class="form-panel"><div class="form-panel-heading"><span class="label">Step 1 / asset identity</span><h2>What is being admitted?</h2></div><div class="form-grid"><Field v-model="form.name" label="Name" required /><Field v-model="form.symbol" label="Symbol" required /><Field v-model="form.chain" label="Chain" required /><Field v-model="form.token_address" label="Token address" required /></div></div><div v-else-if="submitStep === 2" class="form-panel"><div class="form-panel-heading"><span class="label">Step 2 / market identity</span><h2>Which objective sources identify it?</h2></div><div class="form-grid"><Field v-model="form.target_currency" label="Target currency" required /><Field v-model="form.market_identifier" label="Primary market identifier" required /><Field v-model="form.secondary_market_identifier" label="Secondary market identifier" required /></div><p class="form-note">Beacon uses CoinGecko as the primary objective feed and CoinPaprika as the independent secondary feed where supported. Identifiers are checked against returned symbol and asset identity.</p></div><div v-else-if="submitStep === 3" class="form-panel"><div class="form-panel-heading"><span class="label">Step 3 / evidence sources</span><h2>Assign one source to each role.</h2></div><div class="form-grid"><Field v-model="form.issuer_url" label="Issuer URL" type="url" required /><Field v-model="form.redemption_url" label="Redemption URL" type="url" required /><Field v-model="form.reserve_backing_url" label="Reserve / backing URL" type="url" required /><Field v-model="form.security_url" label="Security URL" type="url" required /><Field v-model="form.governance_url" label="Governance URL" type="url" required /></div><p class="form-note">HTTPS is required. Sources are bounded, role-bound and treated as untrusted evidence. Beacon does not accept a submitter declaration of independence as fact.</p></div><div v-else class="form-panel"><div class="form-panel-heading"><span class="label">Step 4 / review</span><h2>Register the evidence bundle.</h2></div><dl class="review-list"><div><dt>Asset</dt><dd>{{ form.name }} / {{ form.symbol }} on {{ form.chain }}</dd></div><div><dt>Objective feeds</dt><dd>{{ form.market_identifier }} + {{ form.secondary_market_identifier }}</dd></div><div><dt>Testnet V1 registration fee</dt><dd><strong>1 GEN</strong> exact, fixed, non-refundable</dd></div></dl><p class="form-note">The fee is an anti-spam registration fee held by the protocol for Testnet V1. It is not a collateral deposit or reward.</p></div><div v-if="formErrors.length" class="notice error"><div v-for="message in formErrors" :key="message">{{ message }}</div></div><div class="form-actions"><button v-if="submitStep > 1" type="button" class="button button-quiet" @click="submitStep -= 1">Back</button><button class="button button-dark" :disabled="writing">{{ submitStep === 4 ? 'Confirm and submit once' : 'Continue' }}</button></div></form><div v-else class="form-card transaction-card"><div class="form-panel-heading"><span class="label">Step 5 / transaction</span><h2>Registration status</h2></div><p class="form-note">Beacon broadcasts once. If reconciliation is ambiguous, use Check again with the same saved hash.</p></div></section>
 
-      <section v-else-if="route === 'challenge'" class="page-width page-section form-section">
-        <PageHeading eyebrow="Governance surface" title="Challenge or reassess" copy="A challenge must target the current finalized passport version. Reassessment creates a new version; prior versions remain readable." />
-        <div v-if="!configured" class="notice warning">Set VITE_CONTRACT_ADDRESS before using write surfaces.</div>
-        <form v-else class="form-card" @submit.prevent="challengeAsset">
-          <Field v-model="challengeForm.asset_id" label="Asset ID" placeholder="chain:token-address" required />
-          <Field v-model="challengeForm.reason" label="Challenge reason" type="textarea" required />
-          <div v-if="writeError" class="notice error">{{ writeError }}</div>
-          <button class="button button-dark" :disabled="writing">{{ writing ? 'Broadcasting once...' : 'Challenge current passport' }}</button>
-        </form>
-        <div class="reassess-card">
-          <div><span class="label">Reassessment</span><h2>After a challenge is finalized</h2><p>Use the same hash reconciliation lifecycle to request the next passport version.</p></div>
-          <button class="button button-quiet" :disabled="writing || !challengeForm.asset_id" @click="reassessAsset">Reassess asset</button>
-        </div>
-      </section>
+      <section v-else-if="route.name === 'challenge'" class="page-width page-section form-section"><button class="back-link" @click="navigate(`/assets/${encodeURIComponent(route.assetId)}`)">← Back to passport</button><PageHeading eyebrow="Governance surface" title="Challenge a passport" :copy="challengeAssetState ? `${challengeAssetState.name} / current v${challengePassport?.version || 0}` : 'A challenge must target the current finalized passport version.'" /><div v-if="!configured" class="notice warning">Set <code>VITE_CONTRACT_ADDRESS</code> before using write surfaces.</div><div v-else-if="challengeLoading" class="empty-state">Reading the current passport…</div><div v-else-if="challengeError" class="notice error">{{ challengeError }}</div><form v-else class="form-card" @submit.prevent="submitChallenge"><div class="challenge-target"><span class="label">Target / on-chain</span><code>{{ route.assetId }}</code><span v-if="challengePassport">v{{ challengePassport.version }} · {{ challengePassport.verdict || challengePassport.failure_state }}</span></div><div class="form-grid"><label class="field"><span class="field-label">Challenge category *</span><select v-model="challengeForm.category" class="field-input" required><option disabled value="">Choose a category</option><option v-for="category in categories" :key="category" :value="category">{{ category }}</option></select></label><Field v-model="challengeForm.evidence_url" label="New evidence URL" type="url" required /></div><Field v-model="challengeForm.reason" label="Reason" type="textarea" required /><p class="form-note">Challenge fee: <strong>0.25 GEN</strong> exact, fixed, non-refundable Testnet V1 anti-spam fee. Reassessment creates a new passport version and keeps this record immutable.</p><div v-if="challengeErrors.length" class="notice error"><div v-for="message in challengeErrors" :key="message">{{ message }}</div></div><div v-if="writeError" class="notice error">{{ writeError }}</div><div class="form-actions"><button class="button button-dark" :disabled="writing">{{ writing ? 'Preparing challenge…' : 'Challenge v' + (challengePassport?.version || '?') }}</button><button type="button" class="button button-quiet" :disabled="writing || !challengePassport || challengeAssetState?.lifecycle_status !== 'CHALLENGED'" @click="reassessAsset(route.assetId)">Reassess current challenge</button></div></form></section>
 
-      <section v-else-if="route === 'proof'" class="page-width page-section">
-        <PageHeading eyebrow="Public verification" title="Live proof" copy="Contract-derived state is marked live, and protocol explanation is marked specification." />
-        <div class="proof-layout">
-          <div class="proof-card">
-            <span class="label live-label">LIVE CONTRACT DATA</span>
-            <div v-if="!configured" class="empty-state">No contract address configured.</div>
-            <div v-else-if="loading" class="empty-state">Reading live proof...</div>
-            <div v-else-if="error" class="notice error">{{ error }}</div>
-            <template v-else>
-              <div class="proof-number">{{ liveCount }} <small>assets recorded</small></div>
-              <div class="proof-line"><span>Contract</span><code>{{ contractAddress }}</code></div>
-              <div class="proof-line"><span>Read method</span><code>asset_count()</code></div>
-              <div class="proof-line"><span>Source</span><span>Beacon Intelligent Contract</span></div>
-            </template>
-          </div>
-          <div class="proof-card explanatory-card">
-            <span class="label">Protocol specification</span>
-            <h2>How the proof is produced</h2>
-            <p>Objective market fields are normalized and compared with strict equality. Semantic evidence is independently fetched by validators and checked with a bounded custom leader/validator pattern.</p>
-            <p>The final verdict is mapped on contract from the risk passport and safety caps. No frontend value is a policy input.</p>
-          </div>
-        </div>
-      </section>
+      <section v-else-if="route.name === 'proof'" class="page-width page-section"><PageHeading eyebrow="Public verification" title="Live proof" copy="A future proof surface for deployment, transaction, validator and passport evidence. It never fabricates live proof before deployment." /><div class="proof-layout"><div class="proof-card"><span class="label live-label">LIVE CONTRACT DATA</span><div v-if="!configured" class="empty-state">No deployment configured. This surface is intentionally empty.</div><div v-else-if="loading" class="empty-state">Reading contract proof…</div><div v-else-if="error" class="notice error">{{ error }}</div><template v-else><div class="proof-number">{{ liveCount }} <small>asset IDs returned</small></div><div class="proof-line"><span>Deployment</span><code>{{ contractAddress }}</code></div><div class="proof-line"><span>Registry source</span><code>asset_count()</code></div></template></div><div class="proof-card explanatory-card"><span class="label">Proof schema / specification</span><h2>What will be published</h2><div class="proof-checklist"><div><span>01</span><strong>Deployment</strong><small>network, address and source hash</small></div><div><span>02</span><strong>Transactions</strong><small>persisted hashes and finalized receipts</small></div><div><span>03</span><strong>Validator result</strong><small>bounded consensus and failure state</small></div><div><span>04</span><strong>Passport versions</strong><small>immutable history and challenge links</small></div></div><p>Only contract-derived values are marked live. Explanatory protocol text remains specification.</p></div></div></section>
+      <section v-else class="page-width page-section"><PageHeading eyebrow="Beacon" title="Surface not found" copy="Return to the collateral registry or Beacon home." /><button class="button button-dark" @click="navigate('/')">Go home</button></section>
     </main>
-    <footer class="footer page-width"><span>BEACON / collateral admission</span><span>Read-only until a contract address is configured</span></footer>
+    <footer class="footer page-width"><span>BEACON / collateral admission</span><span>Testnet V1 · no live deployment in this build</span></footer><TransactionStatus :state="tx" @close="tx.open = false" @recover="recoverWrite" />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
-import Badge from "./components/Badge.vue";
-import Field from "./components/Field.vue";
-import PageHeading from "./components/PageHeading.vue";
-import PassportGrid from "./components/PassportGrid.vue";
-import BeaconRegistry from "./services/beacon.js";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
+import Badge from "./components/Badge.vue"; import Field from "./components/Field.vue"; import PageHeading from "./components/PageHeading.vue"; import TransactionStatus from "./components/TransactionStatus.vue";
+import BeaconRegistry, { CHALLENGE_CATEGORIES as CONTRACT_CATEGORIES } from "./services/beacon.js";
+import { filterRegistry, parseBeaconPath, passportDisplayState, validateChallengeInput, validateSubmissionFields } from "./services/presentation.js";
 
-const registry = new BeaconRegistry();
-const contractAddress = registry.contractAddress;
-const configured = computed(() => registry.isConfigured());
-const route = ref(readRoute());
-const assets = ref([]);
-const liveCount = ref(0);
-const detailAsset = ref(null);
-const detailPassport = ref(null);
-const loading = ref(false);
-const writing = ref(false);
-const error = ref("");
-const writeError = ref("");
-const form = reactive(registry.emptySubmission());
-const challengeForm = reactive({ asset_id: "", reason: "" });
-
-function readRoute() {
-  const value = decodeURIComponent(window.location.hash.slice(1) || "landing");
-  return value.startsWith("passport/") ? "detail" : value;
-}
-function navigate(next) {
-  window.location.hash = next;
-  route.value = next.startsWith("passport/") ? "detail" : next;
-  if (route.value === "registry" || route.value === "proof") loadRegistry();
-  if (route.value === "detail") loadDetail(decodeURIComponent(next.slice("passport/".length)));
-}
-function navClass(name) { return { "nav-active": route.value === name }; }
-function openDetail(assetId) { navigate(`passport/${encodeURIComponent(assetId)}`); }
-async function loadRegistry() {
-  if (!configured.value) return;
-  loading.value = true; error.value = "";
-  try {
-    liveCount.value = await registry.assetCount();
-    const ids = await registry.assetIds();
-    assets.value = await Promise.all(ids.map((id) => registry.asset(id)));
-  } catch (cause) { error.value = cause.message || "Unable to read the Beacon contract."; }
-  finally { loading.value = false; }
-}
-async function loadDetail(assetId) {
-  if (!configured.value) return;
-  loading.value = true; error.value = "";
-  try { detailAsset.value = await registry.asset(assetId); detailPassport.value = await registry.currentPassport(assetId); }
-  catch (cause) { error.value = cause.message || "Unable to read the passport."; }
-  finally { loading.value = false; }
-}
-async function submitAsset() {
-  writing.value = true; writeError.value = "";
-  try { const result = await registry.submitAsset({ ...form }); openDetail(result.state.asset_id); }
-  catch (cause) { writeError.value = cause.message || "Submission failed; no automatic rebroadcast was attempted."; }
-  finally { writing.value = false; }
-}
-async function evaluateAsset(assetId) {
-  writing.value = true; writeError.value = "";
-  try { await registry.evaluateAsset(assetId); await loadDetail(assetId); }
-  catch (cause) { writeError.value = cause.message || "Evaluation failed; no automatic rebroadcast was attempted."; }
-  finally { writing.value = false; }
-}
-async function challengeAsset() {
-  writing.value = true; writeError.value = "";
-  try { await registry.challengeAsset(challengeForm.asset_id, challengeForm.reason); await loadDetail(challengeForm.asset_id); }
-  catch (cause) { writeError.value = cause.message || "Challenge failed; no automatic rebroadcast was attempted."; }
-  finally { writing.value = false; }
-}
-async function reassessAsset() {
-  writing.value = true; writeError.value = "";
-  try { await registry.reassessAsset(challengeForm.asset_id); await loadDetail(challengeForm.asset_id); }
-  catch (cause) { writeError.value = cause.message || "Reassessment failed; no automatic rebroadcast was attempted."; }
-  finally { writing.value = false; }
-}
-function syncRoute() {
-  const hash = window.location.hash.slice(1);
-  route.value = hash.startsWith("passport/") ? "detail" : hash || "landing";
-  if (route.value === "registry" || route.value === "proof") loadRegistry();
-  if (route.value === "detail") loadDetail(decodeURIComponent(hash.slice("passport/".length)));
-}
-onMounted(() => { window.addEventListener("hashchange", syncRoute); syncRoute(); });
+const registry = new BeaconRegistry(); const contractAddress = registry.contractAddress; const configured = computed(() => registry.isConfigured()); const route = ref(parseBeaconPath(window.location.pathname));
+const assets = ref([]); const liveCount = ref(0); const loading = ref(false); const error = ref(""); const detailAsset = ref(null); const detailPassport = ref(null); const historyRows = ref([]); const challengeRows = ref([]); const challengeAssetState = ref(null); const challengePassport = ref(null); const challengeLoading = ref(false); const challengeError = ref(""); const writing = ref(false); const writeError = ref(""); const search = ref(""); const filter = ref("ALL"); const submitStep = ref(1); const form = reactive(registry.emptySubmission()); const challengeForm = reactive({ category: "", reason: "", evidence_url: "" }); const tx = reactive({ open: false, phase: "", operation: "", hash: "", error: "", recoverable: false }); const recovery = ref(null);
+const categories = CONTRACT_CATEGORIES; const filterOptions = ["ALL", "CORE", "STANDARD", "WATCH", "REJECT", "EVALUATION_FAILURE"]; const submitSteps = ["Identity", "Market", "Evidence", "Review", "Transaction"]; const riskFields = [{ key: "peg_risk", label: "Peg risk" }, { key: "liquidity_risk", label: "Liquidity risk" }, { key: "redemption_risk", label: "Redemption risk" }, { key: "backing_risk", label: "Backing risk" }, { key: "admin_governance_risk", label: "Admin / governance" }, { key: "security_risk", label: "Security risk" }, { key: "dependency_risk", label: "Dependency risk" }, { key: "redemption_status", label: "Redemption status" }, { key: "critical_security_incident", label: "Critical incident" }, { key: "algorithmic_backing", label: "Algorithmic backing" }, { key: "severe_instability", label: "Severe instability" }]; const provenanceFields = [{ key: "issuer_provenance", label: "Issuer" }, { key: "redemption_provenance", label: "Redemption" }, { key: "backing_provenance", label: "Backing" }, { key: "security_provenance", label: "Security" }, { key: "governance_provenance", label: "Governance" }]; const filteredAssets = computed(() => filterRegistry(assets.value, search.value, filter.value)); const formErrors = computed(() => validateSubmissionFields(form, submitStep.value === 4 ? 0 : submitStep.value)); const challengeErrors = computed(() => validateChallengeInput(challengeForm)); const displayState = (passport) => passportDisplayState(passport); const navClass = (name) => ({ "nav-active": route.value.name === name }); const openDetail = (id) => navigate(`/assets/${encodeURIComponent(id)}`); const evidenceSources = computed(() => detailAsset.value ? [{ label: "Issuer", url: detailAsset.value.issuer_url }, { label: "Redemption", url: detailAsset.value.redemption_url }, { label: "Reserve / backing", url: detailAsset.value.reserve_backing_url }, { label: "Security", url: detailAsset.value.security_url }, { label: "Governance", url: detailAsset.value.governance_url }] : []);
+function riskClass(value) { return String(value || "unknown").toLowerCase().replaceAll("_", "-"); }
+function navigate(path) { window.history.pushState({}, "", path); syncRoute(); window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
+function syncRoute() { route.value = parseBeaconPath(window.location.pathname); error.value = ""; writeError.value = ""; if (["registry", "landing", "proof"].includes(route.value.name)) loadRegistry(); if (route.value.name === "detail") loadDetail(route.value.assetId); if (route.value.name === "challenge") loadChallenge(route.value.assetId); }
+async function loadRegistry() { if (!configured.value) return; loading.value = true; error.value = ""; try { liveCount.value = Number(await registry.assetCount()); const ids = await registry.assetIds(); assets.value = await Promise.all(ids.map(async (id) => ({ ...(await registry.asset(id)), passport: await registry.currentPassport(id) }))); } catch (cause) { error.value = cause.message || "Unable to read the Beacon contract."; } finally { loading.value = false; } }
+async function loadDetail(id) { if (!configured.value) return; loading.value = true; error.value = ""; detailAsset.value = null; try { const [asset, passport, history, challenges] = await Promise.all([registry.asset(id), registry.currentPassport(id), registry.passportHistory(id), registry.challengeRecords(id)]); detailAsset.value = Object.keys(asset || {}).length ? asset : null; detailPassport.value = passport; historyRows.value = Object.values(history || {}).sort((a, b) => Number(a.version) - Number(b.version)); challengeRows.value = Object.values(challenges || {}); } catch (cause) { error.value = cause.message || "Unable to read the passport."; } finally { loading.value = false; } }
+async function loadChallenge(id) { if (!configured.value) return; challengeLoading.value = true; challengeError.value = ""; try { const [asset, passport] = await Promise.all([registry.asset(id), registry.currentPassport(id)]); challengeAssetState.value = Object.keys(asset || {}).length ? asset : null; challengePassport.value = passport; challengeForm.category = ""; } catch (cause) { challengeError.value = cause.message || "Unable to read the current passport."; } finally { challengeLoading.value = false; } }
+function beginTx(operation, id) { tx.open = true; tx.phase = "Preparing"; tx.operation = operation; tx.hash = ""; tx.error = ""; tx.recoverable = false; writing.value = true; }
+function setRecovery(operation, id, expected) { recovery.value = { operation, id, expected }; }
+async function finishTx(result, path = "") { tx.hash = result.hash || ""; tx.phase = "State verified"; tx.recoverable = false; writing.value = false; if (path) navigate(path); }
+async function runWrite(operation, id, fn, expected, path = "") { beginTx(operation, id); setRecovery(operation, id, expected); try { tx.phase = "Wallet confirmation"; const result = await fn(); tx.phase = "Finalized"; await new Promise((resolve) => setTimeout(resolve, 120)); await finishTx(result, path); } catch (cause) { writing.value = false; tx.phase = cause?.phase === "reconcile" ? "Check again" : "Unable to complete"; tx.error = cause.message || "The transaction did not complete; no automatic rebroadcast was attempted."; tx.hash = cause.hash || tx.hash; tx.recoverable = Boolean(cause.hash || recovery.value); writeError.value = tx.error; } }
+async function recoverWrite() { if (!recovery.value) return; tx.phase = "Check again"; tx.error = ""; tx.recoverable = false; try { const result = await registry.recover(recovery.value.operation, recovery.value.id, recovery.value.expected); tx.hash = result.hash || tx.hash; tx.phase = "State verified"; if (route.value.name === "detail") await loadDetail(route.value.assetId); if (route.value.name === "challenge") await loadChallenge(route.value.assetId); } catch (cause) { tx.phase = "Check again"; tx.error = cause.message || "The saved transaction is not finalized successfully yet."; tx.recoverable = true; } }
+function advanceSubmit() { if (formErrors.value.length) return; if (submitStep.value < 4) { submitStep.value += 1; return; } const id = `${form.chain.toLowerCase()}:${form.token_address.startsWith("0x") ? form.token_address.toLowerCase() : form.token_address}`; runWrite("submit_asset", id, () => registry.submitAsset({ ...form }), () => registry.asset(id), `/assets/${encodeURIComponent(id)}`); submitStep.value = 5; }
+function evaluateAsset(id) { runWrite("evaluate_asset", id, () => registry.evaluateAsset(id), () => registry.currentPassport(id)); }
+function submitChallenge() { if (challengeErrors.value.length) return; const id = route.value.assetId; runWrite("challenge_asset", id, () => registry.challengeAsset(id, challengeForm.category, challengeForm.reason, challengeForm.evidence_url), () => registry.asset(id)); }
+function reassessAsset(id) { runWrite("reassess_asset", id, () => registry.reassessAsset(id), () => registry.currentPassport(id)); }
+watch(() => tx.phase, (phase) => { if (phase === "State verified") { if (["registry", "landing", "proof"].includes(route.value.name)) loadRegistry(); if (route.value.name === "detail") loadDetail(route.value.assetId); } });
+onMounted(() => { window.addEventListener("popstate", syncRoute); syncRoute(); }); onUnmounted(() => window.removeEventListener("popstate", syncRoute));
 </script>
