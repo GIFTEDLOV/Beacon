@@ -72,7 +72,9 @@
             <div><span class="label">Passport version</span><strong class="large-number">v{{ detailPassport?.version || 0 }}</strong></div>
           </div>
           <PassportGrid :passport="detailPassport" />
+          <div v-if="writeError" class="notice error">{{ writeError }}</div>
           <div class="hero-actions">
+            <button v-if="detailAsset.lifecycle_status === 'SUBMITTED'" class="button button-dark" :disabled="writing" @click="evaluateAsset(detailAsset.asset_id)">{{ writing ? 'Broadcasting once...' : 'Evaluate asset' }}</button>
             <button class="button button-dark" @click="navigate('challenge')">Challenge current version</button>
             <button class="button button-quiet" @click="navigate('proof')">Open public proof</button>
           </div>
@@ -195,6 +197,12 @@ async function submitAsset() {
   writing.value = true; writeError.value = "";
   try { const result = await registry.submitAsset({ ...form }); openDetail(result.state.asset_id); }
   catch (cause) { writeError.value = cause.message || "Submission failed; no automatic rebroadcast was attempted."; }
+  finally { writing.value = false; }
+}
+async function evaluateAsset(assetId) {
+  writing.value = true; writeError.value = "";
+  try { await registry.evaluateAsset(assetId); await loadDetail(assetId); }
+  catch (cause) { writeError.value = cause.message || "Evaluation failed; no automatic rebroadcast was attempted."; }
   finally { writing.value = false; }
 }
 async function challengeAsset() {
