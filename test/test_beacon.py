@@ -716,6 +716,47 @@ def test_objective_validator_uses_numeric_tolerance_and_ignores_timestamps(
         ) is False
 
 
+def test_v3_live_turnover_regression_matches_bands_not_raw_values(
+    direct_vm, direct_deploy, monkeypatch
+):
+    import sys
+    contract = direct_deploy("contracts/beacon.py")
+    submit(direct_vm, contract)
+    evaluate_with(contract, direct_vm)
+    module = sys.modules["_contract_beacon"]
+    with direct_vm.activate():
+        leader = module._objective_bundle(
+            "beacon-dollar", "beacon-dollar-secondary", "BUSD", "USD"
+        )
+    independent = dict(leader)
+    leader["liquidity_turnover_bps"] = 2068
+    leader["secondary_liquidity_turnover_bps"] = 2425
+    independent["liquidity_turnover_bps"] = 2036
+    independent["secondary_liquidity_turnover_bps"] = 1906
+    leader["liquidity_risk"] = "LOW"
+    independent["liquidity_risk"] = "LOW"
+    monkeypatch.setattr(module, "_objective_bundle", lambda *args: independent)
+    with direct_vm.activate():
+        wrapped = module.gl.vm.Return(calldata=leader)
+        assert module._objective_validator(
+            "beacon-dollar",
+            "beacon-dollar-secondary",
+            "BUSD",
+            "USD",
+            wrapped,
+        ) is True
+
+        leader["liquidity_risk"] = "HIGH"
+        wrapped = module.gl.vm.Return(calldata=leader)
+        assert module._objective_validator(
+            "beacon-dollar",
+            "beacon-dollar-secondary",
+            "BUSD",
+            "USD",
+            wrapped,
+        ) is False
+
+
 def test_semantic_validator_is_source_grounded_not_full_dictionary_equality(
     direct_vm, direct_deploy
 ):

@@ -467,17 +467,8 @@ def _objective_snapshot(
   )
  except Exception:
   return json.dumps(_failure(CONSENSUS_VALIDATION_FAILURE),sort_keys=True)
-def _rendered_text(value):
- if isinstance(value,str):
-  return value
- if isinstance(value,dict):
-  if isinstance(value.get("text"),str):
-   return value["text"]
-  ok=value.get("ok")
-  if isinstance(ok,dict)and isinstance(ok.get("text"),str):
-   return ok["text"]
- return _body_text(value)
 def _reduce_evidence(text,role):
+ text=re.sub(r"(?is)<(?:script|style|noscript)[^>]*>.*?</(?:script|style|noscript)>"," ",text)
  text=re.sub(r"<[^>]{1,200}>"," ",text)
  text=re.sub(r"\s+"," ",text).strip()
  if len(text)<=MAX_SEMANTIC_EVIDENCE_LENGTH:
@@ -505,7 +496,7 @@ def _fetch_evidence(url,role):
   status=_status_code(response)
   if status>=500:return _failure(EVIDENCE_UNAVAILABLE)
   if status>=400:return _failure(INVALID_SOURCE)
-  text=_rendered_text(gl.nondet.web.render(url,mode="text"))
+  text=_body_text(response)
   if not isinstance(text,str)or not text.strip():return _failure(INSUFFICIENT_EVIDENCE)
   return _reduce_evidence(text,role)
  except Exception:
@@ -684,10 +675,8 @@ def _objective_validator(
  for key in(
   "price_micro_units",
   "peg_deviation_bps",
-  "liquidity_turnover_bps",
   "secondary_price_micro_units",
   "secondary_peg_deviation_bps",
-  "secondary_liquidity_turnover_bps",
  ):
   if key in proposed or key in independent:
    if not _within_bps(
