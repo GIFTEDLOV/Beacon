@@ -1,5 +1,3 @@
 {
-  "buildCommand": "echo Beacon release uses the validated Vite artifact",
-  "outputDirectory": "dist",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
