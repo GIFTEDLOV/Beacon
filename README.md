@@ -49,6 +49,7 @@ Passports are versioned and prior versions are immutable. Challenges target a sp
 
 Canonical release proof is V4 on Testnet Bradbury:
 
+- Public app: https://beacon-rho-brown.vercel.app
 - Contract: `0xaA0EEB41C30C54104F4106E06acCF4395Ec96b54`
 - Source SHA-256: `5f99961a335247b4b108cdb7a575d356242461fbec411fd10c207018331a809d`
 - Deployment transaction: `0xc5dacaf4e67b4cb8fec89d6d13677f4bedf636ab7a65cd05290262b3b16cb1a4`
