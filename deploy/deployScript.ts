@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { TransactionHash, TransactionStatus, GenLayerClient } from "genlayer-js/types";
+import type { GenLayerClient } from "genlayer-js/types";
 
 
 export default async function main(client: GenLayerClient<any>) {
@@ -19,8 +19,8 @@ export default async function main(client: GenLayerClient<any>) {
     console.log("DEPLOYMENT_TX_HASH", deployTransaction);
 
     const receipt = await client.waitForTransactionReceipt({
-      hash: deployTransaction as TransactionHash,
-      status: TransactionStatus.FINALIZED,
+      hash: deployTransaction,
+      status: "FINALIZED",
       interval: 5000,
       retries: 200,
     });
