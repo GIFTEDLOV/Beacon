@@ -16,9 +16,12 @@ export default async function main(client: GenLayerClient<any>) {
       args: [],
     });
 
+    console.log("DEPLOYMENT_TX_HASH", deployTransaction);
+
     const receipt = await client.waitForTransactionReceipt({
       hash: deployTransaction as TransactionHash,
-      status: TransactionStatus.ACCEPTED,
+      status: TransactionStatus.FINALIZED,
+      interval: 5000,
       retries: 200,
     });
 
@@ -28,7 +31,9 @@ export default async function main(client: GenLayerClient<any>) {
 
     console.log("\n Contract deployed successfully.", {
       "Transaction Hash": deployTransaction,
-      "Contract Address": receipt.data?.contract_address,
+      "Contract Address":
+        receipt.data?.contract_address ??
+        (receipt.txDataDecoded as any)?.contractAddress,
     });
   } catch (error) {
     throw new Error((`Error during deployment:, ${error}`));
