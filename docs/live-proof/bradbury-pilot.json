@@ -261,6 +261,21 @@
       "assets": {}
     }
   },
+  "v2_lifecycle_attempts": {
+    "submit": {
+      "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "fee_wei": "1000000000000000000",
+      "tx_hash": null,
+      "status": "PRE_BROADCAST_RPC_REJECTED",
+      "chain_transaction_created": false,
+      "error": "eth_sendRawTransaction returned -32005 transaction gas rate limit exceeded: node is at capacity; retry in ~570ms. No transaction hash was returned.",
+      "state_after_attempt": {
+        "asset_count": 0,
+        "asset_ids": [],
+        "assets": {}
+      }
+    }
+  },
   "current_authorized_attempt": {
     "attempted": true,
     "submitted": true,
@@ -333,11 +348,12 @@
     }
   ],
   "live_proof_status": "PARTIAL",
-  "release_blocker": "V1 remains historical and unreleasable because its single evaluate_asset transaction finalized with FINISHED_WITH_RETURN but consensus result UNDETERMINED after validator timeout/appeal rounds. V2 deployment is now FINALIZED with schema and empty initial state verified; V2 lifecycle proof has not yet been run.",
+  "release_blocker": "V1 remains historical and unreleasable because its single evaluate_asset transaction finalized with FINISHED_WITH_RETURN but consensus result UNDETERMINED after validator timeout/appeal rounds. V2 deployment is FINALIZED with schema and empty initial state verified, but the single authorized V2 submission attempt was rejected by Bradbury before a transaction hash because the node reported gas rate-limit capacity; no retry, evaluation, challenge, or reassessment was submitted.",
   "known_limitations": [
     "The submit transaction finalized and proved the canonical USDC registry state; the single evaluation finalized without a business verdict because consensus was UNDETERMINED after validator timeout/appeal rounds.",
     "No challenge or reassessment transaction was broadcast because the evaluation did not produce a challengeable passport.",
     "The V2 deployment transaction 0xbe3174abfffc66788ee70966e1fbf818dc630cafebffeaad5d04fda8b5d7a19a was broadcast once using the supported CLI deployContract path. Its bounded waiter timed out at ACCEPTED, but later same-hash reconciliation observed FINALIZED with FINISHED_WITH_RETURN and AGREE; no replacement deployment, finalize transaction, or lifecycle transaction was submitted.",
+    "The V2 submit_asset call used the exact 1 GEN fee but Bradbury rejected eth_sendRawTransaction with -32005 gas rate limit exceeded before returning a transaction hash. The V2 registry remains empty; no evaluation was attempted.",
     "The SDK getContractSchema/getContractCode convenience methods are Studio-only; deployed schema and source parity were verified with the Bradbury GenLayer node endpoints.",
     "The failed pre-consensus deployment and the pre-broadcast timeout remain preserved as historical attempts; the account nonce gap before submit belongs to a pre-existing unrelated transaction and was not changed by Beacon."
   ]
