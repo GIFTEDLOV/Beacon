@@ -259,6 +259,11 @@
       "asset_count": 0,
       "asset_ids": [],
       "assets": {}
+    },
+    "can_appeal_observation": {
+      "deployment_status_code": 7,
+      "helper_result": true,
+      "interpretation": "Observation only; finalized status and deployed state remain authoritative for this workflow. No appeal was sent."
     }
   },
   "v2_lifecycle_attempts": {
