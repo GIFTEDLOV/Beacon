@@ -3,7 +3,8 @@ import {
   createClient,
   generatePrivateKey,
 } from "genlayer-js";
-import { simulator } from "genlayer-js/chains";
+import { testnetBradbury } from "genlayer-js/chains";
+import { BRADBURY_RPC } from "./releaseProof.js";
 
 const ACCOUNT_KEY = "beacon.account.privateKey";
 
@@ -27,12 +28,11 @@ export function removeAccount() {
 }
 
 export function createGenLayerClient(account = getAccount()) {
+  const endpoint = import.meta.env?.VITE_GENLAYER_RPC || BRADBURY_RPC;
   return createClient({
-    chain: simulator,
+    chain: testnetBradbury,
     ...(account ? { account } : {}),
-    ...(import.meta.env?.VITE_GENLAYER_RPC
-      ? { endpoint: import.meta.env.VITE_GENLAYER_RPC }
-      : {}),
+    endpoint,
   });
 }
 
