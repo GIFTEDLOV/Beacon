@@ -389,7 +389,7 @@ def test_semantic_validator_rechecks_source_and_rejects_dissent(direct_vm, direc
     contract.evaluate_asset(asset_id())
 
     direct_vm.clear_mocks()
-    install_mocks(direct_vm, validator={"supported": False})
+    install_mocks(direct_vm, semantic=semantic_result(redemption_risk="HIGH"))
     assert direct_vm.run_validator() is False
 
 
@@ -764,7 +764,7 @@ def test_semantic_validator_is_source_grounded_not_full_dictionary_equality(
     submit(direct_vm, contract)
     evaluate_with(contract, direct_vm)
     direct_vm.clear_mocks()
-    install_mocks(direct_vm, validator={"supported": True})
+    install_mocks(direct_vm, semantic=semantic_result())
     with direct_vm.activate():
         assert direct_vm.run_validator(index=1) is True
 
@@ -774,7 +774,7 @@ def test_semantic_validator_errors_fail_closed(direct_vm, direct_deploy):
     submit(direct_vm, contract)
     evaluate_with(contract, direct_vm)
     direct_vm.clear_mocks()
-    install_mocks(direct_vm, validator="not-json")
+    install_mocks(direct_vm, semantic="not-json")
     with direct_vm.activate():
         assert direct_vm.run_validator(index=1) is False
         assert direct_vm.run_validator(index=1, leader_result={"verdict": "CORE"}) is False
@@ -797,7 +797,70 @@ def test_semantic_validator_source_failure_cannot_agree_to_favorable_claim(
     submit(direct_vm, contract)
     evaluate_with(contract, direct_vm)
     direct_vm.clear_mocks()
-    install_mocks(direct_vm, semantic_status=503, validator={"supported": True})
+    install_mocks(direct_vm, semantic_status=503, semantic=semantic_result())
+    with direct_vm.activate():
+        assert direct_vm.run_validator(index=1) is False
+
+
+def test_v4_semantic_validator_accepts_policy_equivalent_claims(
+    direct_vm, direct_deploy
+):
+    contract = direct_deploy("contracts/beacon.py")
+    submit(direct_vm, contract)
+    evaluate_with(contract, direct_vm, semantic=semantic_result(backing_risk="UNKNOWN"))
+    direct_vm.clear_mocks()
+    install_mocks(direct_vm, semantic=semantic_result(backing_risk="LOW"))
+    leader = semantic_result(backing_risk="UNKNOWN")
+    leader["confidence"] = "HIGH"
+    with direct_vm.activate():
+        assert direct_vm.run_validator(index=1, leader_result=leader) is True
+
+
+@pytest.mark.parametrize(
+    "validator_overrides",
+    [
+        {"redemption_risk": "HIGH"},
+        {"critical_security_incident": True},
+        {"backing_provenance": "UNKNOWN"},
+    ],
+)
+def test_v4_semantic_validator_rejects_less_conservative_claims(
+    validator_overrides, direct_vm, direct_deploy
+):
+    contract = direct_deploy("contracts/beacon.py")
+    submit(direct_vm, contract)
+    evaluate_with(contract, direct_vm, semantic=semantic_result())
+    direct_vm.clear_mocks()
+    install_mocks(direct_vm, semantic=semantic_result(**validator_overrides))
+    with direct_vm.activate():
+        assert direct_vm.run_validator(index=1) is False
+
+
+def test_v4_semantic_validator_matches_bounded_failure_class(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon.py")
+    submit(direct_vm, contract)
+    install_mocks(direct_vm, semantic_status=503)
+    contract.evaluate_asset(asset_id())
+    direct_vm.clear_mocks()
+    install_mocks(direct_vm, semantic_status=503)
+    with direct_vm.activate():
+        assert direct_vm.run_validator(index=1) is True
+
+
+def test_v4_semantic_validator_catches_full_body_exception(
+    direct_vm, direct_deploy, monkeypatch
+):
+    import sys
+
+    contract = direct_deploy("contracts/beacon.py")
+    submit(direct_vm, contract)
+    evaluate_with(contract, direct_vm)
+    module = sys.modules["_contract_beacon"]
+    monkeypatch.setattr(
+        module,
+        "_semantic_source_bundle",
+        lambda *args: (_ for _ in ()).throw(RuntimeError("source failure")),
+    )
     with direct_vm.activate():
         assert direct_vm.run_validator(index=1) is False
 
