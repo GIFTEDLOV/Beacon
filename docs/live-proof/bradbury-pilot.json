@@ -1,4 +1,135 @@
 {
+  "v3": {
+    "v2_source_sha256": "633d396945cb88d217fcd8e0da53750fdbd37dd802f3035a8eac5fe825061890",
+    "source_sha256": "115a9f6a4f6447b2d573e7e487d45630593a2781f8d625cbd8f8ab01c89899dc",
+    "source_bytes": 42650,
+    "deployment_calldata_bytes": 42916,
+    "external_workload": {
+      "web_get_calls": 7,
+      "web_render_calls": 0,
+      "llm_calls": 1,
+      "operations_per_execution": 8
+    },
+    "simulation": {
+      "evaluate": {
+        "status": "PASS",
+        "duration_ms": 30701,
+        "result": null
+      }
+    },
+    "live_proof_status": "PARTIAL",
+    "consensus_fix_live_verified": false,
+    "chain_layer_complete": false,
+    "challenge_performed": false,
+    "reassess_performed": false,
+    "release_blocker": "The single V3 evaluate_asset transaction finalized with FINISHED_WITH_ERROR because the caller supplied a mixed-case asset ID while the stored canonical ID is lowercase. No passport was created, and the one-evaluation rule forbids a retry in this pass.",
+    "deployment": {
+      "broadcasted": true,
+      "tx_hash": "0x2a600fb0fae742da7077eb2aaf62e0ca6c0450ffe77ded54d0865da5071370fa",
+      "status": "FINALIZED",
+      "status_code": 7,
+      "execution": "FINISHED_WITH_RETURN",
+      "consensus": "AGREE",
+      "contract_address": "0x009daEdf30b0AEf98A556b045d73F0C4483e1bcE",
+      "validator_receipts": {
+        "num_of_initial_validators": 5,
+        "votes_committed": 5,
+        "votes_revealed": 5,
+        "validator_votes": [1, 1, 1, 1, 1],
+        "result": "AGREE"
+      },
+      "schema": "12 methods / 4 writes / 8 views",
+      "initial_state": {
+        "asset_count": 0,
+        "asset_ids": [],
+        "assets": {}
+      },
+      "submit": {
+        "broadcasted": true,
+        "tx_hash": "0xdbd67969e11a66b9873cf859e51d34b6add8fecf7c6c3abad7012e538fda99f7",
+        "status": "FINALIZED",
+        "status_code": 7,
+        "execution": "FINISHED_WITH_RETURN",
+        "consensus": "AGREE",
+        "validator_receipts": {
+          "num_of_initial_validators": 5,
+          "votes_committed": 5,
+          "votes_revealed": 5,
+          "validator_votes": [1, 1, 1, 1, 1],
+          "result": "AGREE"
+        },
+        "value_wei": "1000000000000000000",
+        "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "post_state": {
+          "asset_count": 1,
+          "asset_status": "SUBMITTED",
+          "current_version": 0,
+          "current_passport": {
+            "version": 0,
+            "failure_state": "NOT_EVALUATED"
+          },
+          "passport_history": {},
+          "challenge_records": {},
+          "contract_balance_wei": "0xde0b6b3a7640000"
+        }
+      },
+      "evaluate": {
+        "broadcasted": true,
+        "tx_hash": "0x213774b9de32c135e8f7aa18a94834d7d5eab7ce43a06c7836c47bd8c6dba6bc",
+        "status": "FINALIZED",
+        "status_code": 7,
+        "execution": "FINISHED_WITH_ERROR",
+        "consensus_result_field": "AGREE",
+        "passport_created": false,
+        "tx_execution_hash": "0xfbf922b2843548e690b5449a02ae02583bbbc47bf795a9c69103a06df149983b",
+        "rounds": [
+          {
+            "round": 0,
+            "leader_index": 4,
+            "votes_committed": 5,
+            "votes_revealed": 5,
+            "rotations_left": 3,
+            "round_result_code": 1,
+            "round_result": "AGREE",
+            "validator_votes": [2, 2, 2, 2, 2],
+            "validator_vote_names": ["DISAGREE", "DISAGREE", "DISAGREE", "DISAGREE", "DISAGREE"],
+            "validator_result_hashes": [
+              "0x674115654eb6c4a65202790219ce00042135cc574091eda3bd50f32e7c619596",
+              "0x674115654eb6c4a65202790219ce00042135cc574091eda3bd50f32e7c619596",
+              "0x674115654eb6c4a65202790219ce00042135cc574091eda3bd50f32e7c619596",
+              "0x674115654eb6c4a65202790219ce00042135cc574091eda3bd50f32e7c619596",
+              "0x674115654eb6c4a65202790219ce00042135cc574091eda3bd50f32e7c619596"
+            ]
+          }
+        ],
+        "trace": {
+          "result_code": 1,
+          "error": "[EXPECTED] unknown asset",
+          "stdout": "",
+          "stderr": "",
+          "metrics": {
+            "web_module_calls": 0,
+            "llm_module_calls": 0,
+            "run_time": "0s"
+          }
+        },
+        "post_state": {
+          "asset_status": "SUBMITTED",
+          "current_version": 0,
+          "current_passport": {
+            "version": 0,
+            "verdict": "",
+            "max_ltv_bps": 0,
+            "failure_state": "NOT_EVALUATED"
+          },
+          "passport_history": {},
+          "challenge_records": {}
+        },
+        "failure_classification": "TRANSACTION_EXECUTION_FAILURE_CALLER_ASSET_ID_CASE_MISMATCH",
+        "failure_detail": "The submitted call used a mixed-case asset identifier instead of the stored canonical lowercase asset ID. No evaluation retry was sent."
+      }
+    }
+  },
   "status": "V2_EVALUATION_VALIDATORS_TIMEOUT",
   "network": "testnet-bradbury",
   "chain_id": 4221,
