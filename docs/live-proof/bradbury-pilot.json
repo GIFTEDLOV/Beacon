@@ -1,5 +1,5 @@
 {
-  "status": "V2_DEPLOYED_FINALIZED_LIFECYCLE_PENDING",
+  "status": "V2_SUBMIT_ACCEPTED_NOT_FINALIZED",
   "network": "testnet-bradbury",
   "chain_id": 4221,
   "rpc": "https://rpc-bradbury.genlayer.com",
@@ -281,6 +281,60 @@
       }
     }
   },
+  "v2_current_submit": {
+    "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "fee_wei": "1000000000000000000",
+    "genlayer_tx_hash": "0x3e9775e1b2c02e4711f6215707f939962de7f3acad6031e8ae2a1fd47537ce12",
+    "broadcasted": true,
+    "status": "ACCEPTED_RECONCILIATION_TIMEOUT",
+    "status_code": 5,
+    "underlying_evm_transaction": {
+      "tx_hash": "0x1e034686b8970dbda2c88f1b470dfd77d51338d752a5a1d5b863a2b0aafa6e0e",
+      "status": "0x1",
+      "block_number": "0x136f0c5",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x0112bf6e83497965a5fdd6dad1e447a6e004271d",
+      "nonce": "0xf5",
+      "value": "0xde0b6b3a7640000",
+      "gas_limit": "0x126972",
+      "gas_used": "0x117458",
+      "log_count": 4
+    },
+    "last_read": {
+      "status": "Accepted",
+      "status_code": 5,
+      "result": "AGREE",
+      "tx_execution_result": "FINISHED_WITH_RETURN"
+    },
+    "state_after_broadcast": {
+      "asset_count": 1,
+      "asset_ids": ["ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
+      "assets": {
+        "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48": {
+          "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "chain": "ethereum",
+          "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "target_currency": "USD",
+          "market_identifier": "usd-coin",
+          "secondary_market_identifier": "usdc-usd-coin",
+          "issuer_url": "https://developers.circle.com/circle-mint",
+          "redemption_url": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+          "reserve_backing_url": "https://developers.circle.com/stablecoins/what-is-usdc",
+          "security_url": "https://developers.circle.com/cctp/references/technical-guide",
+          "governance_url": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
+          "submitter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "lifecycle_status": "SUBMITTED",
+          "current_version": 0,
+          "current_verdict": "",
+          "current_ltv_bps": 0
+        }
+      }
+    },
+    "contract_balance_after_submit_wei": "0xde0b6b3a7640000",
+    "finality": "NOT_OBSERVED_AFTER_BOUNDED_RECONCILIATION"
+  },
   "current_authorized_attempt": {
     "attempted": true,
     "submitted": true,
@@ -353,12 +407,12 @@
     }
   ],
   "live_proof_status": "PARTIAL",
-  "release_blocker": "V1 remains historical and unreleasable because its single evaluate_asset transaction finalized with FINISHED_WITH_RETURN but consensus result UNDETERMINED after validator timeout/appeal rounds. V2 deployment is FINALIZED with schema and empty initial state verified, but the single authorized V2 submission attempt was rejected by Bradbury before a transaction hash because the node reported gas rate-limit capacity; no retry, evaluation, challenge, or reassessment was submitted.",
+  "release_blocker": "V1 remains historical and unreleasable because its single evaluate_asset transaction finalized with FINISHED_WITH_RETURN but consensus result UNDETERMINED after validator timeout/appeal rounds. V2 deployment is FINALIZED with schema and empty initial state verified. The single V2 submit transaction reached ACCEPTED with FINISHED_WITH_RETURN and AGREE and created the SUBMITTED registry state, but status 7 finality was not observed during bounded reconciliation; evaluation was not attempted.",
   "known_limitations": [
     "The submit transaction finalized and proved the canonical USDC registry state; the single evaluation finalized without a business verdict because consensus was UNDETERMINED after validator timeout/appeal rounds.",
     "No challenge or reassessment transaction was broadcast because the evaluation did not produce a challengeable passport.",
     "The V2 deployment transaction 0xbe3174abfffc66788ee70966e1fbf818dc630cafebffeaad5d04fda8b5d7a19a was broadcast once using the supported CLI deployContract path. Its bounded waiter timed out at ACCEPTED, but later same-hash reconciliation observed FINALIZED with FINISHED_WITH_RETURN and AGREE; no replacement deployment, finalize transaction, or lifecycle transaction was submitted.",
-    "The V2 submit_asset call used the exact 1 GEN fee but Bradbury rejected eth_sendRawTransaction with -32005 gas rate limit exceeded before returning a transaction hash. The V2 registry remains empty; no evaluation was attempted.",
+    "A prior V2 submit_asset attempt used the exact 1 GEN fee but Bradbury rejected eth_sendRawTransaction with -32005 gas rate limit exceeded before returning a transaction hash. The later single V2 submit transaction returned a GenLayer hash, reached ACCEPTED with successful AGREE execution, created the SUBMITTED asset state, and was not rebroadcast; evaluation was not attempted because FINALIZED was not observed.",
     "The SDK getContractSchema/getContractCode convenience methods are Studio-only; deployed schema and source parity were verified with the Bradbury GenLayer node endpoints.",
     "The failed pre-consensus deployment and the pre-broadcast timeout remain preserved as historical attempts; the account nonce gap before submit belongs to a pre-existing unrelated transaction and was not changed by Beacon."
   ]
