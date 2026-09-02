@@ -1,5 +1,5 @@
 {
-  "status": "FAILED_PREDEPLOYMENT",
+  "status": "DEPLOYED_INITIAL_STATE_VERIFIED",
   "network": "testnet-bradbury",
   "chain_id": 4221,
   "rpc": "https://rpc-bradbury.genlayer.com",
@@ -96,6 +96,59 @@
     "failure_layer": "PRE_BROADCAST_RPC",
     "error": "Supported CLI deploy path failed at eth_getTransactionCount with a Bradbury ConnectTimeoutError before signing/broadcast. No retry transaction hash was returned."
   },
+  "current_authorized_attempt": {
+    "attempted": true,
+    "submitted": true,
+    "tx_hash": "0x242b50e0ec2eec5d708031b0489c755bfba765a593f49002ba6e4a6bbf055333",
+    "status": "FINALIZED",
+    "status_code": 7,
+    "execution": "FINISHED_WITH_RETURN",
+    "consensus_result": "AGREE",
+    "source_sha256": "523db0f2b2f640b912e819e28145ed5dd33a2c50631380465a9ed8baef50a955",
+    "source_bytes": 42870,
+    "outer_calldata_bytes": 43108,
+    "deployment_client": "genlayer CLI 0.39.1 with bundled genlayer-js 1.1.8",
+    "deployment_route": "configured Bradbury client initialization followed by client.deployContract({ code, args: [] })",
+    "deployer_balance_before_gen": "13.060085366946832863",
+    "deployer_balance_after_gen": "13.055496126719135",
+    "contract_address": "0xEd5364db325e78f604Def3b95422Fe873fd0E0d4",
+    "validator_receipt": {
+      "num_of_initial_validators": 5,
+      "validator_votes": [1, 1, 1, 1, 1],
+      "result": "AGREE"
+    },
+    "underlying_evm_transaction": {
+      "tx_hash": "0xf22a03d74719a8cb069587a8925b8e8f252308d950d5341c65a20cced43eb693",
+      "status": "0x1",
+      "block_number": "0x1360129",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+      "nonce": "0xec",
+      "type": "0x0",
+      "value": "0x0",
+      "gas_price": "0x89d8eda",
+      "input_selector": "0xe71d5196",
+      "gas_limit": 34114106,
+      "gas_used": 31749901,
+      "input_bytes": 43108,
+      "log_count": 10
+    },
+    "schema": "12 methods / 4 writes / 8 views",
+    "initial_state": {
+      "asset_count": 0,
+      "asset_ids": [],
+      "assets": {}
+    },
+    "final_deployed_source_sha256": "523db0f2b2f640b912e819e28145ed5dd33a2c50631380465a9ed8baef50a955",
+    "source_deployment_parity": "PASS",
+    "finalization_attempt": {
+      "attempted": true,
+      "submitted": false,
+      "tx_hash": null,
+      "status": "NO_CHAIN_HASH_RETURNED",
+      "error": "At READY_TO_FINALIZE, the CLI finalization call received an eth_estimateGas execution revert and eth_sendRawTransaction returned transaction gas rate limit exceeded; the deployment subsequently reached FINALIZED on the same transaction ID."
+    }
+  },
   "failed_attempts": [
     {
       "type": "DEPLOYMENT",
@@ -114,11 +167,11 @@
       "contract_address": null
     }
   ],
-  "live_proof_status": "PARTIAL",
-  "release_blocker": "The compact candidate passed all local and non-broadcast payload gates, but the single supported Bradbury retry failed before signing/broadcast at eth_getTransactionCount with a connection timeout. No contract exists and no retry hash was returned.",
+  "live_proof_status": "PASS",
+  "release_blocker": null,
   "known_limitations": [
-    "Validator receipt evidence will be reported only when the finalized receipt exposes it.",
-    "No submit, evaluate, challenge, or reassess transaction was broadcast because deployment did not finalize successfully.",
-    "The compact source candidate is not source-parity-proven against a deployed contract because the authorized retry did not broadcast."
+    "No submit, evaluate, challenge, or reassess transaction was broadcast in this deployment-only pass.",
+    "The SDK getContractSchema/getContractCode convenience methods are Studio-only; deployed schema and source parity were verified with the Bradbury GenLayer node endpoints.",
+    "The failed pre-consensus deployment and the pre-broadcast timeout remain preserved as historical attempts."
   ]
 }
