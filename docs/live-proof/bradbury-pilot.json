@@ -1,5 +1,5 @@
 {
-  "status": "V2_DEPLOYMENT_ACCEPTED_NOT_FINALIZED",
+  "status": "V2_DEPLOYED_FINALIZED_LIFECYCLE_PENDING",
   "network": "testnet-bradbury",
   "chain_id": 4221,
   "rpc": "https://rpc-bradbury.genlayer.com",
@@ -240,18 +240,25 @@
     "deployment_route": "configured Bradbury client initialization followed by client.deployContract({ code, args: [] })",
     "tx_hash": "0xbe3174abfffc66788ee70966e1fbf818dc630cafebffeaad5d04fda8b5d7a19a",
     "broadcasted": true,
-    "status": "ACCEPTED_TIMEOUT",
-    "status_code": 5,
+    "status": "FINALIZED",
+    "status_code": 7,
     "execution": "FINISHED_WITH_RETURN",
     "consensus_result": "AGREE",
     "tx_execution_hash": "0x3377ea9923610b414ea4df8975b822a267ecf6caa60071f037bb1d9d62a982fb",
-    "contract_address": null,
-    "finality_proof": "NOT_OBSERVED",
+    "contract_address": "0x967bd44fdf3104f06A965675a2F01CfB87819420",
+    "finality_proof": "OBSERVED",
     "poller_result": "Timed out waiting for FINALIZED; same transaction remains ACCEPTED. No rebroadcast performed.",
+    "post_timeout_reconciliation": "Same transaction later read as FINALIZED (status 7); no finalize transaction or rebroadcast was submitted.",
     "last_read_status": {
-      "status": "Accepted",
-      "status_code": 5,
+      "status": "Finalized",
+      "status_code": 7,
       "block_number": "0x136d99f"
+    },
+    "schema": "12 methods / 4 writes / 8 views",
+    "initial_state": {
+      "asset_count": 0,
+      "asset_ids": [],
+      "assets": {}
     }
   },
   "current_authorized_attempt": {
@@ -326,11 +333,11 @@
     }
   ],
   "live_proof_status": "PARTIAL",
-  "release_blocker": "V1 remains historical and unreleasable because its single evaluate_asset transaction finalized with FINISHED_WITH_RETURN but consensus result UNDETERMINED after validator timeout/appeal rounds. The V2 deployment transaction was broadcast once and remains ACCEPTED (status 5) after the bounded waiter timed out; FINALIZED deployment, schema, and initial-state proof are not yet observed, so no V2 lifecycle transaction is eligible.",
+  "release_blocker": "V1 remains historical and unreleasable because its single evaluate_asset transaction finalized with FINISHED_WITH_RETURN but consensus result UNDETERMINED after validator timeout/appeal rounds. V2 deployment is now FINALIZED with schema and empty initial state verified; V2 lifecycle proof has not yet been run.",
   "known_limitations": [
     "The submit transaction finalized and proved the canonical USDC registry state; the single evaluation finalized without a business verdict because consensus was UNDETERMINED after validator timeout/appeal rounds.",
     "No challenge or reassessment transaction was broadcast because the evaluation did not produce a challengeable passport.",
-    "The V2 deployment transaction 0xbe3174abfffc66788ee70966e1fbf818dc630cafebffeaad5d04fda8b5d7a19a was broadcast once using the supported CLI deployContract path. It reached ACCEPTED with FINISHED_WITH_RETURN and AGREE, but the waiter timed out before FINALIZED; no replacement deployment or lifecycle transaction was submitted.",
+    "The V2 deployment transaction 0xbe3174abfffc66788ee70966e1fbf818dc630cafebffeaad5d04fda8b5d7a19a was broadcast once using the supported CLI deployContract path. Its bounded waiter timed out at ACCEPTED, but later same-hash reconciliation observed FINALIZED with FINISHED_WITH_RETURN and AGREE; no replacement deployment, finalize transaction, or lifecycle transaction was submitted.",
     "The SDK getContractSchema/getContractCode convenience methods are Studio-only; deployed schema and source parity were verified with the Bradbury GenLayer node endpoints.",
     "The failed pre-consensus deployment and the pre-broadcast timeout remain preserved as historical attempts; the account nonce gap before submit belongs to a pre-existing unrelated transaction and was not changed by Beacon."
   ]
