@@ -699,6 +699,153 @@
       "error": "At READY_TO_FINALIZE, the CLI finalization call received an eth_estimateGas execution revert and eth_sendRawTransaction returned transaction gas rate limit exceeded; the deployment subsequently reached FINALIZED on the same transaction ID."
     }
   },
+  "v4": {
+    "source_sha256": "5f99961a335247b4b108cdb7a575d356242461fbec411fd10c207018331a809d",
+    "source_bytes": 43124,
+    "deployment_calldata_bytes": 43364,
+    "deployment_client": "genlayer CLI 0.39.1 with bundled genlayer-js 1.1.8",
+    "deployment_route": "configured Bradbury client initialization followed by client.deployContract({ code, args: [] })",
+    "deployment": {
+      "broadcasted": true,
+      "tx_hash": "0xc5dacaf4e67b4cb8fec89d6d13677f4bedf636ab7a65cd05290262b3b16cb1a4",
+      "status": "FINALIZED",
+      "status_code": 7,
+      "execution": "FINISHED_WITH_RETURN",
+      "consensus": "AGREE",
+      "contract_address": "0xaA0EEB41C30C54104F4106E06acCF4395Ec96b54",
+      "validator_receipts": {
+        "num_of_initial_validators": 5,
+        "votes_committed": 5,
+        "votes_revealed": 5,
+        "validator_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+        "validator_result_hashes": [
+          "0xd04d0dca98a7b045e4740a3205b0a13c96ca0b652cbd5ee5d93cb69a7e8278d0",
+          "0xd04d0dca98a7b045e4740a3205b0a13c96ca0b652cbd5ee5d93cb69a7e8278d0",
+          "0xd04d0dca98a7b045e4740a3205b0a13c96ca0b652cbd5ee5d93cb69a7e8278d0",
+          "0xd04d0dca98a7b045e4740a3205b0a13c96ca0b652cbd5ee5d93cb69a7e8278d0",
+          "0xd04d0dca98a7b045e4740a3205b0a13c96ca0b652cbd5ee5d93cb69a7e8278d0"
+        ]
+      },
+      "schema": "12 methods / 4 writes / 8 views",
+      "initial_state": {
+        "asset_count": 0,
+        "asset_ids": [],
+        "assets": {}
+      },
+      "source_deployment_parity": "PASS"
+    },
+    "submit": {
+      "broadcasted": true,
+      "tx_hash": "0x2f70c0b99e9aa3cd3e5edc32359de406e893cc6e5374e4043082b3492414dc47",
+      "status": "FINALIZED",
+      "status_code": 7,
+      "execution": "FINISHED_WITH_RETURN",
+      "consensus": "AGREE",
+      "value_wei": "1000000000000000000",
+      "asset": {
+        "name": "USD Coin",
+        "symbol": "USDC",
+        "chain": "Ethereum",
+        "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "target_currency": "USD",
+        "market_identifier": "usd-coin",
+        "secondary_market_identifier": "usdc-usd-coin",
+        "issuer_url": "https://developers.circle.com/circle-mint",
+        "redemption_url": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+        "reserve_backing_url": "https://developers.circle.com/stablecoins/what-is-usdc",
+        "security_url": "https://developers.circle.com/cctp/references/technical-guide",
+        "governance_url": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification"
+      },
+      "validator_receipts": {
+        "num_of_initial_validators": 5,
+        "votes_committed": 5,
+        "votes_revealed": 5,
+        "validator_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+        "validator_result_hashes": [
+          "0x5852d2010aba609c4cee93df48a542e54d18cd4892f1e22dfedd6df4bdc0aec2",
+          "0x5852d2010aba609c4cee93df48a542e54d18cd4892f1e22dfedd6df4bdc0aec2",
+          "0x5852d2010aba609c4cee93df48a542e54d18cd4892f1e22dfedd6df4bdc0aec2",
+          "0x5852d2010aba609c4cee93df48a542e54d18cd4892f1e22dfedd6df4bdc0aec2",
+          "0x5852d2010aba609c4cee93df48a542e54d18cd4892f1e22dfedd6df4bdc0aec2"
+        ],
+        "tx_execution_hash": "0xbf05314533dc42ec1e72641f57002e675a78b27c1a2836de34572b9fc7b121f8"
+      },
+      "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "post_state": {
+        "asset_count": 1,
+        "asset_ids": ["ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"],
+        "asset_status": "SUBMITTED",
+        "asset": {
+          "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "name": "USD Coin",
+          "symbol": "USDC",
+          "chain": "ethereum",
+          "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+          "target_currency": "USD",
+          "market_identifier": "usd-coin",
+          "secondary_market_identifier": "usdc-usd-coin",
+          "issuer_url": "https://developers.circle.com/circle-mint",
+          "redemption_url": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+          "reserve_backing_url": "https://developers.circle.com/stablecoins/what-is-usdc",
+          "security_url": "https://developers.circle.com/cctp/references/technical-guide",
+          "governance_url": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
+          "submitter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "lifecycle_status": "SUBMITTED",
+          "current_version": 0,
+          "current_verdict": "",
+          "current_ltv_bps": 0
+        },
+        "current_passport": {
+          "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+          "version": 0,
+          "verdict": "",
+          "max_ltv_bps": 0,
+          "failure_state": "NOT_EVALUATED"
+        },
+        "passport_history": {},
+        "challenge_records": {},
+        "contract_balance_wei": "1000000000000000000"
+      }
+    },
+    "evaluate_simulation": {
+      "status": "PASS",
+      "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "duration_ms": 8849,
+      "result": null
+    },
+    "evaluate": {
+      "attempted": true,
+      "broadcasted": false,
+      "tx_hash": null,
+      "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "status": "PRE_BROADCAST_RPC_REJECTED",
+      "execution": null,
+      "consensus": null,
+      "chain_transaction_created": false,
+      "passport_created": false,
+      "error": "eth_sendRawTransaction returned -32005 transaction gas rate limit exceeded: node is at capacity, retry in ~1163ms. No transaction hash was returned.",
+      "failure_classification": "PRE_BROADCAST_RATE_LIMIT",
+      "post_state": {
+        "asset_status": "SUBMITTED",
+        "current_version": 0,
+        "current_passport": {
+          "version": 0,
+          "verdict": "",
+          "max_ltv_bps": 0,
+          "failure_state": "NOT_EVALUATED"
+        },
+        "passport_history": {},
+        "challenge_records": {}
+      }
+    },
+    "live_proof_status": "PARTIAL",
+    "consensus_fix_live_verified": false,
+    "chain_layer_complete": false,
+    "challenge": null,
+    "reassess": null,
+    "additional_unnecessary_tx_submitted": false,
+    "release_blocker": "The single V4 evaluate_asset write attempt was rejected before signing/broadcast by Bradbury with -32005 transaction gas rate limit exceeded. No V4 evaluation transaction hash was returned, so no V4 passport or live consensus-fix proof exists. No retry is authorized in this pass."
+  },
   "failed_attempts": [
     {
       "type": "DEPLOYMENT",
@@ -724,6 +871,7 @@
     "No challenge or reassessment transaction was broadcast because the evaluation did not produce a challengeable passport.",
     "The V2 deployment transaction 0xbe3174abfffc66788ee70966e1fbf818dc630cafebffeaad5d04fda8b5d7a19a was broadcast once using the supported CLI deployContract path. Its bounded waiter timed out at ACCEPTED, but later same-hash reconciliation observed FINALIZED with FINISHED_WITH_RETURN and AGREE; no replacement deployment, finalize transaction, or lifecycle transaction was submitted.",
     "A prior V2 submit_asset attempt used the exact 1 GEN fee but Bradbury rejected eth_sendRawTransaction with -32005 gas rate limit exceeded before returning a transaction hash. The later single V2 submit transaction returned a GenLayer hash, reached ACCEPTED and then FINALIZED with successful AGREE execution, created the SUBMITTED asset state, and was not rebroadcast. The single V2 evaluation was then submitted once, reached terminal VALIDATORS_TIMEOUT, and was not retried.",
+    "The single V4 evaluate_asset write attempt was rejected before signing/broadcast by Bradbury -32005 transaction gas rate limit exceeded. No V4 evaluation transaction hash was returned, no V4 evaluation chain state was created, and no retry was submitted.",
     "The SDK getContractSchema/getContractCode convenience methods are Studio-only; deployed schema and source parity were verified with the Bradbury GenLayer node endpoints.",
     "The failed pre-consensus deployment and the pre-broadcast timeout remain preserved as historical attempts; the account nonce gap before submit belongs to a pre-existing unrelated transaction and was not changed by Beacon."
   ]
