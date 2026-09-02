@@ -1,9 +1,10 @@
 {
-  "status": "DEPLOYED_INITIAL_STATE_VERIFIED",
+  "status": "DEPLOYED_EVALUATION_UNDETERMINED",
   "network": "testnet-bradbury",
   "chain_id": 4221,
   "rpc": "https://rpc-bradbury.genlayer.com",
-  "source_sha256": "ab77fd8f762acb86a7d49fbc822bf4b474beec9aeb940789bb672b33d521b8c3",
+  "source_sha256": "523db0f2b2f640b912e819e28145ed5dd33a2c50631380465a9ed8baef50a955",
+  "failed_deployment_source_sha256": "ab77fd8f762acb86a7d49fbc822bf4b474beec9aeb940789bb672b33d521b8c3",
   "contract_frozen": true,
   "public_method_surface": {
     "writes": ["submit_asset", "evaluate_asset", "challenge_asset", "reassess_asset"],
@@ -20,7 +21,9 @@
   "deployer": {
     "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
     "balance_before_gen": "13.061279210588273344",
-    "balance_after_gen": "13.060462001704950244"
+    "balance_after_gen": "13.060462001704950244",
+    "balance_before_lifecycle_gen": "13.055388234507822",
+    "balance_after_lifecycle_gen": "12.053433514620310944"
   },
   "objective_sources": {
     "primary": "CoinGecko /api/v3/coins/{market_identifier}",
@@ -65,8 +68,140 @@
     "asset_ids": null,
     "assets": null
   },
-  "submit": null,
-  "evaluate": null,
+  "submit": {
+    "attempted": true,
+    "tx_hash": "0x3ce08aa386f19b5b1eaa66f047c07e5df8d54085c5f2ccdad0f0d755e0d8582f",
+    "status": "FINALIZED",
+    "status_code": 7,
+    "execution": "FINISHED_WITH_RETURN",
+    "consensus": "AGREE",
+    "value_wei": "1000000000000000000",
+    "precondition": {
+      "asset_count": 0,
+      "asset_ids": [],
+      "assets": {}
+    },
+    "args": {
+      "name": "USD Coin",
+      "symbol": "USDC",
+      "chain": "Ethereum",
+      "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "target_currency": "USD",
+      "market_identifier": "usd-coin",
+      "secondary_market_identifier": "usdc-usd-coin",
+      "issuer_url": "https://developers.circle.com/circle-mint",
+      "redemption_url": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+      "reserve_backing_url": "https://developers.circle.com/stablecoins/what-is-usdc",
+      "security_url": "https://developers.circle.com/cctp/references/technical-guide",
+      "governance_url": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification"
+    },
+    "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "post_state": {
+      "asset": {
+        "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "chain": "ethereum",
+        "current_ltv_bps": 0,
+        "current_verdict": "",
+        "current_version": 0,
+        "governance_url": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
+        "issuer_url": "https://developers.circle.com/circle-mint",
+        "lifecycle_status": "SUBMITTED",
+        "market_identifier": "usd-coin",
+        "name": "USD Coin",
+        "redemption_url": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+        "reserve_backing_url": "https://developers.circle.com/stablecoins/what-is-usdc",
+        "secondary_market_identifier": "usdc-usd-coin",
+        "security_url": "https://developers.circle.com/cctp/references/technical-guide",
+        "status": "SUBMITTED",
+        "submitter": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "symbol": "USDC",
+        "target_currency": "USD",
+        "token_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      },
+      "asset_count": 1,
+      "asset_ids": ["ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"]
+    },
+    "contract_balance_after_gen": "1",
+    "validator_receipts": {
+      "num_of_initial_validators": 5,
+      "votes_committed": 5,
+      "votes_revealed": 5,
+      "validator_votes_encoded": "AQEBAQE=",
+      "result": "AGREE"
+    },
+    "underlying_evm_transaction": {
+      "tx_hash": "0x57fe6dc153f6ef6a58943e28fb61b5360db56eed6b55bb46e19c3a1835240aa5",
+      "status": "0x1",
+      "block_number": "0x1364925",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+      "nonce": "0xee",
+      "type": "0x0",
+      "value": "0xde0b6b3a7640000",
+      "gas_limit": "0x12bb15",
+      "gas_used": "0x11c244",
+      "input_bytes": 676,
+      "log_count": 4
+    }
+  },
+  "evaluate": {
+    "attempted": true,
+    "tx_hash": "0x66879d3ce2e0fa4206a2d60722c94a0a3d5c68f4602b6efce908c432b35a6e9a",
+    "status": "FINALIZED",
+    "status_code": 7,
+    "execution": "FINISHED_WITH_RETURN",
+    "consensus": "UNDETERMINED",
+    "consensus_result_code": 2,
+    "evaluation_classification": "CONSENSUS_FAILURE/TIMEOUT",
+    "precondition": {
+      "asset_lifecycle_status": "SUBMITTED",
+      "asset_current_version": 0,
+      "passport_failure_state": "NOT_EVALUATED"
+    },
+    "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "receipt": {
+      "num_of_initial_validators": 5,
+      "rounds": [
+        {"round": 0, "votes_committed": 5, "votes_revealed": 5, "result": 3, "validator_votes_encoded": "AQMDAQM="},
+        {"round": 1, "votes_committed": 7, "votes_revealed": 7, "result": 2, "validator_votes_encoded": "BAQEBAEBBA=="},
+        {"round": 2, "votes_committed": 11, "votes_revealed": 11, "result": 2, "validator_votes_encoded": "BAMEAwQEAwMEBAQ="}
+      ],
+      "valid_until": 1788321399,
+      "tx_execution_hash": "0x4e416211fd0bea85f403084ccacd3b9ac41c9c9eaab075ac6d386f5dc37b0956"
+    },
+    "post_state": {
+      "asset": {
+        "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "lifecycle_status": "SUBMITTED",
+        "current_version": 0,
+        "current_verdict": "",
+        "current_ltv_bps": 0
+      },
+      "current_passport": {
+        "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "version": 0,
+        "verdict": "",
+        "max_ltv_bps": 0,
+        "failure_state": "NOT_EVALUATED"
+      },
+      "passport_history": {}
+    },
+    "underlying_evm_transaction": {
+      "tx_hash": "0xb29e2ca5b1552f029edd49ac8518d0c7a1471a249e13008af048e97221b15d38",
+      "status": "0x1",
+      "block_number": "0x1365222",
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+      "nonce": "0xef",
+      "type": "0x0",
+      "value": "0x0",
+      "input_selector": "0xe71d5196",
+      "input_bytes": 324,
+      "gas_limit": "0xded89",
+      "gas_used": "0xd2c9d",
+      "log_count": 4
+    }
+  },
   "challenge": null,
   "reassess": null,
   "compact_candidate": {
@@ -167,11 +302,12 @@
       "contract_address": null
     }
   ],
-  "live_proof_status": "PASS",
-  "release_blocker": null,
+  "live_proof_status": "PARTIAL",
+  "release_blocker": "The single evaluate_asset transaction finalized with FINISHED_WITH_RETURN but consensus result UNDETERMINED after validator timeout/appeal rounds; no passport was created, so challenge and reassessment were not eligible.",
   "known_limitations": [
-    "No submit, evaluate, challenge, or reassess transaction was broadcast in this deployment-only pass.",
+    "The submit transaction finalized and proved the canonical USDC registry state; the single evaluation finalized without a business verdict because consensus was UNDETERMINED after validator timeout/appeal rounds.",
+    "No challenge or reassessment transaction was broadcast because the evaluation did not produce a challengeable passport.",
     "The SDK getContractSchema/getContractCode convenience methods are Studio-only; deployed schema and source parity were verified with the Bradbury GenLayer node endpoints.",
-    "The failed pre-consensus deployment and the pre-broadcast timeout remain preserved as historical attempts."
+    "The failed pre-consensus deployment and the pre-broadcast timeout remain preserved as historical attempts; the account nonce gap before submit belongs to a pre-existing unrelated transaction and was not changed by Beacon."
   ]
 }
