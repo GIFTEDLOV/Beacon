@@ -12,6 +12,13 @@ function plain(value) {
   return value;
 }
 
+export function selectCanonicalAssetId(requestedId, storedIds) {
+  if (!Array.isArray(storedIds)) throw new Error("Precondition failed: Beacon returned no asset ID list.");
+  const canonicalId = storedIds.find((storedId) => storedId === requestedId);
+  if (!canonicalId) throw new Error("Precondition failed: asset ID must exactly match Beacon state.");
+  return canonicalId;
+}
+
 const store = () => (typeof localStorage === "undefined" ? null : localStorage);
 
 export default class BeaconRegistry {
@@ -61,10 +68,11 @@ export default class BeaconRegistry {
     }, () => this.asset(id), SUBMISSION_FEE_WEI);
   }
   async evaluateAsset(id) {
-    return this._write("evaluate_asset", id, [id], async () => {
-      const current = await this.asset(id);
+    const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
+    return this._write("evaluate_asset", canonicalId, [canonicalId], async () => {
+      const current = await this.asset(canonicalId);
       if (!current || Number(current.current_version) !== 0 || current.lifecycle_status !== "SUBMITTED") throw new Error("Precondition failed: asset is not awaiting first evaluation.");
-    }, () => this.currentPassport(id));
+    }, () => this.currentPassport(canonicalId));
   }
   async challengeAsset(id, category, reason, evidenceUrl) {
     const args = [id, 0, category, reason, evidenceUrl];

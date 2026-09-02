@@ -1,5 +1,70 @@
 {
   "v3": {
+    "caller_patch": {
+      "status": "APPLIED",
+      "scope": "evaluation caller only",
+      "canonical_asset_id_source": "V3 contract asset_ids() read",
+      "canonical_asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "malformed_asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48",
+      "malformed_transaction": {
+        "tx_hash": "0x213774b9de32c135e8f7aa18a94834d7d5eab7ce43a06c7836c47bd8c6dba6bc",
+        "classification": "CALLER_INPUT_ERROR_WRONG_ASSET_ID_CASE",
+        "status": "FINALIZED",
+        "execution": "FINISHED_WITH_ERROR",
+        "passport_created": false
+      },
+      "pre_broadcast_guard": "caller requires exact string membership in returned asset_ids()",
+      "contract_modified": false
+    },
+    "corrected_evaluate": {
+      "broadcasted": true,
+      "tx_hash": "0x7459cf4d2dba2b74080b061a5e352d286837879d5e77da4e79092e8c2c8503cd",
+      "asset_id": "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "caller_path": "read asset_ids() -> verify SUBMITTED/current_version 0 -> client.writeContract(evaluate_asset)",
+      "status": "UNDETERMINED",
+      "status_code": 6,
+      "execution": "FINISHED_WITH_RETURN",
+      "consensus": "DISAGREE",
+      "passport_created": false,
+      "tx_execution_hash": "0xef320bee28b9bd86d1d145bbb95e4a5bdc52126b9c18cc1bd827207553fb8c03",
+      "result_hash": "0x2ca56883be07b23e546a88f43601bd2bbacfaad00827604122c3ca1682c296f2",
+      "validator_receipts": {
+        "num_of_initial_validators": 5,
+        "rounds": 3,
+        "final_round": 2,
+        "votes_committed": 5,
+        "votes_revealed": 5,
+        "validator_votes": ["TIMEOUT", "DETERMINISTIC_VIOLATION", "TIMEOUT", "DETERMINISTIC_VIOLATION", "DETERMINISTIC_VIOLATION"],
+        "validator_result_hashes": [
+          "0x9fc8d2d92c2ea25ae2ac3d9b20370cb9cb1e53d073b5c1a20b03621ca750f8df",
+          "0x1400c84ebbbf2cbce6ffc64ef82cc03873eb1b1050759e1ebb537d6c55360008",
+          "0x9fc8d2d92c2ea25ae2ac3d9b20370cb9cb1e53d073b5c1a20b03621ca750f8df",
+          "0x1400c84ebbbf2cbce6ffc64ef82cc03873eb1b1050759e1ebb537d6c55360008",
+          "0x1400c84ebbbf2cbce6ffc64ef82cc03873eb1b1050759e1ebb537d6c55360008"
+        ]
+      },
+      "raw_receipt_summary": {
+        "round_result_code": 2,
+        "round_result": "DISAGREE",
+        "rotations_left": 0,
+        "previous_status_code": 13,
+        "valid_until": 0
+      },
+      "post_state": {
+        "asset_status": "SUBMITTED",
+        "asset_current_version": 0,
+        "passport": {
+          "version": 0,
+          "verdict": "",
+          "max_ltv_bps": 0,
+          "failure_state": "NOT_EVALUATED"
+        },
+        "passport_history": {},
+        "challenge_records": {}
+      },
+      "failure_classification": "CONSENSUS_FAILURE_UNDETERMINED_CANONICAL_ID",
+      "failure_detail": "The exact canonical asset ID reached evaluation, but the single corrected evaluation finalized UNDETERMINED with two TIMEOUT and three DETERMINISTIC_VIOLATION votes across the observed final validator set. No retry is authorized."
+    },
     "v2_source_sha256": "633d396945cb88d217fcd8e0da53750fdbd37dd802f3035a8eac5fe825061890",
     "source_sha256": "115a9f6a4f6447b2d573e7e487d45630593a2781f8d625cbd8f8ab01c89899dc",
     "source_bytes": 42650,
@@ -22,7 +87,7 @@
     "chain_layer_complete": false,
     "challenge_performed": false,
     "reassess_performed": false,
-    "release_blocker": "The single V3 evaluate_asset transaction finalized with FINISHED_WITH_ERROR because the caller supplied a mixed-case asset ID while the stored canonical ID is lowercase. No passport was created, and the one-evaluation rule forbids a retry in this pass.",
+    "release_blocker": "The malformed mixed-case caller transaction was preserved and corrected, but the single corrected canonical-ID evaluation finalized UNDETERMINED with no passport. No further V3 evaluation retry is authorized.",
     "deployment": {
       "broadcasted": true,
       "tx_hash": "0x2a600fb0fae742da7077eb2aaf62e0ca6c0450ffe77ded54d0865da5071370fa",
