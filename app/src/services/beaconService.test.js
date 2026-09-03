@@ -23,26 +23,26 @@ test("contract service sends exact configured fees and hardened argument shapes"
   };
   const registry = new BeaconRegistry({ address, client });
   await registry.submitAsset(fields);
-  await registry.challengeAsset(`ethereum:${address.toLowerCase()}`, "PEG", "Price evidence diverges", "https://challenger.example/evidence");
+  await registry.challengeAsset(`eip155:1:${address.toLowerCase()}`, "PEG", "Price evidence diverges", "https://challenger.example/evidence");
   assert.equal(writes[0].value, SUBMISSION_FEE_WEI);
   assert.equal(writes[1].value, CHALLENGE_FEE_WEI);
   assert.deepEqual(writes[1].args.slice(2), ["PEG", "Price evidence diverges", "https://challenger.example/evidence"]);
 });
 
 test("canonical asset selection preserves the exact ID returned by Beacon state", () => {
-  const canonical = "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+  const canonical = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
   assert.equal(selectCanonicalAssetId(canonical, [canonical]), canonical);
 });
 
 test("mixed-case reconstructed asset IDs are rejected before broadcast", () => {
-  const canonical = "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
-  const mixedCase = "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48";
+  const canonical = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+  const mixedCase = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48";
   assert.throws(() => selectCanonicalAssetId(mixedCase, [canonical]), /exactly match Beacon state/);
 });
 
 test("evaluation uses the canonical asset ID returned by Beacon state", async () => {
-  const canonical = "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
-  const mixedCase = "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48";
+  const canonical = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+  const mixedCase = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48";
   const reads = [];
   const writes = [];
   const client = {
@@ -66,8 +66,8 @@ test("evaluation uses the canonical asset ID returned by Beacon state", async ()
 });
 
 test("evaluation rejects a mixed-case ID before any write call", async () => {
-  const canonical = "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
-  const mixedCase = "ethereum:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48";
+  const canonical = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
+  const mixedCase = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48";
   let writes = 0;
   const client = {
     async readContract({ functionName }) { if (functionName === "asset_ids") return [canonical]; return {}; },

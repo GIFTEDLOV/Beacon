@@ -4,7 +4,7 @@ import type { GenLayerClient } from "genlayer-js/types";
 
 
 export default async function main(client: GenLayerClient<any>) {
-  const filePath = path.resolve(process.cwd(), "contracts/beacon.py");
+  const filePath = path.resolve(process.cwd(), "contracts/beacon_v5.py");
 
   try {
     const contractCode = new Uint8Array(readFileSync(filePath));

@@ -1,0 +1,41 @@
+{
+  "network": "Testnet Bradbury",
+  "source": {
+    "path": "contracts/beacon_v5.py",
+    "sha256": "b5077515361badc7c04d792d3f61c331f5d9b1c21edcd7cbc27e4576f80fc3e0",
+    "bytes": 52329,
+    "parity_verified": true
+  },
+  "deployment": {
+    "tx": "0xd96311f0072722af9cfa71e2c1552722bfacb55d19ef58ee7cbf685fd72ec204",
+    "contract": "0xd52daA517259ca08dF2f4839C0d8962E0A3148c8",
+    "status": "FINALIZED",
+    "execution": "FINISHED_WITH_RETURN",
+    "consensus": "AGREE",
+    "validator_summary": "5 AGREE"
+  },
+  "asset": {
+    "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "submit_tx": "0xecee1abd2cf6b4d29fdf97384737a36811901b2c8642e01b2387eb7c096aa376",
+    "submit_status": "FINALIZED / FINISHED_WITH_RETURN / AGREE",
+    "identity_root": "eip155:1 + 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "identity_stage_output": "VERIFIED",
+    "primary_market_id": "usd-coin",
+    "secondary_market_id": "usdc-usd-coin",
+    "issuer_domain": "circle.com",
+    "identity_digest": "a3a2b92cb9400b2a3a1b345db29335f5d3b4579d545e728b143554a5ea847df",
+    "lifecycle_readback": "SUBMITTED",
+    "passport_version": 0
+  },
+  "evaluation": {
+    "tx": "0xca4f1e7d1cc63231dcbe64d8525843f7602004184335aa2f23ffe14796829e7e",
+    "status": "UNDETERMINED",
+    "execution": "FINISHED_WITH_RETURN",
+    "consensus": "DISAGREE",
+    "validator_summary": "3 TIMEOUT / 14 DETERMINISTIC_VIOLATION",
+    "passport_version": 0,
+    "state_unchanged": true,
+    "retry_sent": false
+  },
+  "live_multi_challenge_proof": "NOT_TRUTHFULLY_AVAILABLE"
+}

@@ -1,6 +1,6 @@
 import { account, createGenLayerClient } from "./genlayer.js";
 import { executeWriteLifecycle, reconcilePersistedWrite } from "./transactionLifecycle.js";
-import { V4_CONTRACT_ADDRESS } from "./releaseProof.js";
+import { V5_CONTRACT_ADDRESS } from "./releaseProof.js";
 
 export const SUBMISSION_FEE_WEI = 1000000000000000000n;
 export const CHALLENGE_FEE_WEI = 250000000000000000n;
@@ -24,7 +24,7 @@ const store = () => (typeof localStorage === "undefined" ? null : localStorage);
 
 export default class BeaconRegistry {
   constructor({ address = import.meta.env?.VITE_CONTRACT_ADDRESS, client = null } = {}) {
-    this.contractAddress = address || V4_CONTRACT_ADDRESS;
+    this.contractAddress = address || V5_CONTRACT_ADDRESS;
     this.client = client || (this.isConfigured() ? createGenLayerClient(account) : null);
   }
 
@@ -61,9 +61,10 @@ export default class BeaconRegistry {
     return reconcilePersistedWrite({ getPersistedHash: async () => this._getPersisted(operation, id), reconcile: (hash) => this._reconcile(hash), readExpectedState: expected });
   }
   async submitAsset(fields) {
-    const token = fields.token_address.startsWith("0x") ? fields.token_address.toLowerCase() : fields.token_address;
-    const id = `${fields.chain.toLowerCase()}:${token}`;
-    return this._write("submit_asset", id, Object.values(fields), async () => {
+    const token = fields.token_address.toLowerCase();
+    const id = `eip155:1:${token}`;
+    const args = [fields.name || "", fields.symbol || "", fields.chain, fields.token_address, fields.target_currency, fields.market_identifier || "", fields.secondary_market_identifier || "", fields.issuer_url, fields.redemption_url, fields.reserve_backing_url, fields.security_url, fields.governance_url];
+    return this._write("submit_asset", id, args, async () => {
       const current = await this.asset(id);
       if (current && Object.keys(current).length) throw new Error("Precondition failed: asset already exists.");
     }, () => this.asset(id), SUBMISSION_FEE_WEI);
