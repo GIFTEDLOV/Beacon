@@ -1,0 +1,168 @@
+{
+  "fixture_kind": "read-only-live-forensics",
+  "captured_at": "2026-09-04",
+  "contract": "0xd52daA517259ca08dF2f4839C0d8962E0A3148c8",
+  "historical_v4_contract": "0xaA0EEB41C30C54104F4106E06acCF4395Ec96b54",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "repository": {
+    "branch": "main",
+    "starting_head": "a77459ac9f2747539b2b16e81646ce5129b87812",
+    "worktree": "clean",
+    "last_known_remote_head": "03edecbb20acead7705c785f7b15391cf4cb57cf",
+    "remote_read": "unavailable: github.com connection refused by environment"
+  },
+  "source_parity": {
+    "path": "contracts/beacon_v5.py",
+    "sha256": "b5077515361badc7c04d792d3f61c331f5d9b1c21edcd7cbc27e4576f80fc3e0",
+    "bytes": 52329,
+    "deployed_code_bytes": 52329,
+    "deployed_code_sha256": "b5077515361badc7c04d792d3f61c331f5d9b1c21edcd7cbc27e4576f80fc3e0",
+    "parity": true
+  },
+  "state": {
+    "asset_count": 1,
+    "asset_ids": [
+      "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    ],
+    "asset": {
+      "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "chain": "eip155:1",
+      "token_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "target_currency": "USD",
+      "name": "USDC",
+      "symbol": "USDC",
+      "market_identifier": "usd-coin",
+      "secondary_market_identifier": "usdc-usd-coin",
+      "identity_status": "VERIFIED",
+      "identity_digest": "a3a2b92cb9400b2a3a1b345db29335f5d3bb4579d545e728b143554a5ea847df",
+      "official_issuer_domain": "circle.com",
+      "current_version": 1,
+      "current_verdict": "REJECT",
+      "current_ltv_bps": 0,
+      "lifecycle_status": "CHALLENGED",
+      "issuer_url": "https://developers.circle.com/stablecoins/usdc-contract-addresses.md",
+      "redemption_url": "https://developers.circle.com/stablecoins/usdc-contract-addresses.md?role=redemption",
+      "reserve_backing_url": "https://developers.circle.com/xreserve/references/supported-blockchains-and-domains.md",
+      "security_url": "https://developers.circle.com/cctp/references/contract-interfaces.md",
+      "governance_url": "https://developers.circle.com/contracts/erc-20-token.md"
+    },
+    "passport_v1": {
+      "version": 1,
+      "verdict": "REJECT",
+      "max_ltv_bps": 0,
+      "failure_state": "NONE",
+      "policy_basis": "MULTIPLE_CRITICAL_UNKNOWN_FIELDS",
+      "identity_status": "VERIFIED",
+      "identity_digest": "a3a2b92cb9400b2a3a1b345db29335f5d3bb4579d545e728b143554a5ea847df",
+      "canonical_chain": "eip155:1",
+      "canonical_token_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "primary_market_id": "usd-coin",
+      "secondary_market_id": "usdc-usd-coin",
+      "challenge_count": 0,
+      "supported_challenge_count": 0,
+      "challenge_set_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "passport_history_versions": [1],
+    "challenges": {
+      "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#SECURITY#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": {
+        "challenge_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#SECURITY#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+        "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "challenger": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "target_version": 1,
+        "category": "SECURITY",
+        "reason": "The official Circle CCTP interface documentation describes security-relevant USDC transfer and mint/burn controls for the exact Ethereum contract; review whether this control surface materially affects the Passport security-risk assessment.",
+        "evidence_url": "https://developers.circle.com/cctp/references/contract-interfaces",
+        "created_at": "2026-09-04T06:57:09Z",
+        "status": "OPEN",
+        "evaluation_status": "PENDING",
+        "evaluation_result": "",
+        "evaluation_reason_code": "",
+        "evidence_digest": "",
+        "resolution_version": 0
+      },
+      "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#GOVERNANCE#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": {
+        "challenge_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#GOVERNANCE#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+        "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        "challenger": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "target_version": 1,
+        "category": "GOVERNANCE",
+        "reason": "The official Circle ERC-20 documentation describes admin-controlled roles and permissioned functions for the USDC contract; review whether this control surface materially affects the Passport governance-risk assessment.",
+        "evidence_url": "https://developers.circle.com/contracts/erc-20-token",
+        "created_at": "2026-09-04T08:06:56Z",
+        "status": "OPEN",
+        "evaluation_status": "PENDING",
+        "evaluation_result": "",
+        "evaluation_reason_code": "",
+        "evidence_digest": "",
+        "resolution_version": 0
+      }
+    }
+  },
+  "transactions": {
+    "deployment": "0xd96311f0072722af9cfa71e2c1552722bfacb55d19ef58ee7cbf685fd72ec204",
+    "submission": "0xecee1abd2cf6b4d29fdf97384737a36811901b2c8642e01b2387eb7c096aa376",
+    "successful_evaluation": "0xb3f1a8393196992fb520f544c36d2f164747fe23f32885124c6f20b8bed9b4bc",
+    "challenge_a": "0xc0d0f9db24c7cb23796dd80ff69d48ef451ec86cc033c6bb858d768de6a49884",
+    "challenge_b": "0x4e305fe15d4703f700a1f1b423b61b5406011010015bfed4288aced7a28d13e2",
+    "failed_reassessment": "0x08101b86905430cc742624df3445457c4c24d8f57d18be186dc4cad0111c9c09"
+  },
+  "failed_reassessment": {
+    "tx_id": "0x08101b86905430cc742624df3445457c4c24d8f57d18be186dc4cad0111c9c09",
+    "stored_status": "FINALIZED",
+    "status_code": 7,
+    "consensus_result": "AGREE",
+    "execution_result": "FINISHED_WITH_ERROR",
+    "result_hash": "0xf939a047dbc00312e196c2a59a4fd8c3ca9e75edd608925cf4bebe1a6d6e2dd0",
+    "tx_execution_hash": "0x9d3c92d4b8a269a8a9ad73d4e95c839fe76e5aa1df1fa02d415567440ca48e51",
+    "initial_validators": 5,
+    "populated_round": {
+      "round": 0,
+      "leader_index": 4,
+      "votes_committed": 5,
+      "votes_revealed": 5,
+      "result": 1,
+      "validator_votes_base64": "BAICBAI=",
+      "validator_votes": ["DETERMINISTIC_VIOLATION", "DISAGREE", "DISAGREE", "DETERMINISTIC_VIOLATION", "DISAGREE"],
+      "validator_result_hashes": [
+        "0x9f99ce1c57463ea1ac484178b67c3383e685691099e2b08e813c872a69fe0a29",
+        "0xf939a047dbc00312e196c2a59a4fd8c3ca9e75edd608925cf4bebe1a6d6e2dd0",
+        "0xf939a047dbc00312e196c2a59a4fd8c3ca9e75edd608925cf4bebe1a6d6e2dd0",
+        "0x9f99ce1c57463ea1ac484178b67c3383e685691099e2b08e813c872a69fe0a29",
+        "0xf939a047dbc00312e196c2a59a4fd8c3ca9e75edd608925cf4bebe1a6d6e2dd0"
+      ]
+    },
+    "eq_blocks_outputs_rlp": "f8a1b89800261163616e6f6e6963616c5f61646472657373d4023078613062383639393163363231386233366331643139643461326539656230636533363036656234380f63616e6f6e6963616c5f636861696e446569703135353a310d6661696c7572655f7374617465a40145564944454e43455f554e415641494c41424c450f6964656e746974795f73746174757354554e564552494649454486706164646564",
+    "trace": {
+      "rounds": [0, 1],
+      "result_code": 1,
+      "kind": "UserError",
+      "return_data": {
+        "data": "[EXPECTED] reassessment evidence unavailable",
+        "events": [],
+        "fingerprint": "present in both traces; validator-specific memory/error fingerprints differed",
+        "storage_changes": []
+      },
+      "stdout": "",
+      "stderr": "",
+      "llm_calls": 0,
+      "web_calls": 0,
+      "first_failing_guard": "contracts/beacon_v5.py:838-839"
+    },
+    "state_after_failure": {
+      "passport_version": 1,
+      "challenge_a_status": "OPEN",
+      "challenge_a_evaluation_status": "PENDING",
+      "challenge_b_status": "OPEN",
+      "challenge_b_evaluation_status": "PENDING",
+      "open_eligible_challenges": 2
+    }
+  },
+  "nonce_snapshot": {
+    "signer": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "latest": "0x118",
+    "pending": "0x118",
+    "unknown_pending_transaction": false,
+    "balance_wei_hex": "0x4c77e29bdf7820d0",
+    "chain_id_hex": "0x107d"
+  }
+}
