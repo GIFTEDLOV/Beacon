@@ -5,11 +5,11 @@
   "raw_body_digest_policy": "forensic metadata only; never a consensus equality field",
   "source": {
     "path": "contracts/beacon_v6.py",
-    "sha256": "f8a784b27ff3432e7c6d406f1230c73ea9fec1f4d8563cc3f9250e131c0d6d26",
-    "bytes": 58020,
+    "sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+    "bytes": 49301,
     "dependency": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
     "candidate_version": "Beacon V6",
-    "generated_from_head": "d9e9130aef1c35a41bd8a1466069e8a080359c6c"
+    "generated_from_head": "e163482294f4ac5f12807d6a6344e1d7ce445b14"
   },
   "asset": {
     "canonical_chain": "ethereum",
