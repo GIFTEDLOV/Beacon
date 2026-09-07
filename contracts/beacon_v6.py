@@ -38,14 +38,20 @@ CHALLENGE_RESULTS=("SUPPORTED","NOT_SUPPORTED","INSUFFICIENT_EVIDENCE")
 CHALLENGE_REASON_CODES=("MATERIAL","NOT_MATERIAL","ASSET_BINDING_UNVERIFIED","EVIDENCE_INSUFFICIENT",)
 MAX_RESPONSE_LENGTH=1048576
 MAX_EVIDENCE_LENGTH=2800
+MAX_OPEN_CHALLENGES=8
 SEMANTIC_WINDOW_LENGTH=520
 OBJECTIVE_CONFLICT_TOLERANCE_BPS=100
 OBJECTIVE_VALIDATOR_TOLERANCE_BPS=100
 SUBMISSION_FEE_WEI=1000000000000000000
 CHALLENGE_FEE_WEI=250000000000000000
-CANONICAL_ETHEREUM="eip155:1"
-CHAIN_ALIASES={"eip155:1":("ethereum","eth-ethereum"),"ethereum":("ethereum","eth-ethereum"),"eth":("ethereum","eth-ethereum"),"mainnet":("ethereum","eth-ethereum"),}
-CHAIN_TERMS={CANONICAL_ETHEREUM:("ethereum",)}
+CANONICAL_ETHEREUM="ethereum"
+CANONICAL_ETHEREUM_NAMESPACE="eip155:1"
+# The adapter is the only authority that turns a user-facing chain value into
+# provider namespaces. Adding a chain later means adding one complete entry,
+# not weakening the identity rules for existing entries.
+CHAIN_ADAPTERS={"ethereum":{"canonical_chain":"ethereum","namespace":"eip155:1","coingecko_platform":"ethereum","coinpaprika_platform":"eth-ethereum","terms":("ethereum",)},}
+CHAIN_ALIASES={"eip155:1":"ethereum","ethereum":"ethereum","eth":"ethereum","mainnet":"ethereum",}
+CHAIN_TERMS={"ethereum":("ethereum",)}
 SEMANTIC_SOURCE_ROLES=("issuer","redemption","reserve_backing","security","governance",)
 CHALLENGE_CATEGORIES=("PEG","LIQUIDITY","REDEMPTION","BACKING","SECURITY","GOVERNANCE","DEPENDENCY","OTHER",)
 ROLE_TERMS={"issuer":"issuer issue circle usdc operator","redemption":"redeem redemption mint burn eligible terms","reserve_backing":"reserve backing cash treasury collateral attestation","security":"security audit exploit vulnerability freeze pause","governance":"admin owner upgrade governance control permission","peg":"peg price deviation stability redemption","liquidity":"liquidity volume market depth turnover","backing":"reserve backing cash treasury collateral attestation","dependency":"dependency oracle custodian infrastructure provider","other":"",}
@@ -144,6 +150,15 @@ class PassportRecord:
  challenge_count:u256
  supported_challenge_count:u256
  evidence_digest:str
+ canonical_namespace:str
+ canonical_name:str
+ canonical_symbol:str
+ coingecko_id:str
+ coinpaprika_id:str
+ coingecko_binding_status:str
+ coinpaprika_binding_status:str
+ target_currency:str
+ reassessment_version:u256
 @allow_storage
 @dataclass
 class ChallengeRecord:
@@ -161,6 +176,7 @@ class ChallengeRecord:
  evaluation_reason_code:str
  evidence_digest:str
  resolution_version:u256
+ reason_digest:str
 def _failure(reason):
  return{"failure_state":reason}
 def _status_code(w):
@@ -203,7 +219,10 @@ def _canonical_chain(vv):
  key=vv.strip().lower()
  if key not in CHAIN_ALIASES:
   raise gl.vm.UserError("[EXPECTED] unsupported chain")
- return CANONICAL_ETHEREUM,CHAIN_ALIASES[key][0],CHAIN_ALIASES[key][1]
+ adapter=CHAIN_ADAPTERS.get(CHAIN_ALIASES[key])
+ if not isinstance(adapter,dict):
+  raise gl.vm.UserError("[EXPECTED] unsupported chain")
+ return adapter["canonical_chain"],adapter["namespace"],adapter["coingecko_platform"],adapter["coinpaprika_platform"]
 def _asset_id(chain,token_address):
  return chain+":"+token_address.lower()
 def _decimal_to_micro(vv):
@@ -215,8 +234,10 @@ def _decimal_to_micro(vv):
  pieces=text.split(".")
  fraction=(pieces[1]if len(pieces)==2 else "")[:6].ljust(6,"0")
  return int(pieces[0])*1000000+int(fraction or "0")
-def _identity_urls(pc,pp,a):
- return("https://api.coingecko.com/api/v3/coins/"+pc+"/contract/"+a+"?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false","https://api.coinpaprika.com/v1/contracts/"+pp+"/"+a,)
+def _coingecko_identity_url(pc,a):
+ return "https://api.coingecko.com/api/v3/coins/"+pc+"/contract/"+a+"?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false"
+def _coinpaprika_identity_url(pp,a):
+ return "https://api.coinpaprika.com/v1/contracts/"+pp+"/"+a
 def _json_get(url,max_length=MAX_RESPONSE_LENGTH):
  try:
   w=gl.nondet.web.get(url)
@@ -239,15 +260,15 @@ def _json_get(url,max_length=MAX_RESPONSE_LENGTH):
  except Exception:
   return _failure(EVIDENCE_UNAVAILABLE)
 def _coingecko_identity(pc,a):
- data=_json_get(_identity_urls(pc,"eth-ethereum",a)[0])
+ data=_json_get(_coingecko_identity_url(pc,a))
  if "failure_state"in data:
-  return data
+  return{"binding_status":"UNVERIFIED","failure_state":data["failure_state"]}
  pl=data.get("platforms")
  links=data.get("links")
  ra=pl.get(pc)if isinstance(pl,dict)else None
  da=data.get("contract_address")
  if(not isinstance(data.get("id"),str)or not isinstance(data.get("symbol"),str)or not isinstance(data.get("name"),str)or not isinstance(data.get("asset_platform_id"),str)or data.get("asset_platform_id").lower()!=pc.lower()or not isinstance(ra,str)or ra.lower()!=a.lower()or not isinstance(da,str)or da.lower()!=a.lower()):
-  return{"failure_state":ASSET_IDENTITY_UNVERIFIED}
+  return{"binding_status":"UNVERIFIED","failure_state":ASSET_IDENTITY_UNVERIFIED}
  hp=links.get("homepage")if isinstance(links,dict)else[]
  domains=[]
  if isinstance(hp,list):
@@ -258,8 +279,8 @@ def _coingecko_identity(pc,a):
      if root not in domains:
       domains.append(root)
  if not domains:
-  return{"failure_state":ASSET_IDENTITY_UNVERIFIED}
- return{"provider":"COINGECKO","market_id":data["id"].lower(),"symbol":data["symbol"].upper(),"name":data["name"].strip(),"official_domains":domains,"failure_state":NO_FAILURE,}
+  return{"binding_status":"UNVERIFIED","failure_state":ASSET_IDENTITY_UNVERIFIED}
+ return{"provider":"COINGECKO","market_id":data["id"].lower(),"symbol":data["symbol"].upper(),"name":data["name"].strip(),"official_domains":domains,"binding_status":"VERIFIED","failure_state":NO_FAILURE,}
 def _coinpaprika_contract_binding(pp,a,market_id):
  detail=_json_get("https://api.coinpaprika.com/v1/coins/"+market_id)
  if "failure_state"in detail:
@@ -271,26 +292,35 @@ def _coinpaprika_contract_binding(pp,a,market_id):
   return ASSET_IDENTITY_UNVERIFIED
  return NO_FAILURE if any(isinstance(item,dict)and isinstance(item.get("platform"),str)and item["platform"].lower()==pp.lower()and isinstance(item.get("contract"),str)and item["contract"].lower()==a.lower()for item in contracts)else ASSET_IDENTITY_UNVERIFIED
 def _coinpaprika_identity(pp,a):
- data=_json_get(_identity_urls("ethereum",pp,a)[1])
+ data=_json_get(_coinpaprika_identity_url(pp,a))
  if "failure_state"in data:
-  return data
+  return{"binding_status":"UNVERIFIED","failure_state":data["failure_state"]}
  if(not isinstance(data.get("id"),str)or not isinstance(data.get("symbol"),str)or not isinstance(data.get("name"),str)):
-  return{"failure_state":ASSET_IDENTITY_UNVERIFIED}
+  return{"binding_status":"UNVERIFIED","failure_state":ASSET_IDENTITY_UNVERIFIED}
  binding=_coinpaprika_contract_binding(pp,a,data["id"])
  if binding!=NO_FAILURE:
-  return{"failure_state":binding}
- return{"provider":"COINPAPRIKA","market_id":data["id"].lower(),"symbol":data["symbol"].upper(),"name":data["name"].strip(),"official_domains":[],"failure_state":NO_FAILURE,}
-def _identity_bundle(canonical_chain,pc,pp,a,name_claim,symbol_claim,market_claim,secondary_claim,):
+  return{"binding_status":"UNVERIFIED","failure_state":binding}
+ return{"provider":"COINPAPRIKA","market_id":data["id"].lower(),"symbol":data["symbol"].upper(),"name":data["name"].strip(),"official_domains":[],"binding_status":"VERIFIED","failure_state":NO_FAILURE,}
+def _identity_bundle(canonical_chain,namespace,pc,pp,a,target_currency,name_claim,symbol_claim,market_claim,secondary_claim,):
  p=_coingecko_identity(pc,a)
  q=_coinpaprika_identity(pp,a)
- if p.get("failure_state")==EVIDENCE_UNAVAILABLE or q.get("failure_state")==EVIDENCE_UNAVAILABLE:
-  return{"identity_status":IDENTITY_UNVERIFIED,"failure_state":EVIDENCE_UNAVAILABLE,"canonical_chain":canonical_chain,"canonical_address":a,}
- if p.get("failure_state")!=NO_FAILURE or q.get("failure_state")!=NO_FAILURE:
-  return{"identity_status":IDENTITY_UNVERIFIED,"failure_state":ASSET_IDENTITY_UNVERIFIED,"canonical_chain":canonical_chain,"canonical_address":a,}
+ provider_failure=EVIDENCE_UNAVAILABLE if EVIDENCE_UNAVAILABLE in (p.get("failure_state"),q.get("failure_state")) else NO_FAILURE
+ if provider_failure==NO_FAILURE and(p.get("failure_state")!=NO_FAILURE or q.get("failure_state")!=NO_FAILURE):
+  provider_failure=ASSET_IDENTITY_UNVERIFIED
+ p_id=p.get("market_id","")
+ q_id=q.get("market_id","")
+ symbol=p.get("symbol","")
+ name=p.get("name","")
+ od=sorted(p.get("official_domains",[]))if isinstance(p.get("official_domains",[]),list)else[]
+ binding_status_p=p.get("binding_status","UNVERIFIED")
+ binding_status_q=q.get("binding_status","UNVERIFIED")
+ if provider_failure!=NO_FAILURE:
+  r={"identity_status":IDENTITY_UNVERIFIED,"failure_state":provider_failure,"canonical_chain":canonical_chain,"canonical_namespace":namespace,"canonical_address":a.lower(),"canonical_token_address":a.lower(),"canonical_name":name,"canonical_symbol":symbol,"primary_market_id":p_id,"secondary_market_id":q_id,"coingecko_id":p_id,"coinpaprika_id":q_id,"coingecko_binding_status":binding_status_p,"coinpaprika_binding_status":binding_status_q,"target_currency":target_currency,"symbol":symbol,"name":name,"issuer_domains":od,"official_issuer_domain":od[0]if od else "",}
+  r["identity_digest"]=_digest({"identity_status":r["identity_status"],"chain":canonical_chain,"namespace":namespace,"address":r["canonical_token_address"],"name":name,"symbol":symbol,"target_currency":target_currency,"coingecko_id":p_id,"coinpaprika_id":q_id,"coingecko_binding_status":binding_status_p,"coinpaprika_binding_status":binding_status_q,"domains":od,})
+  return r
  conflict=(p["symbol"]!=q["symbol"]or p["name"].lower()!=q["name"].lower()or(name_claim and name_claim.strip().lower()!=p["name"].lower())or(symbol_claim and symbol_claim.strip().upper()!=p["symbol"])or(market_claim and market_claim.strip().lower()!=p["market_id"])or(secondary_claim and secondary_claim.strip().lower()!=q["market_id"]))
- od=sorted(p.get("official_domains",[]))
- r={"identity_status":IDENTITY_CONFLICT if conflict else IDENTITY_VERIFIED,"failure_state":ASSET_IDENTITY_CONFLICT if conflict else NO_FAILURE,"canonical_chain":canonical_chain,"canonical_address":a,"primary_market_id":p["market_id"],"secondary_market_id":q["market_id"],"symbol":p["symbol"],"name":p["name"],"issuer_domains":od,"official_issuer_domain":od[0]if od else "",}
- r["identity_digest"]=_digest({"chain":canonical_chain,"address":a,"primary":p["market_id"],"secondary":q["market_id"],"symbol":p["symbol"],"name":p["name"],"domains":od,})
+ r={"identity_status":IDENTITY_CONFLICT if conflict else IDENTITY_VERIFIED,"failure_state":ASSET_IDENTITY_CONFLICT if conflict else NO_FAILURE,"canonical_chain":canonical_chain,"canonical_namespace":namespace,"canonical_address":a.lower(),"canonical_token_address":a.lower(),"canonical_name":p["name"],"canonical_symbol":p["symbol"],"primary_market_id":p["market_id"],"secondary_market_id":q["market_id"],"coingecko_id":p["market_id"],"coinpaprika_id":q["market_id"],"coingecko_binding_status":p["binding_status"],"coinpaprika_binding_status":q["binding_status"],"target_currency":target_currency,"symbol":p["symbol"],"name":p["name"],"issuer_domains":od,"official_issuer_domain":od[0]if od else "",}
+ r["identity_digest"]=_digest({"identity_status":r["identity_status"],"chain":canonical_chain,"namespace":namespace,"address":r["canonical_token_address"],"name":r["canonical_name"],"symbol":r["canonical_symbol"],"target_currency":target_currency,"coingecko_id":r["coingecko_id"],"coinpaprika_id":r["coinpaprika_id"],"coingecko_binding_status":r["coingecko_binding_status"],"coinpaprika_binding_status":r["coinpaprika_binding_status"],"domains":od,})
  return r
 def _identity_leader(*args):
  return _identity_bundle(*args)
@@ -307,8 +337,8 @@ def _identity_validator(args,lr):
   return False
 def _run_identity(asset):
  try:
-  canonical_chain,pc,pp=_canonical_chain(asset.chain)
-  args=(canonical_chain,pc,pp,asset.token_address,asset.name_claim,asset.symbol_claim,asset.market_identifier_claim,asset.secondary_market_identifier_claim,)
+  canonical_chain,namespace,pc,pp=_canonical_chain(asset.chain)
+  args=(canonical_chain,namespace,pc,pp,asset.token_address,asset.target_currency,asset.name_claim,asset.symbol_claim,asset.market_identifier_claim,asset.secondary_market_identifier_claim,)
   def identity_leader_fn():
    return _identity_leader(*args)
   def identity_validator_fn(lr):
@@ -316,7 +346,7 @@ def _run_identity(asset):
   r=gl.vm.run_nondet_unsafe(identity_leader_fn,identity_validator_fn)
   return r if isinstance(r,dict)else _failure(CONSENSUS_VALIDATION_FAILURE)
  except Exception:
-  return{"identity_status":IDENTITY_UNVERIFIED,"failure_state":CONSENSUS_VALIDATION_FAILURE,"canonical_chain":asset.chain,"canonical_address":asset.token_address,}
+  return{"identity_status":IDENTITY_UNVERIFIED,"failure_state":CONSENSUS_VALIDATION_FAILURE,"canonical_chain":asset.chain,"canonical_namespace":"","canonical_address":asset.token_address,"canonical_token_address":asset.token_address,"coingecko_binding_status":"UNVERIFIED","coinpaprika_binding_status":"UNVERIFIED","identity_digest":"",}
 def _objective_url(pc,a):
  return "https://api.coingecko.com/api/v3/coins/"+pc+"/contract/"+a+"?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false"
 def _secondary_objective_url(pp,a):
@@ -419,7 +449,7 @@ def _objective_validator(args,lr):
   return False
 def _run_objective(asset,i):
  try:
-  _,pc,pp=_canonical_chain(asset.chain)
+  _,_,pc,pp=_canonical_chain(asset.chain)
   args=(i["canonical_chain"],pc,pp,i["canonical_address"],i["primary_market_id"],i["secondary_market_id"],i["symbol"],asset.target_currency,)
   def objective_leader_fn():
    return _objective_bundle(*args)
@@ -445,13 +475,18 @@ def _reduce_evidence(text,role):
   return text[:MAX_EVIDENCE_LENGTH]
  windows.sort()
  return " ... ".join(text[start:end]for start,end in windows)[:MAX_EVIDENCE_LENGTH]
-def _binding_matches(text,i):
+def _binding_matches(text,i,require_address=True,role=""):
  lower=text.lower()
  a=i.get("canonical_address","").lower()
  symbol=i.get("symbol","").lower()
  name=i.get("name","").lower()
  chain_terms=CHAIN_TERMS.get(i.get("canonical_chain"),())
- return bool(a and a in lower and any(term in lower for term in chain_terms)and symbol and re.search(r"\b"+re.escape(symbol)+r"\b",lower)and(not name or name in lower or name==symbol))
+ identity_match=bool(symbol and re.search(r"\b"+re.escape(symbol)+r"\b",lower)and(not name or name in lower or name==symbol))
+ chain_match=any(term in lower for term in chain_terms)
+ address_match=bool(a and a in lower)
+ role_terms=ROLE_TERMS.get(role.lower(),"").split()
+ role_match=not role_terms or any(term in lower for term in role_terms)
+ return bool(identity_match and role_match and(address_match and chain_match if require_address else True))
 def _authorized_domain(host,domain):
  return isinstance(domain,str)and bool(domain)and(host==domain or host.endswith("."+domain))
 def _authority_status(url,role,i):
@@ -489,7 +524,7 @@ def _source_evidence(url,role,i):
   if not y.strip()or len(y)>MAX_RESPONSE_LENGTH:
    r["failure_state"]=SOURCE_IDENTITY_UNVERIFIED
    return r
-  if _binding_matches(y,i):
+  if _binding_matches(y,i,role=="issuer"or au=="INDEPENDENT_VERIFIED",role):
    r["asset_binding_status"]="VERIFIED"
    r["text"]=_reduce_evidence(y,role)
    r["evidence_digest"]=_evidence_digest(role,i,r["text"])
@@ -610,10 +645,10 @@ def _challenge_prompt(i,target_version,category,reason,e):
 def _valid_challenge_result(vv):
  return isinstance(vv,dict)and set(vv.keys())=={"evaluation_result","evaluation_reason_code"}and vv.get("evaluation_result")in CHALLENGE_RESULTS and vv.get("evaluation_reason_code")in CHALLENGE_REASON_CODES
 def _challenge_judge(i,target_version,category,reason,e):
- if e.get("failure_state")==EVIDENCE_UNAVAILABLE:
-  return{"failure_state":EVIDENCE_UNAVAILABLE}
+ if "failure_state"in e:
+  return{"failure_state":e["failure_state"]}
  if e.get("asset_binding_status")!="VERIFIED":
-  return{"evaluation_result":"INSUFFICIENT_EVIDENCE","evaluation_reason_code":"ASSET_BINDING_UNVERIFIED"}
+  return{"failure_state":SOURCE_IDENTITY_UNVERIFIED}
  try:
   raw=gl.nondet.exec_prompt(_challenge_prompt(i,target_version,category,reason,e.get("text","")),response_format="json")
   r=json.loads(raw)if isinstance(raw,str)else raw
@@ -638,7 +673,7 @@ def _challenge_evidence(url,i,category):
    return{"failure_state":INVALID_SOURCE,"asset_binding_status":"UNVERIFIED","text":"","evidence_digest":""}
   if not y.strip()or len(y)>MAX_RESPONSE_LENGTH:
    return{"asset_binding_status":"UNVERIFIED","text":"","evidence_digest":""}
-  if not _binding_matches(y,i):
+  if not _binding_matches(y,i,True,category.lower()):
    return{"asset_binding_status":"UNVERIFIED","text":"","evidence_digest":""}
   text=_reduce_evidence(y,category.lower())
   digest=_evidence_digest(category,i,text)
@@ -660,9 +695,10 @@ def _challenge_validator(args,lr):
   independent=_challenge_judge(i,target_version,category,reason,e)
   if "failure_state"in independent or "failure_state"in proposed:
    return set(proposed.keys())=={"failure_state","evidence_digest"}and proposed.get("failure_state")==independent.get("failure_state")and proposed.get("evidence_digest","")==""
-  if not _valid_challenge_result(proposed)or not _valid_challenge_result(independent):
+  proposed_decision={key:proposed.get(key)for key in("evaluation_result","evaluation_reason_code")}
+  if not _valid_challenge_result(proposed_decision)or not _valid_challenge_result(independent):
    return False
-  return proposed.get("evaluation_result")==independent.get("evaluation_result")and proposed.get("evaluation_reason_code")==independent.get("evaluation_reason_code")
+  return proposed_decision==independent
  except Exception:
   return False
 def _run_challenge(i,challenge):
@@ -681,8 +717,12 @@ def _challenge_summary(f):
  cats=sorted(set(fi["category"]for fi in sup))
  return{"supported_categories":cats,"supported_challenge_count":len(sup),"risk_escalation_claims":[{"category":item["category"],"reason_code":item["evaluation_reason_code"]}for item in sup],"evidence_digests":[item["evidence_digest"]for item in f],}
 def _challenge_set_digest(f):
- ordered=sorted(f,key=lambda item:item.get("challenge_id",""))
+ ordered=[]
+ for item in sorted(f,key=lambda item:item.get("challenge_id","")):
+  ordered.append({"challenge_id":item.get("challenge_id",""),"target_version":item.get("target_version",0),"category":item.get("category",""),"reason":item.get("reason","")[:512],"reason_digest":item.get("reason_digest",_digest({"reason":item.get("reason","")})),"evidence_url":item.get("evidence_url",""),"evidence_digest":item.get("evidence_digest",""),"evaluation_result":item.get("evaluation_result",""),"evaluation_reason_code":item.get("evaluation_reason_code","")})
  return _digest(ordered)
+def _challenge_assessment(challenge,result):
+ return{"challenge_id":challenge.challenge_id,"target_version":challenge.target_version,"category":challenge.category,"reason":challenge.reason,"reason_digest":challenge.reason_digest or _digest({"reason":challenge.reason}),"evidence_url":challenge.evidence_url,"evidence_digest":result.get("evidence_digest",""),"evaluation_result":result.get("evaluation_result",""),"evaluation_reason_code":result.get("evaluation_reason_code","")}
 def _escalate_challenges(o,s,f):
  o=dict(o)
  s=dict(s)
@@ -766,7 +806,7 @@ def _build_passport(asset,version,i,o,sw,f):
  confidence=sp.get("confidence","LOW")
  if op.get("objective_coverage")!="BOTH"and failure_state==NO_FAILURE:
   confidence="LOW"
- return PassportRecord(asset.asset_id,version,evaluated_at,i.get("canonical_chain",asset.chain),i.get("canonical_address",asset.token_address),i.get("primary_market_id",""),i.get("secondary_market_id",""),i.get("identity_status",IDENTITY_UNVERIFIED),i.get("identity_digest",""),i.get("official_issuer_domain",""),_source_status(m,"issuer","authority_status"),_source_status(m,"issuer","asset_binding_status"),_source_status(m,"redemption","authority_status"),_source_status(m,"redemption","asset_binding_status"),_source_status(m,"reserve_backing","authority_status"),_source_status(m,"reserve_backing","asset_binding_status"),_source_status(m,"security","authority_status"),_source_status(m,"security","asset_binding_status"),_source_status(m,"governance","authority_status"),_source_status(m,"governance","asset_binding_status"),op.get("peg_risk",UNKNOWN),op.get("liquidity_risk",UNKNOWN),sp.get("redemption_risk",UNKNOWN),sp.get("backing_risk",UNKNOWN),sp.get("admin_governance_risk",UNKNOWN),sp.get("security_risk",UNKNOWN),sp.get("dependency_risk",UNKNOWN),confidence,verdict,ltv,failure_state,safety_cap,policy_basis,os,ss,op.get("objective_coverage","NONE"),op.get("primary_source_status","NOT_RUN"),op.get("secondary_source_status","NOT_RUN"),op.get("market_timestamp",""),op.get("secondary_market_timestamp",""),op.get("price_micro_units",0),op.get("peg_deviation_bps",0),op.get("liquidity_turnover_bps",0),op.get("secondary_price_micro_units",0),op.get("secondary_peg_deviation_bps",0),op.get("secondary_liquidity_turnover_bps",0),sp.get("redemption_status","UNKNOWN"),sp.get("critical_security_incident",False),sp.get("algorithmic_backing",False),sp.get("severe_instability",False),sp.get("critical_unknown_fields",0),sp.get("issuer_provenance","UNKNOWN"),sp.get("redemption_provenance","UNKNOWN"),sp.get("backing_provenance","UNKNOWN"),sp.get("security_provenance","UNKNOWN"),sp.get("governance_provenance","UNKNOWN"),cd,len(f),sum(1 for item in f if item.get("evaluation_result")=="SUPPORTED"),evidence_digest)
+ return PassportRecord(asset.asset_id,version,evaluated_at,i.get("canonical_chain",asset.chain),i.get("canonical_address",asset.token_address),i.get("primary_market_id",""),i.get("secondary_market_id",""),i.get("identity_status",IDENTITY_UNVERIFIED),i.get("identity_digest",""),i.get("official_issuer_domain",""),_source_status(m,"issuer","authority_status"),_source_status(m,"issuer","asset_binding_status"),_source_status(m,"redemption","authority_status"),_source_status(m,"redemption","asset_binding_status"),_source_status(m,"reserve_backing","authority_status"),_source_status(m,"reserve_backing","asset_binding_status"),_source_status(m,"security","authority_status"),_source_status(m,"security","asset_binding_status"),_source_status(m,"governance","authority_status"),_source_status(m,"governance","asset_binding_status"),op.get("peg_risk",UNKNOWN),op.get("liquidity_risk",UNKNOWN),sp.get("redemption_risk",UNKNOWN),sp.get("backing_risk",UNKNOWN),sp.get("admin_governance_risk",UNKNOWN),sp.get("security_risk",UNKNOWN),sp.get("dependency_risk",UNKNOWN),confidence,verdict,ltv,failure_state,safety_cap,policy_basis,os,ss,op.get("objective_coverage","NONE"),op.get("primary_source_status","NOT_RUN"),op.get("secondary_source_status","NOT_RUN"),op.get("market_timestamp",""),op.get("secondary_market_timestamp",""),op.get("price_micro_units",0),op.get("peg_deviation_bps",0),op.get("liquidity_turnover_bps",0),op.get("secondary_price_micro_units",0),op.get("secondary_peg_deviation_bps",0),op.get("secondary_liquidity_turnover_bps",0),sp.get("redemption_status","UNKNOWN"),sp.get("critical_security_incident",False),sp.get("algorithmic_backing",False),sp.get("severe_instability",False),sp.get("critical_unknown_fields",0),sp.get("issuer_provenance","UNKNOWN"),sp.get("redemption_provenance","UNKNOWN"),sp.get("backing_provenance","UNKNOWN"),sp.get("security_provenance","UNKNOWN"),sp.get("governance_provenance","UNKNOWN"),cd,len(f),sum(1 for item in f if item.get("evaluation_result")=="SUPPORTED"),evidence_digest,i.get("canonical_namespace",""),i.get("canonical_name",i.get("name","")),i.get("canonical_symbol",i.get("symbol","")),i.get("coingecko_id",i.get("primary_market_id","")),i.get("coinpaprika_id",i.get("secondary_market_id","")),i.get("coingecko_binding_status","UNVERIFIED"),i.get("coinpaprika_binding_status","UNVERIFIED"),asset.target_currency,version)
 def _asset_to_dict(asset):
  status=asset.current_verdict if asset.lifecycle_status==EVALUATED else asset.lifecycle_status
  return{"asset_id":asset.asset_id,"name":asset.name,"symbol":asset.symbol,"chain":asset.chain,"token_address":asset.token_address,"target_currency":asset.target_currency,"market_identifier":asset.market_identifier,"secondary_market_identifier":asset.secondary_market_identifier,"name_claim":asset.name_claim,"symbol_claim":asset.symbol_claim,"market_identifier_claim":asset.market_identifier_claim,"secondary_market_identifier_claim":asset.secondary_market_identifier_claim,"issuer_url":asset.issuer_url,"redemption_url":asset.redemption_url,"reserve_backing_url":asset.reserve_backing_url,"security_url":asset.security_url,"governance_url":asset.governance_url,"identity_status":asset.identity_status,"identity_digest":asset.identity_digest,"official_issuer_domain":asset.official_issuer_domain,"submitter":asset.submitter,"lifecycle_status":asset.lifecycle_status,"status":status,"current_version":asset.current_version,"current_verdict":asset.current_verdict,"current_ltv_bps":asset.current_ltv_bps,}
@@ -791,7 +831,7 @@ class Beacon(gl.Contract):
   if gl.message.value!=expected:
    raise gl.vm.UserError("[EXPECTED] exact "+label+" fee required")
  def _validate_submission(self,name,symbol,chain,token_address,target_currency,market_claim,secondary_claim,urls):
-  canonical,_,_=_canonical_chain(chain)
+  _,namespace,_,_=_canonical_chain(chain)
   if not _is_token_address(token_address):
    raise gl.vm.UserError("[EXPECTED] invalid token address")
   if not isinstance(target_currency,str)or not re.fullmatch(r"[A-Za-z]{3,12}",target_currency):
@@ -807,7 +847,7 @@ class Beacon(gl.Contract):
    raise gl.vm.UserError("[EXPECTED] objective claims require independent identifiers")
   if any(not _is_https_source(url)for url in urls)or len({url.lower()for url in urls})!=5:
    raise gl.vm.UserError("[EXPECTED] invalid or reused semantic source")
-  return canonical,token_address.lower(),target_currency.upper(),name.strip(),symbol.upper(),market_claim.lower(),secondary_claim.lower()
+  return namespace,token_address.lower(),target_currency.upper(),name.strip(),symbol.upper(),market_claim.lower(),secondary_claim.lower()
  def _store_identity(self,asset,i):
   asset.identity_status=i.get("identity_status",IDENTITY_UNVERIFIED)
   asset.identity_digest=i.get("identity_digest","")
@@ -875,7 +915,12 @@ class Beacon(gl.Contract):
   challenge_id=asset_id+"#"+str(target_version)+"#"+category+"#"+challenger.lower()
   if challenge_id in self.challenges:
    raise gl.vm.UserError("[EXPECTED] duplicate challenge")
-  self.challenges[challenge_id]=ChallengeRecord(challenge_id=challenge_id,asset_id=asset_id,challenger=challenger,target_version=target_version,category=category,reason=reason.strip(),evidence_url=evidence_url,created_at=_message_datetime(),status="OPEN",evaluation_status=CHALLENGE_PENDING,evaluation_result="",evaluation_reason_code="",evidence_digest="",resolution_version=0)
+  existing_ids=self.challenge_ids_by_asset[asset_id]if asset_id in self.challenge_ids_by_asset else []
+  open_count=sum(1 for existing_id in existing_ids if self.challenges[existing_id].status=="OPEN"and self.challenges[existing_id].target_version==target_version)
+  if open_count>=MAX_OPEN_CHALLENGES:
+   raise gl.vm.UserError("[EXPECTED] maximum open challenges reached")
+  clean_reason=reason.strip()
+  self.challenges[challenge_id]=ChallengeRecord(challenge_id=challenge_id,asset_id=asset_id,challenger=challenger,target_version=target_version,category=category,reason=clean_reason,evidence_url=evidence_url,created_at=_message_datetime(),status="OPEN",evaluation_status=CHALLENGE_PENDING,evaluation_result="",evaluation_reason_code="",evidence_digest="",resolution_version=0,reason_digest=_digest({"reason":clean_reason}))
   self.challenge_ids_by_asset.get_or_insert_default(asset_id).append(challenge_id)
   asset.lifecycle_status=CHALLENGED
   return challenge_id
@@ -890,6 +935,8 @@ class Beacon(gl.Contract):
   eligible=sorted([self.challenges[challenge_id]for challenge_id in self.challenge_ids_by_asset[asset_id]if self.challenges[challenge_id].status=="OPEN"and self.challenges[challenge_id].target_version==target_version],key=lambda challenge:challenge.challenge_id)
   if not eligible:
    raise gl.vm.UserError("[EXPECTED] no eligible open challenge")
+  if len(eligible)>MAX_OPEN_CHALLENGES:
+   raise gl.vm.UserError("[EXPECTED] maximum open challenges exceeded")
   i=_run_identity(asset)
   if i.get("failure_state")in(EVIDENCE_UNAVAILABLE,CONSENSUS_VALIDATION_FAILURE):
    raise gl.vm.UserError("[EXPECTED] reassessment evidence unavailable")
@@ -899,16 +946,16 @@ class Beacon(gl.Contract):
   f=[]
   for challenge in eligible:
    r=_run_challenge(i,challenge)
-   if r.get("failure_state")in(EVIDENCE_UNAVAILABLE,CONSENSUS_VALIDATION_FAILURE,"INVALID_CHALLENGE_OUTPUT"):
+   if "failure_state"in r or not _valid_challenge_result({key:r.get(key)for key in("evaluation_result","evaluation_reason_code")})or not r.get("evidence_digest"):
     raise gl.vm.UserError("[EXPECTED] reassessment challenge evaluation failed")
-   f.append({"challenge_id":challenge.challenge_id,"category":challenge.category,"evaluation_result":r.get("evaluation_result","INSUFFICIENT_EVIDENCE"),"evaluation_reason_code":r.get("evaluation_reason_code","EVIDENCE_INSUFFICIENT"),"evidence_digest":r.get("evidence_digest","")})
+   f.append(_challenge_assessment(challenge,r))
   passport=self._evaluate_passport(asset,target_version+1,i,f)
-  if passport.failure_state in(EVIDENCE_UNAVAILABLE,CONSENSUS_VALIDATION_FAILURE):
+  if passport.failure_state!=NO_FAILURE:
    raise gl.vm.UserError("[EXPECTED] reassessment evidence unavailable")
   self._store_evaluation(asset,passport)
   for fi in f:
    ex=self.challenges[fi["challenge_id"]]
-   self.challenges[fi["challenge_id"]]=ChallengeRecord(challenge_id=ex.challenge_id,asset_id=ex.asset_id,challenger=ex.challenger,target_version=ex.target_version,category=ex.category,reason=ex.reason,evidence_url=ex.evidence_url,created_at=ex.created_at,status="RESOLVED",evaluation_status=CHALLENGE_COMPLETE,evaluation_result=fi["evaluation_result"],evaluation_reason_code=fi["evaluation_reason_code"],evidence_digest=fi["evidence_digest"],resolution_version=passport.version)
+   self.challenges[fi["challenge_id"]]=ChallengeRecord(challenge_id=ex.challenge_id,asset_id=ex.asset_id,challenger=ex.challenger,target_version=ex.target_version,category=ex.category,reason=ex.reason,evidence_url=ex.evidence_url,created_at=ex.created_at,status="RESOLVED",evaluation_status=CHALLENGE_COMPLETE,evaluation_result=fi["evaluation_result"],evaluation_reason_code=fi["evaluation_reason_code"],evidence_digest=fi["evidence_digest"],resolution_version=passport.version,reason_digest=fi["reason_digest"])
  @gl.public.view
  def asset(self,asset_id:str)->dict:
   return _asset_to_dict(self.assets_store[asset_id])if asset_id in self.assets_store else{}

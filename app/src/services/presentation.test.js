@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   filterRegistry,
+  identityDisplayState,
   parseBeaconPath,
   passportDisplayState,
   validateChallengeInput,
@@ -35,9 +36,20 @@ test("path parsing supports every public route without hash aliases", () => {
 
 test("submission validation catches identity, source and duplicate-role errors", () => {
   assert.deepEqual(validateSubmissionFields(validSubmission), []);
+  assert.ok(validateSubmissionFields({ ...validSubmission, chain: "polygon" }, 1).some((message) => message.includes("Ethereum")));
   assert.ok(validateSubmissionFields({ ...validSubmission, secondary_market_identifier: validSubmission.market_identifier }, 2).some((message) => message.includes("independent")));
   assert.ok(validateSubmissionFields({ ...validSubmission, issuer_url: "http://localhost/asset" }, 3).length);
   assert.ok(validateSubmissionFields({ ...validSubmission, governance_url: validSubmission.issuer_url }, 3).some((message) => message.includes("reused")));
+});
+
+test("identity presentation distinguishes authenticated fields from submitter claims", () => {
+  const verified = identityDisplayState({ identity_status: "VERIFIED", canonical_chain: "ethereum", canonical_namespace: "eip155:1", canonical_token_address: "0xabc", canonical_name: "USDC", canonical_symbol: "USDC", coingecko_id: "usd-coin", coinpaprika_id: "usdc-usd-coin", coingecko_binding_status: "VERIFIED", coinpaprika_binding_status: "VERIFIED" }, { chain: "ethereum", token_address: "0xabc" });
+  assert.equal(verified.canonicalChain, "ethereum");
+  assert.equal(verified.coingeckoBinding, "VERIFIED");
+  const unverified = identityDisplayState({ identity_status: "UNVERIFIED", canonical_chain: "ethereum", canonical_token_address: "0xabc", primary_market_id: "usd-coin" }, { chain: "polygon", token_address: "0xdef" });
+  assert.equal(unverified.canonicalChain, "UNVERIFIED");
+  assert.equal(unverified.coingeckoId, "UNVERIFIED");
+  assert.equal(unverified.submittedChain, "polygon");
 });
 
 test("challenge validation rejects unbounded or unsafe inputs", () => {

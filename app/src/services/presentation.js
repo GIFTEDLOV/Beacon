@@ -61,6 +61,24 @@ export function passportDisplayState(passport) {
   return { kind: "pending", label: "UNASSESSED" };
 }
 
+export function identityDisplayState(passport = {}, asset = {}) {
+  const verified = passport.identity_status === "VERIFIED";
+  return {
+    status: passport.identity_status || asset.identity_status || "UNVERIFIED",
+    canonicalChain: verified ? passport.canonical_chain || "UNVERIFIED" : "UNVERIFIED",
+    canonicalNamespace: verified ? passport.canonical_namespace || "UNVERIFIED" : "UNVERIFIED",
+    canonicalAddress: verified ? passport.canonical_token_address || "UNVERIFIED" : "UNVERIFIED",
+    canonicalName: verified ? passport.canonical_name || "UNVERIFIED" : "UNVERIFIED",
+    canonicalSymbol: verified ? passport.canonical_symbol || "UNVERIFIED" : "UNVERIFIED",
+    coingeckoId: verified ? passport.coingecko_id || passport.primary_market_id || "UNVERIFIED" : "UNVERIFIED",
+    coinpaprikaId: verified ? passport.coinpaprika_id || passport.secondary_market_id || "UNVERIFIED" : "UNVERIFIED",
+    coingeckoBinding: verified ? passport.coingecko_binding_status || "UNVERIFIED" : "UNVERIFIED",
+    coinpaprikaBinding: verified ? passport.coinpaprika_binding_status || "UNVERIFIED" : "UNVERIFIED",
+    submittedChain: asset.chain || "—",
+    submittedAddress: asset.token_address || "—",
+  };
+}
+
 export function filterRegistry(rows, query = "", filter = "ALL") {
   const needle = query.trim().toLowerCase();
   return rows.filter((row) => {

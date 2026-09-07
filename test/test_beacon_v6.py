@@ -1,4 +1,5 @@
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -144,6 +145,78 @@ def test_v6_wrong_market_claim_is_a_conflict(direct_vm, direct_deploy):
     assert passport["failure_state"] == "ASSET_IDENTITY_CONFLICT"
 
 
+def test_v6_wrong_coingecko_claim_fails_even_when_address_binds(
+    direct_vm, direct_deploy
+):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    submit(direct_vm, contract, submission_args(market_claim="usd-coin"))
+    passport = evaluate_v6(direct_vm, contract, gecko=gecko_body(market_id="other-asset"))
+    assert passport["identity_status"] == "CONFLICT"
+    assert passport["coingecko_binding_status"] == "VERIFIED"
+    assert passport["failure_state"] == "ASSET_IDENTITY_CONFLICT"
+
+
+def test_v6_wrong_coinpaprika_claim_fails_even_when_address_binds(
+    direct_vm, direct_deploy
+):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    submit(direct_vm, contract, submission_args(secondary_claim="usdc-usd-coin"))
+    passport = evaluate_v6(
+        direct_vm,
+        contract,
+        paprika=paprika_contract_body(market_id="other-asset"),
+        paprika_coin=paprika_coin_body(market_id="other-asset"),
+    )
+    assert passport["identity_status"] == "CONFLICT"
+    assert passport["coinpaprika_binding_status"] == "VERIFIED"
+    assert passport["failure_state"] == "ASSET_IDENTITY_CONFLICT"
+
+
+def test_v6_provider_name_disagreement_fails_closed(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    submit(direct_vm, contract)
+    passport = evaluate_v6(direct_vm, contract, gecko=gecko_body(name="Not USDC"))
+    assert passport["identity_status"] == "CONFLICT"
+    assert passport["failure_state"] == "ASSET_IDENTITY_CONFLICT"
+
+
+def test_v6_unsupported_chain_fails_at_submission(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    args = submission_args()
+    args[2] = "polygon"
+    previous_value = direct_vm.value
+    direct_vm.value = 1000000000000000000
+    try:
+        with direct_vm.expect_revert("unsupported chain"):
+            contract.submit_asset(*args)
+    finally:
+        direct_vm.value = previous_value
+
+
+def test_v6_identity_digest_binds_all_decision_fields(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    submit(direct_vm, contract)
+    passport = evaluate_v6(direct_vm, contract)
+    module = sys.modules["_contract_beacon_v6"]
+    fields = {
+        "identity_status": passport["identity_status"],
+        "chain": passport["canonical_chain"],
+        "namespace": passport["canonical_namespace"],
+        "address": passport["canonical_token_address"],
+        "name": passport["canonical_name"],
+        "symbol": passport["canonical_symbol"],
+        "target_currency": passport["target_currency"],
+        "coingecko_id": passport["coingecko_id"],
+        "coinpaprika_id": passport["coinpaprika_id"],
+        "coingecko_binding_status": passport["coingecko_binding_status"],
+        "coinpaprika_binding_status": passport["coinpaprika_binding_status"],
+        "domains": [passport["official_issuer_domain"]],
+    }
+    assert module._digest(fields) == passport["identity_digest"]
+    changed = dict(fields, address="0x2222222222222222222222222222222222222222")
+    assert module._digest(changed) != passport["identity_digest"]
+
+
 def test_v6_spoofed_symbol_claim_is_a_conflict(direct_vm, direct_deploy):
     contract = direct_deploy("contracts/beacon_v6.py")
     submit(direct_vm, contract, submission_args(symbol_claim="FAKE"))
@@ -176,6 +249,34 @@ def test_v6_unrelated_authority_source_fails_closed(direct_vm, direct_deploy):
     assert passport["identity_status"] == "VERIFIED"
     assert passport["failure_state"] == "SOURCE_IDENTITY_UNVERIFIED"
     assert passport["issuer_authority_status"] == "UNVERIFIED"
+
+
+def test_v6_lookalike_authority_source_fails_closed(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    urls = [
+        "https://circle.com.attacker.example/issuer",
+        *SEMANTIC_URLS[1:],
+    ]
+    submit(direct_vm, contract, submission_args(urls=urls))
+    passport = evaluate_v6(direct_vm, contract)
+    assert passport["verdict"] == "REJECT"
+    assert passport["failure_state"] == "SOURCE_IDENTITY_UNVERIFIED"
+
+
+def test_v6_userinfo_and_private_sources_are_rejected_at_submission(
+    direct_vm, direct_deploy
+):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    for unsafe in ("https://circle.com@attacker.example/issuer", "https://127.0.0.1/issuer"):
+        urls = [unsafe, *SEMANTIC_URLS[1:]]
+        args = submission_args(urls=urls)
+        previous_value = direct_vm.value
+        direct_vm.value = 1000000000000000000
+        try:
+            with direct_vm.expect_revert("invalid or reused semantic source"):
+                contract.submit_asset(*args)
+        finally:
+            direct_vm.value = previous_value
 
 
 def test_v6_redirected_semantic_source_fails_closed(direct_vm, direct_deploy):
@@ -304,6 +405,118 @@ def test_v6_reassessment_orders_and_resolves_every_challenge(
     assert passport["version"] == 2
     assert passport["challenge_count"] == 2
     assert passport["supported_challenge_count"] == 2
+
+
+def test_v6_three_challenges_are_all_assessed_with_reason_and_evidence(
+    direct_vm, direct_deploy
+):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    submit(direct_vm, contract)
+    evaluate_v6(direct_vm, contract)
+    challenges = [
+        ("SECURITY", "security reason", "https://challenger.example/security-three", "Ethereum Security USDC " + V5_ADDRESS),
+        ("REDEMPTION", "redemption reason", "https://challenger.example/redemption-three", "Ethereum Redemption USDC " + V5_ADDRESS),
+        ("GOVERNANCE", "governance reason", "https://challenger.example/governance-three", "Ethereum Governance USDC " + V5_ADDRESS),
+    ]
+    ids = []
+    sources = {}
+    for category, reason, url, body in challenges:
+        ids.append(challenge(direct_vm, contract, 1, category, reason, url))
+        sources[re.escape(url)] = body
+    direct_vm.clear_mocks()
+    install_v6_mocks(direct_vm, semantic=semantic_result(), challenge=challenge_result(), challenge_sources=sources)
+    module = sys.modules["_contract_beacon_v6"]
+    before = contract.passport_by_version(V5_ID, 1)
+    contract.reassess_asset(V5_ID)
+    records = contract.challenge_records(V5_ID)
+    assert all(records[item]["status"] == "RESOLVED" for item in ids)
+    assert all(records[item]["evaluation_status"] == "COMPLETE" for item in ids)
+    assert all(records[item]["resolution_version"] == 2 for item in ids)
+    assert all(records[item]["reason_digest"] for item in ids)
+    assert all(records[item]["evidence_digest"] for item in ids)
+    assert {records[item]["category"] for item in ids} == {"SECURITY", "REDEMPTION", "GOVERNANCE"}
+    passport = contract.current_passport(V5_ID)
+    assessments = [
+        {
+            "challenge_id": item,
+            "target_version": records[item]["target_version"],
+            "category": records[item]["category"],
+            "reason": records[item]["reason"],
+            "reason_digest": records[item]["reason_digest"],
+            "evidence_url": records[item]["evidence_url"],
+            "evidence_digest": records[item]["evidence_digest"],
+            "evaluation_result": records[item]["evaluation_result"],
+            "evaluation_reason_code": records[item]["evaluation_reason_code"],
+        }
+        for item in ids
+    ]
+    assert passport["challenge_count"] == 3
+    assert passport["challenge_set_digest"] == module._challenge_set_digest(assessments)
+    assert contract.passport_by_version(V5_ID, 1) == before
+
+
+def test_v6_challenge_set_digest_changes_for_reason_or_evidence(direct_deploy):
+    direct_deploy("contracts/beacon_v6.py")
+    module = next(
+        value
+        for name, value in sys.modules.items()
+        if name.endswith("beacon_v6") and hasattr(value, "_challenge_set_digest")
+    )
+    base = {
+        "challenge_id": "challenge-1",
+        "target_version": 1,
+        "category": "SECURITY",
+        "reason": "reason A",
+        "reason_digest": module._digest({"reason": "reason A"}),
+        "evidence_url": "https://evidence.example/a",
+        "evidence_digest": "evidence-A",
+        "evaluation_result": "SUPPORTED",
+        "evaluation_reason_code": "MATERIAL",
+    }
+    assert module._challenge_set_digest([base]) != module._challenge_set_digest([dict(base, reason="reason B")])
+    assert module._challenge_set_digest([base]) != module._challenge_set_digest([dict(base, evidence_digest="evidence-B")])
+
+
+def test_v6_maximum_open_challenges_is_enforced(direct_vm, direct_deploy, direct_alice):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    submit(direct_vm, contract)
+    evaluate_v6(direct_vm, contract)
+    for index, category in enumerate(("PEG", "LIQUIDITY", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE", "DEPENDENCY", "OTHER")):
+        challenge(direct_vm, contract, 1, category, "reason " + str(index), "https://challenger.example/" + category.lower())
+    with direct_vm.prank(direct_alice):
+        previous_value = direct_vm.value
+        direct_vm.value = CHALLENGE_FEE_WEI
+        try:
+            with direct_vm.expect_revert("maximum open challenges reached"):
+                contract.challenge_asset(V5_ID, 1, "PEG", "ninth reason", "https://challenger.example/ninth")
+        finally:
+            direct_vm.value = previous_value
+
+
+def test_v6_one_failed_challenge_keeps_entire_set_open(
+    direct_vm, direct_deploy
+):
+    contract = direct_deploy("contracts/beacon_v6.py")
+    submit(direct_vm, contract)
+    evaluate_v6(direct_vm, contract)
+    first = challenge(direct_vm, contract, 1, "SECURITY", "good reason", "https://challenger.example/good")
+    second = challenge(direct_vm, contract, 1, "GOVERNANCE", "bad reason", "https://challenger.example/bad")
+    direct_vm.clear_mocks()
+    install_v6_mocks(
+        direct_vm,
+        semantic=semantic_result(),
+        challenge=challenge_result(),
+        challenge_sources={
+            r"challenger\.example/good": "Ethereum Security USDC " + V5_ADDRESS,
+            r"challenger\.example/bad": "",
+        },
+    )
+    with direct_vm.expect_revert("reassessment challenge evaluation failed"):
+        contract.reassess_asset(V5_ID)
+    records = contract.challenge_records(V5_ID)
+    assert records[first]["status"] == records[second]["status"] == "OPEN"
+    assert records[first]["resolution_version"] == records[second]["resolution_version"] == 0
+    assert contract.current_passport(V5_ID)["version"] == 1
 
 
 def test_v6_exact_live_two_challenge_fixture_is_reproduced_locally(
