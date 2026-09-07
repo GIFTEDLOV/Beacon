@@ -1,0 +1,15 @@
+{
+  "proof": "canonical-usdc-evaluation",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "contract": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "pre_version": 0,
+  "pre_identity_status": "UNVERIFIED",
+  "pre_lifecycle_status": "SUBMITTED",
+  "latest_nonce_before": 288,
+  "pending_nonce_before": 288,
+  "broadcast_attempt_count": 1,
+  "transaction_hash": "0x7b7d9e1cf49605aa6b362b2cc0edcab2cf02312a44b37e0fee29422672055d03"
+}

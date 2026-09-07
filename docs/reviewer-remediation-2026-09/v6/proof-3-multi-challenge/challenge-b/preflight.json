@@ -1,0 +1,19 @@
+{
+  "read_only_v6_challenge_evidence_preflight": true,
+  "category": "BACKING",
+  "url": "https://developers.circle.com/xreserve/references/supported-blockchains-and-domains",
+  "http_status": 200,
+  "final_host": "developers.circle.com",
+  "requested_host": "developers.circle.com",
+  "final_host_matches_requested": true,
+  "body_bytes": 338747,
+  "body_bounded_by_max_response_length": true,
+  "identity_match": true,
+  "chain_match": true,
+  "exact_address_match": true,
+  "role_match": true,
+  "matched_role_term": "reserve",
+  "asset_binding_status": "VERIFIED",
+  "preflight_evidence_digest": "878d09d716129c9bb611b88ae55a9536a5a0e78a1c9eaa670886489071002f21",
+  "evidence_context": "The Circle xReserve body contains USDC, Ethereum, the canonical Ethereum USDC address, and reserve/backing role terms."
+}

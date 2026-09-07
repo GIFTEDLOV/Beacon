@@ -1,0 +1,24 @@
+{
+  "transaction_hash": "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+  "status_code": 5,
+  "status_name": "ACCEPTED",
+  "final_status_code": null,
+  "final_status_name": null,
+  "result_code": 1,
+  "result_name": "AGREE",
+  "execution_code": 1,
+  "execution_name": "FINISHED_WITH_RETURN",
+  "execution_error": null,
+  "contract_address": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "tx_data_bytes": 49309,
+  "raw_tx_data_sha256": "13af9689b6a91c0201f0f2a81631c9af196f4c4c6c6ee1d621da8f13512ef2d2",
+  "decoded_code_bytes": 49301,
+  "decoded_code_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+  "retrieval": {
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "method": "genlayer-js client.getTransaction",
+    "read_only": true,
+    "reconciliation_window_polls": 72,
+    "poll_interval_seconds": 5
+  }
+}

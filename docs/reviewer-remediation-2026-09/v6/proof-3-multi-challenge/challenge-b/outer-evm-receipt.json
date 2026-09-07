@@ -1,0 +1,60 @@
+{
+  "identifier_type": "OUTER_EVM_SUBMISSION_HASH",
+  "transactionHash": "0xcf981c5b782f761d7aea788fb11d9afc419fe0a7df8f4da81a21b1afbf92c103",
+  "blockHash": "0x128b7068eec104c3cdc4dc1d810278712f7501445b80953f81e94d36962fc2f9",
+  "blockNumber": "0x140cb79",
+  "status": "0x1",
+  "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "to": "0x0112bf6e83497965a5fdd6dad1e447a6e004271d",
+  "nonce": "0x130",
+  "transactionIndex": "0x0",
+  "gasUsed": "0x11685c",
+  "effectiveGasPrice": "0x77359a4",
+  "logs": [
+    {
+      "address": "0x56a05a9bb7b261ad720020a08b9fd5a13177b949",
+      "logIndex": "0x0",
+      "data": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000006",
+      "topics": [
+        "0xae79898352f9a690e2c3c045facb9493b7c3f2b7beb2888e794c6a30d1f45505",
+        "0x000000000000000000000000e3706dc54b2ca0a33941753bc214f95670fee7fb",
+        "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022"
+      ]
+    },
+    {
+      "address": "0x1d301acef55eaf7df5d3741659d426f51061ec8d",
+      "logIndex": "0x1",
+      "data": "0x",
+      "topics": [
+        "0x8da32500fbd0be8afe0905a3b7ea5f782f1d7d731e9fdaabea50d69f14e933ce",
+        "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022",
+        "0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+        "0x000000000000000000000000e3706dc54b2ca0a33941753bc214f95670fee7fb"
+      ]
+    },
+    {
+      "address": "0x55534b80fd102e2f25704daa3a88a24c061f6e03",
+      "logIndex": "0x2",
+      "data": "0x000000000000000000000000e3706dc54b2ca0a33941753bc214f95670fee7fb73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d050220000000000000000000000000000000000000000000000000000000000000093",
+      "topics": ["0x03758e616baf94de0d1218113d7efe48d1d2b2be3c027f2ea429465175b0befe"]
+    },
+    {
+      "address": "0x0112bf6e83497965a5fdd6dad1e447a6e004271d",
+      "logIndex": "0x3",
+      "data": "0x",
+      "topics": [
+        "0xdab9102861c7483a187584d6371d88316f005af507982ccf95c110879f3ed5a5",
+        "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022",
+        "0x000000000000000000000000e3706dc54b2ca0a33941753bc214f95670fee7fb",
+        "0x0000000000000000000000003f5caed686336ed9cf3dede61154b0cd67fb9bd7"
+      ],
+      "decoded_event": {
+        "name": "NewTransaction",
+        "txId": "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022",
+        "recipient": "0xe3706dc54b2ca0a33941753bc214f95670fee7fb",
+        "activator": "0x3f5caed686336ed9cf3dede61154b0cd67fb9bd7"
+      }
+    }
+  ],
+  "evm_submission_succeeded": true
+}

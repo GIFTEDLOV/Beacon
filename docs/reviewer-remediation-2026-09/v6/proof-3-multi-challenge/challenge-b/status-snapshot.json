@@ -1,0 +1,21 @@
+{
+  "read_only_reconciliation": true,
+  "tx_hash": "0xcf981c5b782f761d7aea788fb11d9afc419fe0a7df8f4da81a21b1afbf92c103",
+  "observed_at": "2026-09-07T20:53:59.443Z",
+  "status": 0,
+  "status_name": "UNINITIALIZED",
+  "execution_status": "NOT_VOTED",
+  "execution_result": 0,
+  "execution_result_name": "NOT_VOTED",
+  "execution_error": null,
+  "consensus": "IDLE",
+  "committed": 0,
+  "revealed": 0,
+  "validator_count": 0,
+  "raw_votes": [],
+  "decoded_votes": [],
+  "result_hashes": [],
+  "post_finalization_readback": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED",
+  "rebroadcast_attempted": false,
+  "new_transaction_created": false
+}

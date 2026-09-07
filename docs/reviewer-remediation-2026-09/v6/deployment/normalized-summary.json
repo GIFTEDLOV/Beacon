@@ -1,0 +1,22 @@
+{
+  "candidate_commit": "e163482294f4ac5f12807d6a6344e1d7ce445b14",
+  "source_sha256": "f8a784b27ff3432e7c6d406f1230c73ea9fec1f4d8563cc3f9250e131c0d6d26",
+  "source_bytes": 58020,
+  "network": "GenLayer Testnet Bradbury",
+  "chain_id": 4221,
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "deploy_attempted": true,
+  "deploy_attempt_count": 1,
+  "deploy_tx_hash": null,
+  "final_status": "NOT_SUBMITTED",
+  "final_status_code": 0,
+  "execution_status": "NOT_APPLICABLE",
+  "execution_result": null,
+  "execution_error": "BlockPubdataLimitReached during estimate; intrinsic gas too low on send",
+  "consensus": "NOT_AVAILABLE",
+  "validator_evidence": null,
+  "contract_address": null,
+  "empty_state_verified": false,
+  "deployed_source_parity": "NOT_APPLICABLE",
+  "next_action": "Do not redeploy automatically; investigate Bradbury deployment payload/pubdata limit and obtain explicit approval for a future single attempt."
+}

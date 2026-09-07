@@ -1,0 +1,17 @@
+{
+  "source": "contracts/beacon_v6.py",
+  "source_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+  "source_bytes": 49301,
+  "serialized_deployment_bytes": 49309,
+  "calldata_bytes": 49540,
+  "calldata_keccak256": "0xc1aaec6e1697838bcf177145ef8cb382e1502c32000a4903d6673df350fef593",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "consensus_contract": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+  "estimate_status": "SUCCESS",
+  "estimated_gas": 39408262,
+  "estimated_gas_hex": "0x2595286",
+  "intended_gas_limit": 39408262,
+  "gas_limit_basis": "fresh exact deployment estimate; no arbitrary increase",
+  "broadcast": false
+}

@@ -1,0 +1,39 @@
+{
+  "proof": "canonical-usdc-authentication",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "transaction_hash": "0x6d70c372dd72a330b4550886bc8e1868775a25f34d204b23590962539d0b02f2",
+  "final_status": "FINALIZED",
+  "final_status_code": 7,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_code": 1,
+  "execution_error": null,
+  "consensus": "AGREE",
+  "validator_summary": {
+    "count": 5,
+    "committed": 5,
+    "revealed": 5,
+    "raw_votes": [1, 1, 1, 1, 1],
+    "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"]
+  },
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "passport_version": 0,
+  "identity_digest": "",
+  "canonical_chain": "eip155:1",
+  "canonical_namespace": "eip155:1",
+  "canonical_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "canonical_name": "",
+  "canonical_symbol": "",
+  "coingecko_binding_status": "NOT_YET_EVALUATED",
+  "coinpaprika_binding_status": "NOT_YET_EVALUATED",
+  "asset_identity_status": "UNVERIFIED",
+  "asset_lifecycle_status": "SUBMITTED",
+  "claims": {
+    "name": "USD Coin",
+    "symbol": "USDC",
+    "coingecko_id": "usd-coin",
+    "coinpaprika_id": "usdc-usd-coin"
+  },
+  "authentication_proven": false,
+  "note": "Submission finalization proves storage of the claims and address. Identity authentication requires the separately authorized evaluate_asset transaction."
+}

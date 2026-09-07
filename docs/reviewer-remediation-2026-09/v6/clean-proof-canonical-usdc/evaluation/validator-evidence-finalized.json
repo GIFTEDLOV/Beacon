@@ -1,0 +1,15 @@
+{
+  "transaction_hash": "0x6346bc9e2a243bf4b5f7e0b2ac9a22a365f4e14121422bea30f378db8f3fbc95",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "aggregate_consensus": "AGREE",
+  "result_hashes_match": false,
+  "validators": [
+    {"index": 0, "validator": "0x4FC292d5D255Ec8Ad4cdcd36c5E188dfEE9D160e", "raw_vote": 4, "decoded_vote": "DETERMINISTIC_VIOLATION", "result_hash": "0xfdbbe398f71e7b0537512319c62d3030c014448a5151917596937262f2281053", "execution_status_exposed": false, "deterministic_violation": true, "timeout": false},
+    {"index": 1, "validator": "0x3f5cAED686336ED9cF3Dede61154B0Cd67Fb9bD7", "raw_vote": 3, "decoded_vote": "TIMEOUT", "result_hash": "0x9fc8d2d92c2ea25ae2ac3d9b20370cb9cb1e53d073b5c1a20b03621ca750f8df", "execution_status_exposed": false, "deterministic_violation": false, "timeout": true},
+    {"index": 2, "validator": "0x4Cd1ab61867487F45988dB08eb18bd00e20c518a", "raw_vote": 1, "decoded_vote": "AGREE", "result_hash": "0xff02672a1b00202a10631bf7cbbf2b53b2603c0d8c0911c0476746dcd8cc6a5a", "execution_status_exposed": false, "deterministic_violation": false, "timeout": false},
+    {"index": 3, "validator": "0x2CD9051E10cd1547a7b64eF61EbF1E608235dBda", "raw_vote": 1, "decoded_vote": "AGREE", "result_hash": "0xff02672a1b00202a10631bf7cbbf2b53b2603c0d8c0911c0476746dcd8cc6a5a", "execution_status_exposed": false, "deterministic_violation": false, "timeout": false},
+    {"index": 4, "validator": "0xB7551beF37a05995218f9a1BB7A93e5B6705f535", "raw_vote": 1, "decoded_vote": "AGREE", "result_hash": "0xff02672a1b00202a10631bf7cbbf2b53b2603c0d8c0911c0476746dcd8cc6a5a", "execution_status_exposed": false, "deterministic_violation": false, "timeout": false}
+  ]
+}

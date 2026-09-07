@@ -1,0 +1,9 @@
+{
+  "transaction_hash": "0x6346bc9e2a243bf4b5f7e0b2ac9a22a365f4e14121422bea30f378db8f3fbc95",
+  "broadcast_count_this_phase": 1,
+  "contract": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "function": "evaluate_asset",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "value_wei": "0",
+  "note": "Hash persisted immediately after the single writeContract call returned. No replacement evaluation was attempted."
+}

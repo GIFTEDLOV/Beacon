@@ -1,0 +1,17 @@
+{
+  "transaction_hash": "0x8873ebe0d4cefde82ced3870e317935e4be6eeb91f2967e44403eb46951074af",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "raw_votes": [1, 1, 1, 1, 1],
+  "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+  "result_hashes": [
+    "0xb33c928ca3884fb5541ca184f7f8eadd7dfb5ed7b5fa3c850ead6c74cb738d5a",
+    "0xb33c928ca3884fb5541ca184f7f8eadd7dfb5ed7b5fa3c850ead6c74cb738d5a",
+    "0xb33c928ca3884fb5541ca184f7f8eadd7dfb5ed7b5fa3c850ead6c74cb738d5a",
+    "0xb33c928ca3884fb5541ca184f7f8eadd7dfb5ed7b5fa3c850ead6c74cb738d5a",
+    "0xb33c928ca3884fb5541ca184f7f8eadd7dfb5ed7b5fa3c850ead6c74cb738d5a"
+  ],
+  "result_hashes_match": true,
+  "finalization_observed": false
+}

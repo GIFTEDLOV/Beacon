@@ -1,0 +1,25 @@
+{
+  "transaction_hash": "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+  "final_status": "FINALIZED",
+  "final_status_code": 7,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "validator_summary": {
+    "validator_count": 5,
+    "committed": 5,
+    "revealed": 5,
+    "raw_votes": [1, 1, 1, 1, 1],
+    "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+    "result_hashes_match": true
+  },
+  "contract_address": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "readback": {
+    "asset_count": 0,
+    "asset_ids": [],
+    "assets": {},
+    "empty_state_verified": true
+  },
+  "read_only": true
+}

@@ -1,6 +1,6 @@
 import { account, createGenLayerClient } from "./genlayer.js";
 import { executeWriteLifecycle, reconcilePersistedWrite } from "./transactionLifecycle.js";
-import { V5_CONTRACT_ADDRESS } from "./releaseProof.js";
+import { V6_CONTRACT_ADDRESS } from "./releaseProof.js";
 
 export const SUBMISSION_FEE_WEI = 1000000000000000000n;
 export const CHALLENGE_FEE_WEI = 250000000000000000n;
@@ -24,7 +24,7 @@ const store = () => (typeof localStorage === "undefined" ? null : localStorage);
 
 export default class BeaconRegistry {
   constructor({ address = import.meta.env?.VITE_CONTRACT_ADDRESS, client = null } = {}) {
-    this.contractAddress = address || V5_CONTRACT_ADDRESS;
+    this.contractAddress = address || V6_CONTRACT_ADDRESS;
     this.client = client || (this.isConfigured() ? createGenLayerClient(account) : null);
   }
 

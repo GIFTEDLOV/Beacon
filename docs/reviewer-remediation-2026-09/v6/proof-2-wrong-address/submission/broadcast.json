@@ -1,0 +1,9 @@
+{
+  "transaction_hash": "0x8873ebe0d4cefde82ced3870e317935e4be6eeb91f2967e44403eb46951074af",
+  "broadcast_count_this_phase": 1,
+  "contract": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "function": "submit_asset",
+  "fee_wei": "1000000000000000000",
+  "wrong_asset_id": "eip155:1:0x2222222222222222222222222222222222222222",
+  "note": "Hash persisted immediately after the single submit_asset call returned. No replacement submission was attempted."
+}

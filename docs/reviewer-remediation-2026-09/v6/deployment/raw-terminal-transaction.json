@@ -1,0 +1,16 @@
+{
+  "deployment_command": "genlayer deploy --contract contracts/beacon_v6.py --rpc https://rpc-bradbury.genlayer.com",
+  "attempted_once": true,
+  "terminal_error": {
+    "estimate_gas": "invalid transaction: BlockPubdataLimitReached",
+    "fallback": "Gas estimation failed, using default 200_000",
+    "send_raw_transaction": "[0x0897eb72a9ae14db4260b14b25152156980a85ecc897b95a1be465d65c806c46]: intrinsic gas too low"
+  },
+  "same_identifier_reconciliation": {
+    "eth_getTransactionByHash": null,
+    "eth_getTransactionReceipt": null,
+    "latest_nonce": "0x11c",
+    "pending_nonce": "0x11c",
+    "genlayer_receipt": "Timed out waiting for transaction to reach FINALIZED (current status: 0)"
+  }
+}

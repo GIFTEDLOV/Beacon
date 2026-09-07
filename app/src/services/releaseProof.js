@@ -1,5 +1,6 @@
 export const V4_CONTRACT_ADDRESS = "0xaA0EEB41C30C54104F4106E06acCF4395Ec96b54";
 export const V5_CONTRACT_ADDRESS = "0xd52daA517259ca08dF2f4839C0d8962E0A3148c8";
+export const V6_CONTRACT_ADDRESS = "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb";
 export const BRADBURY_RPC = "https://rpc-bradbury.genlayer.com";
 
 export const V4_RELEASE_PROOF = Object.freeze({
@@ -36,4 +37,36 @@ export const V5_RELEASE_PROOF = Object.freeze({
   verdict: "NO_PASSPORT",
   maxLtvBps: 0,
   policyBasis: "NO_PASSPORT_AFTER_CONSENSUS_FAILURE",
+});
+
+export const V6_RELEASE_PROOF = Object.freeze({
+  network: "Testnet Bradbury",
+  chainId: 4221,
+  contractAddress: V6_CONTRACT_ADDRESS,
+  sourcePath: "contracts/beacon_v6.py",
+  sourceCommit: "a8a13da99030771e3530e35eb28b9083c94ea847",
+  sourceSha256: "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+  sourceBytes: 49301,
+  deploymentTx: "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+  deploymentStatus: "FINALIZED / FINISHED_WITH_RETURN / AGREE",
+  assetId: "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  submitTx: "0x0b71b38fe2d154472c99d5a3ef8bab816321e7384e7c46c4fd5ef416cdd97406",
+  submitStatus: "FINALIZED / FINISHED_WITH_RETURN / AGREE",
+  evaluateTx: "0x6346bc9e2a243bf4b5f7e0b2ac9a22a365f4e14121422bea30f378db8f3fbc95",
+  evaluateStatus: "FINALIZED / FINISHED_WITH_RETURN / AGREE",
+  validatorSummary: "3 AGREE / 1 DETERMINISTIC_VIOLATION / 1 TIMEOUT",
+  identityStatus: "VERIFIED",
+  semanticBindingStatus: "ALL FIVE ROLES VERIFIED",
+  wrongAddressTx: "0xa16cfa68208b7c04fbcdb7a86792f7a1b965003229ffa7cd33b7a72f06f5ba84",
+  challengeATx: "0x9b02c8266de71c0832c6d070e9f2a360227f6eeaad4a6c7bf9f5ab6d3a9fb03a",
+  challengeBEvmTx: "0xcf981c5b782f761d7aea788fb11d9afc419fe0a7df8f4da81a21b1afbf92c103",
+  challengeBProtocolTx: "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022",
+  reassessmentEvmTx: "0x0ca2d940c24e9454b988d2db02572c970eda4b7027f4e0e66a31f5ef4275bd75",
+  reassessmentProtocolTx: "0xe1aee4247d31a528b22f48ea8a5d2a3a6bd18fdf10956aa9115e6a9f4c63728c",
+  reassessmentStatus: "UNDETERMINED / FINISHED_WITH_RETURN / DISAGREE",
+  reassessmentValidatorSummary: "12 DETERMINISTIC_VIOLATION / 5 TIMEOUT / 0 AGREE",
+  passportVersion: 1,
+  verdict: "REJECT",
+  maxLtvBps: 0,
+  policyBasis: "IDENTITY_BOUND_FAIL_CLOSED",
 });

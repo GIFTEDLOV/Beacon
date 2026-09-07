@@ -1,0 +1,11 @@
+{
+  "http_status": 200,
+  "response": {
+    "jsonrpc": "2.0",
+    "result": {
+      "status": "Undetermined",
+      "statusCode": 6
+    },
+    "id": 3
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "phase": "beacon-v6-compact-second-deployment",
+  "captured_at_utc": "2026-09-07T12:22:36.5687447Z",
+  "branch": "v6-reassessment-hardening",
+  "head": "a8a13da99030771e3530e35eb28b9083c94ea847",
+  "origin_branch_head": "a8a13da99030771e3530e35eb28b9083c94ea847",
+  "tracked_source_clean": true,
+  "historical_untracked_evidence_excluded": true,
+  "network": {
+    "name": "GenLayer Testnet Bradbury",
+    "chain_id": 4221,
+    "rpc": "https://rpc-bradbury.genlayer.com"
+  },
+  "rpc_health": {
+    "http_status": 200,
+    "chain_id_hex": "0x107d",
+    "latest_block_hex": "0x1403c11",
+    "syncing": false,
+    "txpool_content": "unsupported_method",
+    "txpool_error": {
+      "code": -32601,
+      "message": "method not found: txpool_content"
+    }
+  },
+  "deployer": {
+    "address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "balance_wei": "4495833503923432044",
+    "balance_gen_approx": "4.495833503923432",
+    "latest_nonce": 284,
+    "pending_nonce": 284,
+    "unknown_pending_transaction": false,
+    "pending_check_basis": "latest nonce equals pending nonce; txpool_content unavailable"
+  },
+  "source": {
+    "path": "contracts/beacon_v6.py",
+    "sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+    "bytes": 49301,
+    "dependency": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+    "approved_commit": "a8a13da99030771e3530e35eb28b9083c94ea847"
+  },
+  "deployment_encoding": {
+    "consensus_contract": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+    "abi_inputs": 6,
+    "initial_validators": 5,
+    "max_rotations": 3,
+    "serialized_bytes": 49309,
+    "calldata_bytes": 49540,
+    "calldata_keccak256": "0xc1aaec6e1697838bcf177145ef8cb382e1502c32000a4903d6673df350fef593"
+  },
+  "estimate": {
+    "status": "SUCCESS",
+    "estimated_gas": 39408262,
+    "estimated_gas_hex": "0x2595286",
+    "broadcast": false
+  }
+}

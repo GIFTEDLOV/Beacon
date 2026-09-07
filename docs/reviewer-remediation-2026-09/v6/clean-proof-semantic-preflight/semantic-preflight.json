@@ -1,0 +1,116 @@
+{
+  "network_context": {
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "chain_id": 4221,
+    "deployment_hash": "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+    "deployment_status_at_check": "ACCEPTED",
+    "contract_address": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb"
+  },
+  "identity": {
+    "canonical_chain": "ethereum",
+    "canonical_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "canonical_name": "USDC",
+    "canonical_symbol": "USDC",
+    "official_domain": "circle.com"
+  },
+  "v6_constants": {
+    "max_response_length": 1048576,
+    "max_evidence_length": 2800,
+    "chain_terms": ["ethereum"],
+    "issuer_terms": ["issuer", "issue", "circle", "usdc", "operator"],
+    "redemption_terms": ["redeem", "redemption", "mint", "burn", "eligible", "terms"],
+    "reserve_backing_terms": ["reserve", "backing", "cash", "treasury", "collateral", "attestation"],
+    "security_terms": ["security", "audit", "exploit", "vulnerability", "freeze", "pause"],
+    "governance_terms": ["admin", "owner", "upgrade", "governance", "control", "permission"]
+  },
+  "source_checks": {
+    "authority": "_authority_status",
+    "content_binding": "_binding_matches",
+    "combined_source_result": "_source_evidence",
+    "redirect_policy": "final HTTPS host must equal requested host when exposed"
+  },
+  "help_center_candidate": {
+    "url": "https://help.circle.com/support/en/usdc-supported-blockchains-minting-redemption-faqs?id=kb_article_view&sysparm_article=KB0010590",
+    "http_status": 200,
+    "final_host": "help.circle.com",
+    "authority_status": "VERIFIED",
+    "body_bytes": 217273,
+    "identity_match": true,
+    "role_match": true,
+    "chain_match": false,
+    "address_match": false,
+    "asset_binding_status": "UNVERIFIED",
+    "expected_v6_result": "SOURCE_IDENTITY_UNVERIFIED",
+    "reason": "Direct fetched body was an app-shell response without the required Ethereum/address content."
+  },
+  "future_urls": {
+    "issuer": {
+      "url": "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+      "http_status": 200,
+      "final_host": "developers.circle.com",
+      "authority_status": "VERIFIED",
+      "asset_binding_status": "VERIFIED",
+      "identity_match": true,
+      "role_match": true,
+      "chain_match": true,
+      "address_match": true,
+      "body_bytes": 345922,
+      "expected_v6_result": "PASS"
+    },
+    "redemption": {
+      "url": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+      "http_status": 200,
+      "final_host": "developers.circle.com",
+      "authority_status": "VERIFIED",
+      "asset_binding_status": "VERIFIED",
+      "identity_match": true,
+      "role_match": true,
+      "chain_match": false,
+      "address_match": false,
+      "body_bytes": 373669,
+      "expected_v6_result": "PASS"
+    },
+    "reserve_backing": {
+      "url": "https://developers.circle.com/stablecoins/what-is-usdc",
+      "http_status": 200,
+      "final_host": "developers.circle.com",
+      "authority_status": "VERIFIED",
+      "asset_binding_status": "VERIFIED",
+      "identity_match": true,
+      "role_match": true,
+      "chain_match": true,
+      "address_match": false,
+      "body_bytes": 301836,
+      "expected_v6_result": "PASS"
+    },
+    "security": {
+      "url": "https://developers.circle.com/cctp/references/technical-guide",
+      "http_status": 200,
+      "final_host": "developers.circle.com",
+      "authority_status": "VERIFIED",
+      "asset_binding_status": "VERIFIED",
+      "identity_match": true,
+      "role_match": true,
+      "chain_match": true,
+      "address_match": false,
+      "body_bytes": 432622,
+      "expected_v6_result": "PASS"
+    },
+    "governance": {
+      "url": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
+      "http_status": 200,
+      "final_host": "developers.circle.com",
+      "authority_status": "VERIFIED",
+      "asset_binding_status": "VERIFIED",
+      "identity_match": true,
+      "role_match": true,
+      "chain_match": true,
+      "address_match": false,
+      "body_bytes": 335912,
+      "expected_v6_result": "PASS"
+    }
+  },
+  "all_five_distinct": true,
+  "all_five_v6_preflight_pass": true,
+  "read_only": true
+}

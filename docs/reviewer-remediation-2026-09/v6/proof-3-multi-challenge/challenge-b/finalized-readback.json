@@ -1,0 +1,55 @@
+{
+  "read_only": true,
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "asset_current_version": 1,
+  "asset_lifecycle_status": "CHALLENGED",
+  "current_passport_version": 1,
+  "passport_v2": {},
+  "passport_v2_exists": false,
+  "open_challenge_count": 2,
+  "challenge_records": {
+    "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#BACKING#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": {
+      "challenge_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#BACKING#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "challenger": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "category": "BACKING",
+      "target_version": 1,
+      "reason": "Circle xReserve documentation identifies the canonical Ethereum USDC address in the source-chain reserve table; assess whether the documented USDC reserve and backing relationship supports a material backing concern.",
+      "status": "OPEN",
+      "evaluation_status": "PENDING",
+      "evaluation_result": "",
+      "evaluation_reason_code": "",
+      "reason_digest": "84eef6384818ed58b07ca8c540dc87795898566b113c53f7c90f7835cf15a6c9",
+      "evidence_digest": "",
+      "resolution_version": 0,
+      "evidence_url": "https://developers.circle.com/xreserve/references/supported-blockchains-and-domains",
+      "created_at": "2026-09-07T20:46:37Z"
+    },
+    "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#REDEMPTION#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266": {
+      "challenge_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#REDEMPTION#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "challenger": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "category": "REDEMPTION",
+      "target_version": 1,
+      "reason": "Circle\u2019s CCTP contract-interface documentation identifies the canonical Ethereum USDC burn token and describes burn-and-mint transfer controls; assess whether the documented redemption pathway supports a material concern.",
+      "status": "OPEN",
+      "evaluation_status": "PENDING",
+      "evaluation_result": "",
+      "evaluation_reason_code": "",
+      "reason_digest": "73dd0b6c91ae2ed55a6707c62a59e25018ef8cde7652afd1b7034f4a2e886d17",
+      "evidence_digest": "",
+      "resolution_version": 0,
+      "evidence_url": "https://developers.circle.com/cctp/references/contract-interfaces",
+      "created_at": "2026-09-07T19:54:10Z"
+    }
+  },
+  "passport": {
+    "version": 1,
+    "identity_status": "VERIFIED",
+    "verdict": "REJECT",
+    "challenge_count": 0,
+    "supported_challenge_count": 0,
+    "challenge_set_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "reassessment_version": 1
+  }
+}

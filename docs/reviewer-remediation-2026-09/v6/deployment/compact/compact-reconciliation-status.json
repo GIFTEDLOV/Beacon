@@ -1,0 +1,72 @@
+{
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "transaction_hash": "0x2f0f54cc8a987fb3b71d74c741914dc69adfeb498534550fa84a6c4c73349e92",
+  "address": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "retrieval_api": "genlayer-js client.getTransaction",
+  "nonce": {
+    "latest_before_poll_hex": "0x11d",
+    "pending_before_poll_hex": "0x11d",
+    "latest_before_poll": 285,
+    "pending_before_poll": 285,
+    "pending_after_poll_hex": "0x11d",
+    "pending_after_poll": 285
+  },
+  "status_before_reconciliation": {
+    "status_code": 5,
+    "status_name": "ACCEPTED",
+    "execution_status": "FINISHED_WITH_RETURN",
+    "consensus": "AGREE"
+  },
+  "raw_transaction_status_response": {
+    "status": 7,
+    "status_name": "FINALIZED",
+    "result": 1,
+    "result_name": "AGREE",
+    "execution": 1,
+    "execution_name": "FINISHED_WITH_RETURN",
+    "execution_error": null,
+    "tx_id": "0x2f0f54cc8a987fb3b71d74c741914dc69adfeb498534550fa84a6c4c73349e92",
+    "contract_address": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+    "raw_tx_data_bytes": 49309,
+    "raw_tx_data_sha256": "13af9689b6a91c0201f0f2a81631c9af196f4c4c6c6ee1d621da8f13512ef2d2",
+    "decoded_code_bytes": 49301,
+    "decoded_code_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c"
+  },
+  "raw_receipt_status_response": {
+    "final_status_code": 7,
+    "final_status_name": "FINALIZED",
+    "execution_code": 1,
+    "execution_status": "FINISHED_WITH_RETURN",
+    "execution_error": null,
+    "consensus_result_code": 1,
+    "consensus_result": "AGREE"
+  },
+  "validator_evidence": {
+    "validator_count": 5,
+    "committed": 5,
+    "revealed": 5,
+    "raw_votes": [1, 1, 1, 1, 1],
+    "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+    "result_hashes": [
+      "0x4955d55c9823ac98b5310b265074020ed5ec66b11a9ae4b96f6b3b810fc295fa",
+      "0x4955d55c9823ac98b5310b265074020ed5ec66b11a9ae4b96f6b3b810fc295fa",
+      "0x4955d55c9823ac98b5310b265074020ed5ec66b11a9ae4b96f6b3b810fc295fa",
+      "0x4955d55c9823ac98b5310b265074020ed5ec66b11a9ae4b96f6b3b810fc295fa",
+      "0x4955d55c9823ac98b5310b265074020ed5ec66b11a9ae4b96f6b3b810fc295fa"
+    ],
+    "result_hashes_match": true
+  },
+  "post_finalization_readback": {
+    "unknown_id": "ethereum:0x0000000000000000000000000000000000000000",
+    "asset_count": 0,
+    "asset_ids": [],
+    "assets": {},
+    "asset": {},
+    "current_passport": {},
+    "passport_history": {},
+    "challenge_records": {}
+  },
+  "readback_all_succeeded": true,
+  "readback_read_only": true
+}

@@ -1,0 +1,23 @@
+{
+  "phase": "beacon-v6-compact-second-deployment",
+  "broadcast_attempt_count": 1,
+  "broadcast_result": "HASH_RETURNED",
+  "transaction_hash": "0x2f0f54cc8a987fb3b71d74c741914dc69adfeb498534550fa84a6c4c73349e92",
+  "hash_type": "GenLayer consensus transaction identifier returned by deploy command",
+  "returned_contract_address": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "status_code_at_capture": 5,
+  "status_name_at_capture": "ACCEPTED",
+  "execution_status_at_capture": "FINISHED_WITH_RETURN",
+  "consensus_at_capture": "AGREE",
+  "source": "contracts/beacon_v6.py",
+  "source_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+  "source_bytes": 49301,
+  "serialized_deployment_bytes": 49309,
+  "calldata_bytes": 49540,
+  "estimated_gas": 39408262,
+  "intended_gas_limit": 39408262,
+  "gas_limit_basis": "fresh exact deployment estimate",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "deployer": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+}

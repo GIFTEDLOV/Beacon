@@ -1,0 +1,32 @@
+{
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "latest_block": "0x1403fc8",
+  "syncing": false,
+  "deployer": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "balance_wei": "0x3e52d6d13b8942aa",
+  "latest_nonce": 285,
+  "pending_nonce": 285,
+  "unknown_pending_transaction": false,
+  "source": {
+    "path": "contracts/beacon_v6.py",
+    "bytes": 49301,
+    "sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c"
+  },
+  "deployment_encoding": {
+    "serialized_bytes": 49309,
+    "calldata_bytes": 49540,
+    "calldata_keccak256": "0xc1aaec6e1697838bcf177145ef8cb382e1502c32000a4903d6673df350fef593"
+  },
+  "estimate": {
+    "status": "SUCCESS",
+    "estimated_gas": "39408262",
+    "estimated_gas_hex": "0x2595286"
+  },
+  "broadcast": false,
+  "txpool_content": {
+    "supported": false,
+    "error_code": -32601,
+    "error_message": "method not found: txpool_content"
+  }
+}

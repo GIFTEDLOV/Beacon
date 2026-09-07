@@ -1,0 +1,15 @@
+{
+  "tx_hash": "0x9b02c8266de71c0832c6d070e9f2a360227f6eeaad4a6c7bf9f5ab6d3a9fb03a",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "validators": [
+    {"address": "0x9D998aD7C7f9Cc448A4DbDf49edD7CADBe3d57B6", "raw_vote": 1, "decoded_vote": "AGREE", "vote_hash": "0x8c5099b61980ede4e097b48a1a739127a35055aeda95aa786a99145fc2707a31", "result_hash": "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32"},
+    {"address": "0xE8fdefdfe18fD8E5B0d576b7CcfC5a29CE43fD7f", "raw_vote": 1, "decoded_vote": "AGREE", "vote_hash": "0xf012c16f39ba92b53292b0784824ab9d3ca506cf075f1b26810f6ffe070159b1", "result_hash": "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32"},
+    {"address": "0x0c526A6af46A038E31dA21C123756Ab2D75f06Bc", "raw_vote": 1, "decoded_vote": "AGREE", "vote_hash": "0xf4899dd1492fa157d23eec76743f8b6e2e73fd13ef8825f1bab58e10b565829d", "result_hash": "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32"},
+    {"address": "0x77a07271abB443F55be19c357AA35206BeB63E1d", "raw_vote": 1, "decoded_vote": "AGREE", "vote_hash": "0x4a1b3715cb843fe8e342a0e4279b052a40ed740dd2d5456da4d53f0f2fbc2eba", "result_hash": "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32"},
+    {"address": "0xb4Fb7ADc6877a6A16bd131c7c9270834bD3DEf34", "raw_vote": 1, "decoded_vote": "AGREE", "vote_hash": "0x61ed97113fd1dec4e371c0bba6a84de340e81e399ef81f3340ba4ae85ffa3014", "result_hash": "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32"}
+  ],
+  "aggregate_consensus": "AGREE",
+  "result_hashes_match": true
+}

@@ -1,0 +1,20 @@
+{
+  "transaction_hash": "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+  "status_code": 5,
+  "status_name": "ACCEPTED",
+  "execution_code": 1,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "raw_votes": [1, 1, 1, 1, 1],
+  "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+  "result_hashes_match": true,
+  "contract_address": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "finalization_observed": false,
+  "empty_state_readback": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED",
+  "read_only": true
+}

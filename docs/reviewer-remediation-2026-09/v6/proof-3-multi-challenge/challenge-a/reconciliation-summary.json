@@ -1,0 +1,17 @@
+{
+  "tx_hash": "0x9b02c8266de71c0832c6d070e9f2a360227f6eeaad4a6c7bf9f5ab6d3a9fb03a",
+  "status_before": "ACCEPTED / 5",
+  "status_now": "ACCEPTED / 5",
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "finalized_observed": false,
+  "post_finalization_readback": "NOT_PERFORMED",
+  "latest_nonce_post_broadcast": "0x130",
+  "pending_nonce_post_broadcast": "0x130",
+  "balance_post_broadcast_wei": "0x11019ee9c4245b7a",
+  "rebroadcast_attempted": false,
+  "new_transaction_created": false,
+  "next_action": "Reconcile the same hash later; do not create Challenge B or C until Challenge A finalization is observed."
+}

@@ -1,0 +1,39 @@
+{
+  "read_only_reconciliation": true,
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "contract": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "evm_submission_hash": "0x0ca2d940c24e9454b988d2db02572c970eda4b7027f4e0e66a31f5ef4275bd75",
+  "genlayer_protocol_tx_id": "0xe1aee4247d31a528b22f48ea8a5d2a3a6bd18fdf10956aa9115e6a9f4c63728c",
+  "status_transitions": [
+    "COMMITTING (3), round 2",
+    "APPEAL_COMMITTING (10), round 3",
+    "APPEAL_REVEALING (9), round 3",
+    "PROPOSING (2), round 4",
+    "COMMITTING (3), round 4",
+    "UNDETERMINED (6), round 4"
+  ],
+  "final_status": "UNDETERMINED",
+  "final_status_code": 6,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "1",
+  "execution_error": null,
+  "aggregate_consensus": "DISAGREE",
+  "validator_count": 17,
+  "committed": 17,
+  "revealed": 17,
+  "agree_count": 0,
+  "deterministic_violation_count": 12,
+  "timeout_count": 5,
+  "result_hashes": [
+    "0x9fc8d2d92c2ea25ae2ac3d9b20370cb9cb1e53d073b5c1a20b03621ca750f8df",
+    "0x3c77137476fb31ec9174da8970756f60f333ba1489b99a115b6cdd1cb62832fe"
+  ],
+  "result_hashes_match": false,
+  "post_state_read": false,
+  "multi_challenge_reassessment_proven": false,
+  "rebroadcast_attempted": false,
+  "new_reassessment_transaction_count": 1,
+  "blocker": "Protocol reached terminal UNDETERMINED rather than FINALIZED; no Passport v2 / challenge post-readback was performed."
+}

@@ -1,0 +1,21 @@
+{
+  "proof": "wrong-address-usdc-claims",
+  "tx_hash": "0xa16cfa68208b7c04fbcdb7a86792f7a1b965003229ffa7cd33b7a72f06f5ba84",
+  "finalized": true,
+  "post_version": 1,
+  "wrong_address": "0x2222222222222222222222222222222222222222",
+  "wrong_address_authenticated_as_usdc": false,
+  "mismatch_rejection_proven": true,
+  "reason": "The finalized Passport preserves the submitted wrong address, leaves identity UNVERIFIED, leaves both provider IDs empty and both provider bindings UNVERIFIED, and records ASSET_IDENTITY_UNVERIFIED. The positive USDC control has VERIFIED identity, CoinGecko, and CoinPaprika bindings.",
+  "validator_quality": {
+    "validator_count": 5,
+    "committed": 5,
+    "revealed": 5,
+    "aggregate_consensus": "AGREE",
+    "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+    "result_hashes_match": true
+  },
+  "latest_nonce": "0x12f",
+  "pending_nonce": "0x12f",
+  "read_only_comparison_asset": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+}

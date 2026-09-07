@@ -1,0 +1,19 @@
+{
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "contract": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "transaction_hash": "0x0b71b38fe2d154472c99d5a3ef8bab816321e7384e7c46c4fd5ef416cdd97406",
+  "broadcast_count": 1,
+  "preflight_nonce": {"latest": 297, "pending": 297},
+  "post_reconciliation_nonce": {"latest": 298, "pending": 298},
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "status": "ACCEPTED",
+  "status_code": 5,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "asset_readback": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED",
+  "blocker": "Bradbury did not expose FINALIZED during the read-only reconciliation window.",
+  "no_retry": true
+}

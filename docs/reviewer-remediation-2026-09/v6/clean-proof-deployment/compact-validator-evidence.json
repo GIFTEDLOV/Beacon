@@ -1,0 +1,32 @@
+{
+  "transaction_hash": "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "raw_votes": [1, 1, 1, 1, 1],
+  "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+  "validator_addresses": [
+    "0x27276953fa2052A5178Ae5a3D114a3DFB9A2fC98",
+    "0x4f36CB2C58385575fafb443d80E3c290b12DA6aE",
+    "0xB7551beF37a05995218f9a1BB7A93e5B6705f535",
+    "0x96298d411a2D622945BEACa6112374583b501d52",
+    "0xE8fdefdfe18fD8E5B0d576b7CcfC5a29CE43fD7f"
+  ],
+  "validator_vote_hashes": [
+    "0x4688a2ecdd6b03fb1f4cf20e8e834e2b22f7e2bb39801a68f68e8a965911b8ac",
+    "0x02afa64b2e9cfe45ebbac89e6ce5768c7117086c01db04e1b355ef08ecd81c67",
+    "0xc42d8f7234f48c327dcb2e79b715ca3acffc3ddb36642eb4604d7102cd5067c1",
+    "0xd05b2569f5d5f4af6cf72462fc9c4076f387d58e5a712cb47d49ef8e4d25f5db",
+    "0x82e06b85540e0ced34bf73ca11af284f873df107826660fe6ec97053b8077a3b"
+  ],
+  "result_hashes": [
+    "0xdf8c63d860e1da7524d022cee4dee4bc3bc51f80977bfc68036703ffac765685",
+    "0xdf8c63d860e1da7524d022cee4dee4bc3bc51f80977bfc68036703ffac765685",
+    "0xdf8c63d860e1da7524d022cee4dee4bc3bc51f80977bfc68036703ffac765685",
+    "0xdf8c63d860e1da7524d022cee4dee4bc3bc51f80977bfc68036703ffac765685",
+    "0xdf8c63d860e1da7524d022cee4dee4bc3bc51f80977bfc68036703ffac765685"
+  ],
+  "result_hashes_match": true,
+  "aggregate_consensus": "AGREE",
+  "finalization_observed": false
+}

@@ -1,0 +1,65 @@
+{
+  "phase": "fresh V6 deployment preflight",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "syncing": false,
+  "deployer_address": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "balance_wei": "3485353740554900894",
+  "latest_nonce": 294,
+  "pending_nonce": 294,
+  "unknown_pending_transaction": false,
+  "source": {
+    "path": "contracts/beacon_v6.py",
+    "commit": "a8a13da99030771e3530e35eb28b9083c94ea847",
+    "bytes": 49301,
+    "sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+    "dependency_header": "# { \"Depends\": \"py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6\" }"
+  },
+  "historical_contract": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "provider_preflight": {
+    "coingecko": {
+      "endpoint_shape": "https://api.coingecko.com/api/v3/coins/ethereum/contract/<address>?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false",
+      "http_status": 200,
+      "response_bytes": 12562,
+      "id": "usd-coin",
+      "symbol": "USDC",
+      "name": "USDC",
+      "platform": "ethereum",
+      "ethereum_contract_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    },
+    "coinpaprika": {
+      "endpoint_shape": "https://api.coinpaprika.com/v1/contracts/eth-ethereum/<address>",
+      "http_status": 200,
+      "response_bytes": 834,
+      "id": "usdc-usd-coin",
+      "symbol": "USDC",
+      "name": "USDC",
+      "platform": "eth-ethereum",
+      "contract_lookup_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+      "note": "The contract-lookup response did not expose a top-level address field; V6 also validates the resolved coin record and its contract binding.",
+      "resolved_coin_endpoint": "https://api.coinpaprika.com/v1/coins/usdc-usd-coin"
+    }
+  },
+  "historical_asset": {
+    "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "current_version": 1,
+    "identity_status": "CONFLICT",
+    "name_claim": "USD Coin",
+    "current_verdict": "REJECT"
+  },
+  "semantic_url_preflight": {
+    "authority": "developers.circle.com",
+    "all_urls_https": true,
+    "all_http_statuses": 200,
+    "all_final_hosts": "developers.circle.com",
+    "urls": {
+      "issuer": "https://developers.circle.com/circle-mint",
+      "redemption": "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+      "reserve_backing": "https://developers.circle.com/stablecoins/what-is-usdc",
+      "security": "https://developers.circle.com/cctp/references/technical-guide",
+      "governance": "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification"
+    },
+    "content_observation": "All five pages were reachable on the authenticated Circle authority and contained USDC/role-relevant terms. The issuer page did not expose the exact Ethereum token address in its bounded fetched content; this is retained as a limitation rather than claimed as complete address-bearing semantic proof."
+  },
+  "status": "SOURCE_AND_NETWORK_PREFLIGHT_SUCCESS"
+}

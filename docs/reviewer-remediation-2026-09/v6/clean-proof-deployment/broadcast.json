@@ -1,0 +1,13 @@
+{
+  "broadcast_count_this_phase": 1,
+  "transaction_hash": "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+  "hash_type": "GenLayer consensus transaction identifier returned by the pinned genlayer-js deployContract call",
+  "source": "contracts/beacon_v6.py",
+  "source_commit": "a8a13da99030771e3530e35eb28b9083c94ea847",
+  "source_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+  "source_bytes": 49301,
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "deployer": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "note": "Hash persisted immediately after the single deployContract call returned. No replacement or second deployment was attempted."
+}

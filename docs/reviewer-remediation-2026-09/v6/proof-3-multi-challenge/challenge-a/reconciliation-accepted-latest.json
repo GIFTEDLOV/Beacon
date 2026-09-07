@@ -1,0 +1,32 @@
+{
+  "read_only_reconciliation": true,
+  "tx_hash": "0x9b02c8266de71c0832c6d070e9f2a360227f6eeaad4a6c7bf9f5ab6d3a9fb03a",
+  "status_before": "ACCEPTED",
+  "status": "ACCEPTED",
+  "status_code": 5,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_code": 1,
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "raw_votes": [1, 1, 1, 1, 1],
+  "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+  "result_hashes": [
+    "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32",
+    "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32",
+    "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32",
+    "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32",
+    "0xdf46a2c46c56bce6e4a940ae3e38bf614197026b850c0e898e582cef23588d32"
+  ],
+  "result_hashes_match": true,
+  "latest_nonce": "0x130",
+  "pending_nonce": "0x130",
+  "expected_challenge_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#REDEMPTION#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+  "local_reason_digest": "73dd0b6c91ae2ed55a6707c62a59e25018ef8cde7652afd1b7034f4a2e886d17",
+  "post_finalization_readback": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED",
+  "rebroadcast_attempted": false,
+  "new_transaction_created": false
+}

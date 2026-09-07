@@ -1,0 +1,24 @@
+{
+  "candidate_label": "Beacon V6 approved frozen source; fresh clean-proof deployment",
+  "generated_from_head": "a8a13da99030771e3530e35eb28b9083c94ea847",
+  "dependency_pin": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+  "source": {
+    "path": "contracts/beacon_v6.py",
+    "bytes": 49301,
+    "sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c"
+  },
+  "deployment": {
+    "network": "GenLayer Testnet Bradbury",
+    "chain_id": 4221,
+    "rpc": "https://rpc-bradbury.genlayer.com",
+    "transaction_hash": "0x8570b0ba130db3bced04f3947750731c4cdcbddc7deb80e679a8bd1399d46b3a",
+    "returned_address": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+    "decoded_code_bytes": 49301,
+    "decoded_code_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c"
+  },
+  "finalization": {
+    "observed": false,
+    "status_code_at_end": 5,
+    "status_name_at_end": "ACCEPTED"
+  }
+}

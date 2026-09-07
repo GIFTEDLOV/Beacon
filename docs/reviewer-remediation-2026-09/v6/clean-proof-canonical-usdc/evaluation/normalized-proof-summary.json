@@ -1,0 +1,24 @@
+{
+  "transaction_hash": "0x6346bc9e2a243bf4b5f7e0b2ac9a22a365f4e14121422bea30f378db8f3fbc95",
+  "finalized": true,
+  "post_version": 1,
+  "identity_proof": "PASS",
+  "semantic_binding_proof": "PASS",
+  "canonical_identity": {
+    "chain": "ethereum",
+    "namespace": "eip155:1",
+    "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "name": "USDC",
+    "symbol": "USDC",
+    "coingecko_id": "usd-coin",
+    "coinpaprika_id": "usdc-usd-coin",
+    "identity_digest": "2958989b98ac6e09c78625d816ef2212b49d2072e34630a45e15ed27ecd4e13c"
+  },
+  "semantic_roles_all_verified": true,
+  "objective_source_status": "OK",
+  "semantic_source_status": "OK",
+  "objective_coverage": "BOTH",
+  "verdict": "REJECT",
+  "max_ltv_bps": 0,
+  "validator_quality_note": "3 AGREE / 1 DETERMINISTIC_VIOLATION / 1 TIMEOUT; result hashes mismatched."
+}

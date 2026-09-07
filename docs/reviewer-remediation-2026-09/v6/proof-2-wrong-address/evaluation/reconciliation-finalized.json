@@ -1,0 +1,24 @@
+{
+  "tx_hash": "0xa16cfa68208b7c04fbcdb7a86792f7a1b965003229ffa7cd33b7a72f06f5ba84",
+  "status_before": {"name": "ACCEPTED", "code": 5},
+  "final_status": "FINALIZED",
+  "final_status_code": 7,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "raw_votes": [1, 1, 1, 1, 1],
+  "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+  "result_hashes": [
+    "0x0464914b29093a43741265d1d7394dff0a0c867706746f10f689b4d745558bbb",
+    "0x0464914b29093a43741265d1d7394dff0a0c867706746f10f689b4d745558bbb",
+    "0x0464914b29093a43741265d1d7394dff0a0c867706746f10f689b4d745558bbb",
+    "0x0464914b29093a43741265d1d7394dff0a0c867706746f10f689b4d745558bbb",
+    "0x0464914b29093a43741265d1d7394dff0a0c867706746f10f689b4d745558bbb"
+  ],
+  "result_hashes_match": true,
+  "reconciled_read_only": true
+}

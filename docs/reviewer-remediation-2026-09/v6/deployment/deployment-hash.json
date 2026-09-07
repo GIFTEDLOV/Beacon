@@ -1,0 +1,10 @@
+{
+  "captured_at_utc": "2026-09-07T11:04:53.7809774Z",
+  "deployment_attempt_count": 1,
+  "transaction_hash_returned": false,
+  "transaction_hash": null,
+  "rpc_error_identifier": "0x0897eb72a9ae14db4260b14b25152156980a85ecc897b95a1be465d65c806c46",
+  "rpc_error_identifier_is_transaction_hash": false,
+  "contract_address": null,
+  "broadcast_result": "eth_sendRawTransaction rejected with intrinsic gas too low; no transaction is readable by hash"
+}

@@ -1,0 +1,29 @@
+{
+  "read_only_reconciliation": true,
+  "tx_hash": "0xcf981c5b782f761d7aea788fb11d9afc419fe0a7df8f4da81a21b1afbf92c103",
+  "status_observations": [
+    {"at": "2026-09-07T20:49:54.130Z", "status": "UNINITIALIZED", "execution": "NOT_VOTED", "consensus": "IDLE"},
+    {"at": "2026-09-07T20:50:47.664Z", "status": "UNINITIALIZED", "execution": "NOT_VOTED", "consensus": "IDLE"},
+    {"at": "2026-09-07T20:53:59.443Z", "status": "UNINITIALIZED", "execution": "NOT_VOTED", "consensus": "IDLE"}
+  ],
+  "final_status": "NOT_OBSERVED",
+  "execution_status": "NOT_VOTED",
+  "validator_evidence": {
+    "validator_count": 0,
+    "committed": 0,
+    "revealed": 0,
+    "raw_votes": [],
+    "decoded_votes": [],
+    "result_hashes": []
+  },
+  "local_reason_digest": "84eef6384818ed58b07ca8c540dc87795898566b113c53f7c90f7835cf15a6c9",
+  "onchain_reason_digest": null,
+  "reason_digest_match": null,
+  "latest_nonce_post_broadcast": "0x131",
+  "pending_nonce_post_broadcast": "0x131",
+  "post_finalization_readback": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED",
+  "ready_for_challenge_c": false,
+  "rebroadcast_attempted": false,
+  "new_transaction_created": false,
+  "note": "The transaction is included in Bradbury at nonce 0x130, but the GenLayer status endpoint has not initialized execution. Follow this same hash only; do not replace it."
+}

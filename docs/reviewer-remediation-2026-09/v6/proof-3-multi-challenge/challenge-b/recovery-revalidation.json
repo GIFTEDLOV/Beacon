@@ -1,0 +1,23 @@
+{
+  "read_only_revalidation": true,
+  "evm_submission_hash": "0xcf981c5b782f761d7aea788fb11d9afc419fe0a7df8f4da81a21b1afbf92c103",
+  "evm_receipt_status": "0x1",
+  "evm_block": "0x140cb79",
+  "evm_nonce": "0x130",
+  "genlayer_protocol_tx_id": "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022",
+  "protocol_status": "FINALIZED",
+  "protocol_status_code": 7,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "consensus": "AGREE",
+  "challenge_a": {"category": "REDEMPTION", "target_version": 1, "status": "OPEN", "evaluation_status": "PENDING", "reason_digest": "73dd0b6c91ae2ed55a6707c62a59e25018ef8cde7652afd1b7034f4a2e886d17"},
+  "challenge_b": {"category": "BACKING", "target_version": 1, "status": "OPEN", "evaluation_status": "PENDING", "reason_digest": "84eef6384818ed58b07ca8c540dc87795898566b113c53f7c90f7835cf15a6c9"},
+  "open_challenge_count": 2,
+  "asset_current_version": 1,
+  "asset_lifecycle_status": "CHALLENGED",
+  "current_passport_version": 1,
+  "passport_v2_exists": false,
+  "new_transaction_created": false,
+  "rebroadcast_attempted": false,
+  "reassessment_executed": false
+}

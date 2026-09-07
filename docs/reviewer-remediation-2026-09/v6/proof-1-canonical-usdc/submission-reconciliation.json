@@ -1,0 +1,41 @@
+{
+  "proof": "canonical-usdc-authentication",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "transaction_hash": "0x6d70c372dd72a330b4550886bc8e1868775a25f34d204b23590962539d0b02f2",
+  "expected_contract": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "poll_attempts": 120,
+  "poll_window_seconds_approx": 600,
+  "status_first": {"code": 5, "name": "ACCEPTED"},
+  "status_last": {"code": 5, "name": "ACCEPTED"},
+  "consensus_result": {"code": 1, "name": "AGREE"},
+  "execution": {"code": 1, "name": "FINISHED_WITH_RETURN", "error": null},
+  "contract_address_exposed_by_transaction": null,
+  "validator_evidence": {
+    "count": 5,
+    "committed": 5,
+    "revealed": 5,
+    "raw_votes": [1, 1, 1, 1, 1],
+    "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+    "result_hashes": [
+      "0x3aa765e04f372dff27666787751e11f8dad7fc4e321b54fa34400bfd047286c6",
+      "0x3aa765e04f372dff27666787751e11f8dad7fc4e321b54fa34400bfd047286c6",
+      "0x3aa765e04f372dff27666787751e11f8dad7fc4e321b54fa34400bfd047286c6",
+      "0x3aa765e04f372dff27666787751e11f8dad7fc4e321b54fa34400bfd047286c6",
+      "0x3aa765e04f372dff27666787751e11f8dad7fc4e321b54fa34400bfd047286c6"
+    ],
+    "result_hashes_match": true
+  },
+  "raw_transaction_payload": {
+    "bytes": 446,
+    "sha256": "d67ed45343fd4a52575eee84a3faadea1c7083eaad2530ccad36e5859ce16c7b"
+  },
+  "nonce_after_broadcast": {
+    "latest": 286,
+    "pending": 286
+  },
+  "readback": null,
+  "authentication_proven": false,
+  "blocker": "Transaction remained ACCEPTED after the bounded reconciliation window; FINALIZED was not observed, so passport readback was not performed."
+}

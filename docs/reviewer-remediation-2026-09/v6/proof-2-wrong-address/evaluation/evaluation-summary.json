@@ -1,0 +1,18 @@
+{
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "contract": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "wrong_asset_id": "eip155:1:0x2222222222222222222222222222222222222222",
+  "transaction_hash": "0xa16cfa68208b7c04fbcdb7a86792f7a1b965003229ffa7cd33b7a72f06f5ba84",
+  "broadcast_count": 1,
+  "preflight_nonce": {"latest": "0x12e", "pending": "0x12e"},
+  "status": "ACCEPTED",
+  "status_code": 5,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "validator_outcome": "5 AGREE; result hashes matched",
+  "passport_readback": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED",
+  "negative_identity_proof": "UNPROVEN_PENDING_FINALIZATION",
+  "no_retry": true
+}

@@ -1,0 +1,33 @@
+{
+  "transaction_hash": "0x2f0f54cc8a987fb3b71d74c741914dc69adfeb498534550fa84a6c4c73349e92",
+  "status_before": "ACCEPTED",
+  "status_now": "FINALIZED",
+  "final_status_code": 7,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_code": 1,
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "raw_votes": [1, 1, 1, 1, 1],
+  "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+  "result_hashes_match": true,
+  "contract_address": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "latest_nonce": 285,
+  "pending_nonce": 285,
+  "asset_count": 0,
+  "asset_ids": [],
+  "assets": {},
+  "empty_state_verified": true,
+  "deployment_finalized": true,
+  "deployment_success": true,
+  "rebroadcast_attempted": false,
+  "new_transaction_created": false,
+  "source_binding": {
+    "approved_commit": "a8a13da99030771e3530e35eb28b9083c94ea847",
+    "source_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+    "decoded_code_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c"
+  }
+}

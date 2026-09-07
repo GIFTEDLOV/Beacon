@@ -1,0 +1,19 @@
+{
+  "address": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "read_only": true,
+  "unknown_id": "eip155:1:0x0000000000000000000000000000000000000000",
+  "asset_count": 0,
+  "asset_ids": [],
+  "assets": {},
+  "method_readback": {
+    "asset": {},
+    "current_passport": {},
+    "passport_by_version": {},
+    "passport_history": {},
+    "challenge_records": {}
+  },
+  "all_expected_reads_succeeded": true,
+  "state_status": "accepted",
+  "note": "Read-only calls succeeded against the returned address. This does not upgrade the transaction status from ACCEPTED to FINALIZED."
+}

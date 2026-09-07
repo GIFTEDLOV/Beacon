@@ -1,0 +1,55 @@
+{
+  "identifier_type": "GENLAYER_PROTOCOL_TX_ID",
+  "protocol_tx_id": "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022",
+  "recovery_method": "Decoded consensus NewTransaction(bytes32 txId,address recipient,address activator) log from the outer EVM receipt; matched recipient to Beacon V6 contract and tx calldata to challenge_asset BACKING.",
+  "tx_id_recovery_proven": true,
+  "gen_getTransactionStatus": {
+    "params": {"txID": "0x73d3f6f3a17569874bd4e79343bd1e1ac4f9e0e4dda8c22cde2d99bef6d05022"},
+    "result": {"status": "Finalized", "statusCode": 7}
+  },
+  "gen_getTransactionLifecycle": {"supported": false, "error": "method not found"},
+  "stored_status": "FINALIZED",
+  "status_code": 7,
+  "projected_status": "NOT_EXPOSED_BY_RPC",
+  "resolution_action": "NOT_EXPOSED_BY_RPC",
+  "decision_id": "NOT_EXPOSED",
+  "decision_active": "NOT_EXPOSED",
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "consensus": "AGREE",
+  "queue_position": "0",
+  "tx_execution_hash": "0x72cad67b714f156e50fcea1917816da8b1ee301f95a65895685b53a7396c0855",
+  "validator_count": 5,
+  "committed": 5,
+  "revealed": 5,
+  "raw_votes": [1, 1, 1, 1, 1],
+  "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+  "result_hashes_match": true,
+  "result_hashes": [
+    "0x6b8fd6ed80f4ed62cac66f0696ccd97c66966ad5c67cf681ec8cd795edd5718a",
+    "0x6b8fd6ed80f4ed62cac66f0696ccd97c66966ad5c67cf681ec8cd795edd5718a",
+    "0x6b8fd6ed80f4ed62cac66f0696ccd97c66966ad5c67cf681ec8cd795edd5718a",
+    "0x6b8fd6ed80f4ed62cac66f0696ccd97c66966ad5c67cf681ec8cd795edd5718a",
+    "0x6b8fd6ed80f4ed62cac66f0696ccd97c66966ad5c67cf681ec8cd795edd5718a"
+  ],
+  "timestamps": {
+    "Created": 1788813997,
+    "Pending": 1788813997,
+    "Activated": 1788813998,
+    "Proposed": 1788814000,
+    "Committed": 1788814010,
+    "LastVote": 1788814017,
+    "AppealSubmitted": 0,
+    "LeaderRevealed": 1788814011
+  },
+  "read_state_block_ranges": {"ActivationBlock": 21023611, "ProcessingBlock": 21023612, "ProposalBlock": 21023613},
+  "round": 0,
+  "leader_index": 0,
+  "round_validators": [
+    "0x3f5caed686336ed9cf3dede61154b0cd67fb9bd7",
+    "0x4cd1ab61867487f45988db08eb18bd00e20c518a",
+    "0xa856ae1b278f030082c66fa50a5f51f485d1f940",
+    "0xb93a46b843fb32e8ce392e68edfe93faa4a40817",
+    "0x4f36cb2c58385575fafb443d80e3c290b12da6ae"
+  ]
+}

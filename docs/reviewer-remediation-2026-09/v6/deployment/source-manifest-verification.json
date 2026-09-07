@@ -1,0 +1,12 @@
+{
+  "manifest_path": "docs/forensics/beacon-v6-corrected-source-manifest.json",
+  "manifest_source_path": "contracts/beacon_v6.py",
+  "source_sha256": "f8a784b27ff3432e7c6d406f1230c73ea9fec1f4d8563cc3f9250e131c0d6d26",
+  "source_bytes": 58020,
+  "dependency": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+  "candidate_version": "Beacon V6",
+  "generated_from_head": "d9e9130aef1c35a41bd8a1466069e8a080359c6c",
+  "candidate_commit": "e163482294f4ac5f12807d6a6344e1d7ce445b14",
+  "self_referential_commit_field": false,
+  "verification": "SHA-256 and byte count recomputed from the checked-out source before deployment"
+}

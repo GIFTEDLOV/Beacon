@@ -1,0 +1,6 @@
+{
+  "contract_address": null,
+  "readback_performed": false,
+  "reason": "Deployment did not return or persist a chain transaction and no deployed address exists to query.",
+  "write_methods_called_after_attempt": false
+}

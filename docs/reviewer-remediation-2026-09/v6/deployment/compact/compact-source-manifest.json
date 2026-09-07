@@ -1,0 +1,143 @@
+{
+  "fixture_version": "beacon-v6-corrected-source-manifest-1",
+  "qualification_observed_at": "2026-09-04",
+  "fixture_type": "bounded facts extracted from live Circle responses",
+  "raw_body_digest_policy": "forensic metadata only; never a consensus equality field",
+  "source": {
+    "path": "contracts/beacon_v6.py",
+    "sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+    "bytes": 49301,
+    "dependency": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6",
+    "candidate_version": "Beacon V6",
+    "generated_from_head": "e163482294f4ac5f12807d6a6344e1d7ce445b14"
+  },
+  "asset": {
+    "canonical_chain": "ethereum",
+    "canonical_namespace": "eip155:1",
+    "canonical_token_address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    "symbol": "USDC",
+    "name": "USDC",
+    "issuer_domain": "circle.com"
+  },
+  "submission_rule": {
+    "duplicate_source_url_allowed": false,
+    "rule": "V6 requires five case-insensitively unique HTTPS role URLs; every response is independently bound to the authenticated asset."
+  },
+  "semantic_sources": [
+    {
+      "role": "issuer",
+      "url": "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+      "http_status": 200,
+      "final_url": "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+      "final_host": "developers.circle.com",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 353863,
+      "within_v6_response_limit": true,
+      "forensic_raw_body_sha256": "7fc86a692f079e40cf57d774b4e2900669f1150056729416cb93eb7c2ca6166d",
+      "authority_verified": true,
+      "exact_address_present": true,
+      "canonical_chain_present": true,
+      "usdc_identity_present": true,
+      "role_semantics_present": true,
+      "binding_matches": true,
+      "provenance": "Circle USDC contract-address registry; Ethereum mainnet row binds USDC to the exact address.",
+      "bounded_facts": "USDC is a dollar-backed stablecoin. USDC tokens are controlled by a smart contract on the blockchain. Mainnet: Ethereum — USDC Mainnet Address — 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48."
+    },
+    {
+      "role": "redemption",
+      "url": "https://developers.circle.com/api-reference/cctp/all/create-usdc-burn-quote",
+      "http_status": 200,
+      "final_url": "https://developers.circle.com/api-reference/cctp/all/create-usdc-burn-quote",
+      "final_host": "developers.circle.com",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 449268,
+      "within_v6_response_limit": true,
+      "forensic_raw_body_sha256": "46b06f22201d04d5e8704877f2958f92823da856817f9b90de527e1dd69f078e",
+      "authority_verified": true,
+      "exact_address_present": true,
+      "canonical_chain_present": true,
+      "usdc_identity_present": true,
+      "role_semantics_present": true,
+      "binding_matches": true,
+      "provenance": "Circle CCTP API reference; the USDC fee-token example identifies the exact address as Ethereum mainnet USDC and describes a native USDC burn/transfer quote.",
+      "bounded_facts": "Create a USDC transfer quote. Returns a signed, time-bound fee quote for a native USDC transfer. Prices fees in USDC using the source-chain USDC address (Ethereum mainnet USDC shown here): 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48. Burn quote and transfer settlement terms are documented."
+    },
+    {
+      "role": "reserve_backing",
+      "url": "https://developers.circle.com/xreserve/references/supported-blockchains-and-domains",
+      "http_status": 200,
+      "final_url": "https://developers.circle.com/xreserve/references/supported-blockchains-and-domains",
+      "final_host": "developers.circle.com",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 342974,
+      "within_v6_response_limit": true,
+      "forensic_raw_body_sha256": "1722b54e5d30c8cfdcd55b1910c16a1825998b0195224eac94ed3de8bdbba613",
+      "authority_verified": true,
+      "exact_address_present": true,
+      "canonical_chain_present": true,
+      "usdc_identity_present": true,
+      "role_semantics_present": true,
+      "binding_matches": true,
+      "provenance": "Circle xReserve supported-chain registry; Ethereum source-chain row maps USDC token address to the exact address and xReserve reserve flow.",
+      "bounded_facts": "xReserve source chains: users deposit USDC into these contracts to receive USDC-backed stablecoins. Mainnet table: Ethereum — USDC token address — 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 — xReserve contract address."
+    },
+    {
+      "role": "security",
+      "url": "https://developers.circle.com/cctp/references/contract-interfaces",
+      "http_status": 200,
+      "final_url": "https://developers.circle.com/cctp/references/contract-interfaces",
+      "final_host": "developers.circle.com",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 885754,
+      "within_v6_response_limit": true,
+      "forensic_raw_body_sha256": "7f8a583b2526a941bce3546c0bb01b6d9359b621db29ea78405e8858c5830560",
+      "authority_verified": true,
+      "exact_address_present": true,
+      "canonical_chain_present": true,
+      "usdc_identity_present": true,
+      "role_semantics_present": true,
+      "binding_matches": true,
+      "provenance": "Circle CCTP EVM interface reference; the burnToken example identifies the exact Ethereum USDC address and documents mint/burn and message-control operations.",
+      "bounded_facts": "CCTP EVM contract interfaces document security-relevant transfer controls. depositForBurn burns tokens for minting on a destination. burnToken = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 — USDC on Ethereum. pause and receiveMessage controls are documented."
+    },
+    {
+      "role": "governance",
+      "url": "https://developers.circle.com/contracts/erc-20-token",
+      "http_status": 200,
+      "final_url": "https://developers.circle.com/contracts/erc-20-token",
+      "final_host": "developers.circle.com",
+      "content_type": "text/html; charset=utf-8",
+      "response_bytes": 541486,
+      "within_v6_response_limit": true,
+      "forensic_raw_body_sha256": "c045a04af0a75e4b4763bf9170eae78593e53ab6616aaef17f985b9aeb50f70d",
+      "authority_verified": true,
+      "exact_address_present": true,
+      "canonical_chain_present": true,
+      "usdc_identity_present": true,
+      "role_semantics_present": true,
+      "binding_matches": true,
+      "provenance": "Circle token-template reference; it links the exact USDC Ethereum contract and documents default-admin, permissioned, mint, burn, grantRole, and revokeRole behavior.",
+      "bounded_facts": "Circle's ERC-20 token template identifies the Ethereum USDC contract at 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48 on Etherscan. The defaultAdmin executes permissioned functions; mintTo, burn, grantRole, and revokeRole are documented. Governance and ownership controls are described."
+    }
+  ],
+  "challenge_sources": [
+    {
+      "category": "SECURITY",
+      "url": "https://developers.circle.com/cctp/references/contract-interfaces",
+      "http_status": 200,
+      "final_host": "developers.circle.com",
+      "response_bytes": 885754,
+      "asset_binding": true,
+      "bounded_facts": "Ethereum USDC security-relevant CCTP transfer controls: burnToken = 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48; mint, burn, pause, and receiveMessage behavior."
+    },
+    {
+      "category": "GOVERNANCE",
+      "url": "https://developers.circle.com/contracts/erc-20-token",
+      "http_status": 200,
+      "final_host": "developers.circle.com",
+      "response_bytes": 541486,
+      "asset_binding": true,
+      "bounded_facts": "Ethereum USDC governance-relevant controls: the exact contract address 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eB48 is identified; defaultAdmin and permissioned role, mint, burn, grantRole, and revokeRole behavior are documented."
+    }
+  ]
+}

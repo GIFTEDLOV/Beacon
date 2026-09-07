@@ -1,0 +1,12 @@
+{
+  "http_status": 200,
+  "response": {
+    "jsonrpc": "2.0",
+    "result": null,
+    "error": {
+      "code": -32601,
+      "message": "method not found: gen_getTransactionLifecycle"
+    },
+    "id": 5
+  }
+}

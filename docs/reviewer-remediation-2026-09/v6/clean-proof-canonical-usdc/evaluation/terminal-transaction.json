@@ -1,0 +1,18 @@
+{
+  "transaction_hash": "0x6346bc9e2a243bf4b5f7e0b2ac9a22a365f4e14121422bea30f378db8f3fbc95",
+  "status_code": 5,
+  "status_name": "ACCEPTED",
+  "final_status_code": null,
+  "final_status_name": null,
+  "execution_code": 1,
+  "execution_status": "FINISHED_WITH_RETURN",
+  "execution_result": "AGREE",
+  "execution_error": null,
+  "consensus": "AGREE",
+  "contract_address": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "reconciliation_polls": 72,
+  "poll_interval_seconds": 5,
+  "readback": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED",
+  "read_only_reconciliation": true
+}

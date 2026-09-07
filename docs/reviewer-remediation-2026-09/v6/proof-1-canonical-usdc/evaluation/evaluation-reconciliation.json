@@ -1,0 +1,32 @@
+{
+  "proof": "canonical-usdc-evaluation",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "transaction_hash": "0x7b7d9e1cf49605aa6b362b2cc0edcab2cf02312a44b37e0fee29422672055d03",
+  "contract": "0x1b1c54A6a098015736f26C6629ae7d62aC765FB4",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "poll_attempts": 120,
+  "poll_window_seconds_approx": 600,
+  "status_first": {"code": 5, "name": "ACCEPTED"},
+  "status_last": {"code": 5, "name": "ACCEPTED"},
+  "execution": {"code": 1, "name": "FINISHED_WITH_RETURN", "error": null},
+  "consensus": {"code": 1, "name": "AGREE"},
+  "validator_summary": {
+    "count": 5,
+    "committed": 5,
+    "revealed": 5,
+    "raw_votes": [1, 1, 1, 1, 1],
+    "decoded_votes": ["AGREE", "AGREE", "AGREE", "AGREE", "AGREE"],
+    "result_hashes": [
+      "0xc107911adc68f29ccb41c189054eaa2622065192bceb79aa62f3c61b3afdf004",
+      "0xc107911adc68f29ccb41c189054eaa2622065192bceb79aa62f3c61b3afdf004",
+      "0xc107911adc68f29ccb41c189054eaa2622065192bceb79aa62f3c61b3afdf004",
+      "0xc107911adc68f29ccb41c189054eaa2622065192bceb79aa62f3c61b3afdf004",
+      "0xc107911adc68f29ccb41c189054eaa2622065192bceb79aa62f3c61b3afdf004"
+    ],
+    "result_hashes_match": true
+  },
+  "readback": null,
+  "authentication_proven": false,
+  "blocker": "The evaluation remained ACCEPTED after the reconciliation window; FINALIZED and post-state current_version=1 were not observed. No second evaluation was attempted."
+}

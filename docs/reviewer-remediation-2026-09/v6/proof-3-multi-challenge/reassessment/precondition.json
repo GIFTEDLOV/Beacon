@@ -1,0 +1,40 @@
+{
+  "read_only_precondition": true,
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "chain_id": 4221,
+  "contract": "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb",
+  "asset_id": "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  "pre_version": 1,
+  "pre_lifecycle": "CHALLENGED",
+  "pre_identity_status": "VERIFIED",
+  "pre_passport_version": 1,
+  "pre_passport_failure_state": "NONE",
+  "open_challenge_count": 2,
+  "open_challenge_ids_sorted": [
+    "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#BACKING#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48#1#REDEMPTION#0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+  ],
+  "a_preflight": {
+    "category": "REDEMPTION",
+    "binding": "VERIFIED",
+    "address_match": true,
+    "chain_match": true,
+    "role_match": true,
+    "evidence_digest": "69b775a6a23ebd378ebfbfa23071b2f6cb1441d378807b5201eba63c44c8a48f"
+  },
+  "b_preflight": {
+    "category": "BACKING",
+    "binding": "VERIFIED",
+    "address_match": true,
+    "chain_match": true,
+    "role_match": true,
+    "evidence_digest": "23d05e4d4ac6d4412a6db3972b9e210537c70c6f9e187eb4ad4bf117c944f5fc"
+  },
+  "latest_nonce_pre": "0x131",
+  "pending_nonce_pre": "0x131",
+  "unknown_pending_transaction": false,
+  "deployer_balance_wei": "975292696862688394",
+  "deployer_balance_gen": "0.975292696862688394",
+  "transaction_broadcast": false,
+  "new_reassessment_transaction": false
+}

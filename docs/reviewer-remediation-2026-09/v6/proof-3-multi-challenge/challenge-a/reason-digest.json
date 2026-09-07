@@ -1,0 +1,8 @@
+{
+  "reason": "Circle’s CCTP contract-interface documentation identifies the canonical Ethereum USDC burn token and describes burn-and-mint transfer controls; assess whether the documented redemption pathway supports a material concern.",
+  "reason_length": 221,
+  "local_reason_digest": "73dd0b6c91ae2ed55a6707c62a59e25018ef8cde7652afd1b7034f4a2e886d17",
+  "onchain_reason_digest": null,
+  "reason_digest_match": null,
+  "comparison_status": "NOT_PERFORMED_BECAUSE_FINALIZED_WAS_NOT_OBSERVED"
+}
