@@ -1,0 +1,33 @@
+{
+  "source": "contracts/beacon_v6.py",
+  "source_bytes": 58020,
+  "method": "Approximate UTF-8 byte sums by source section; overlapping conceptual concerns are assigned to their primary implementation section.",
+  "sections": {
+    "constants_and_policy_inputs_lines_1_61": 3621,
+    "dataclass_and_storage_schemas_lines_62_179": 2678,
+    "shared_http_normalization_and_identity_lines_180_349": 10676,
+    "objective_evidence_lines_350_461": 7329,
+    "semantic_evidence_lines_462_640": 9097,
+    "challenge_evidence_and_judging_lines_641_714": 4287,
+    "challenge_aggregation_and_digests_lines_715_752": 2179,
+    "deterministic_policy_lines_753_783": 2230,
+    "readback_and_serialization_lines_784_820": 4815,
+    "contract_api_and_orchestration_lines_821_987": 10966
+  },
+  "nonfunctional_comment_or_blank_bytes": 296,
+  "highest_value_safe_reductions": [
+    "Factor repeated internal decision-key literals into constants without changing their string values.",
+    "Derive primary_market_id from coingecko_id and secondary_market_id from coinpaprika_id in readback instead of storing duplicate identity facts.",
+    "Use canonical_token_address as the single internal address fact and preserve canonical_address only as a compatibility view alias where required.",
+    "Remove duplicate internal name/symbol aliases while retaining canonical_name/canonical_symbol in Passport readback.",
+    "Shorten private/local identifiers and non-decision-bearing prompt prose only after behavioral tests prove unchanged outputs.",
+    "Keep the dual-provider exact-address checks, authenticated semantic authority, challenge category/reason/evidence handling, bounded challenge count, and atomic reassessment logic unchanged in meaning."
+  ],
+  "duplicated_identity_facts_observed": [
+    "canonical_address / canonical_token_address",
+    "primary_market_id / coingecko_id",
+    "secondary_market_id / coinpaprika_id",
+    "name / canonical_name",
+    "symbol / canonical_symbol"
+  ]
+}

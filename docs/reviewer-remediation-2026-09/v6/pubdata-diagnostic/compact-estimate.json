@@ -1,0 +1,28 @@
+{
+  "candidate": "contracts/beacon_v6.py",
+  "candidate_sha256": "caf91af1184168f7ff2d14cafabc8afdbccefb15f69af94b789f8bf9b9af5a4c",
+  "source_bytes": 49301,
+  "serialized_deploy_payload_bytes": 49309,
+  "outer_calldata_bytes": 49540,
+  "calldata_keccak256": "0xc1aaec6e1697838bcf177145ef8cb382e1502c32000a4903d6673df350fef593",
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "consensus_contract": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+  "request": {
+    "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "to": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+    "value": "0x0",
+    "data_bytes": 49540,
+    "data_keccak256": "0xc1aaec6e1697838bcf177145ef8cb382e1502c32000a4903d6673df350fef593"
+  },
+  "block_before": "0x1402e6c",
+  "block_after": "0x1402e6f",
+  "latest_nonce_before": "0x11c",
+  "pending_nonce_before": "0x11c",
+  "latest_nonce_after": "0x11c",
+  "pending_nonce_after": "0x11c",
+  "estimate_http_status": 200,
+  "estimate_result_hex": "0x2595d46",
+  "estimated_gas": 39411014,
+  "rpc_error": null,
+  "broadcast": false
+}

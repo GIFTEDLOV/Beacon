@@ -1,0 +1,32 @@
+{
+  "rpc": "https://rpc-bradbury.genlayer.com",
+  "consensus_contract": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+  "request_shape": "eth_estimateGas([{from,to,data,value:0x0}])",
+  "rounds": [
+    {
+      "round": 1,
+      "block_before": "0x1402ae9",
+      "block_after": "0x1402af1",
+      "v4": {"result": "0x20b4e28", "error": null},
+      "v5": {"result": "0x279c92c", "error": null},
+      "v6": {"result": null, "error": {"code": -32603, "message": "invalid transaction: BlockPubdataLimitReached", "data": null}}
+    },
+    {
+      "round": 2,
+      "block_before": "0x1402af1",
+      "block_after": "0x1402af3",
+      "v4": {"result": "0x20b4e28", "error": null},
+      "v5": {"result": "0x279c92c", "error": null},
+      "v6": {"result": null, "error": {"code": -32603, "message": "invalid transaction: BlockPubdataLimitReached", "data": null}}
+    },
+    {
+      "round": 3,
+      "block_before": "0x1402af3",
+      "block_after": "0x1402af5",
+      "v4": {"result": "0x20b4e28", "error": null},
+      "v5": {"result": "0x279c92c", "error": null},
+      "v6": {"result": null, "error": {"code": -32603, "message": "invalid transaction: BlockPubdataLimitReached", "data": null}}
+    }
+  ],
+  "conclusion": "The V6 failure persists across changing Bradbury blocks while smaller controls remain accepted; transient aggregate block load is strongly ruled out for the tested windows."
+}

@@ -1,0 +1,40 @@
+{
+  "failed_cli_attempt": {
+    "command": "genlayer deploy --contract contracts/beacon_v6.py --rpc https://rpc-bradbury.genlayer.com",
+    "attempt_count": 1,
+    "estimate_rpc_error": {
+      "code": -32603,
+      "message": "invalid transaction: BlockPubdataLimitReached",
+      "data": null,
+      "nested_error_fields_observed": false
+    },
+    "cli_fallback": "Gas estimation failed, using default 200_000",
+    "subsequent_send_rejection": {
+      "message": "[0x0897eb72a9ae14db4260b14b25152156980a85ecc897b95a1be465d65c806c46]: intrinsic gas too low",
+      "interpretation": "The CLI fallback attempted a send, but the identifier was not accepted as a transaction. It is retained as an attempted hash-like identifier only."
+    },
+    "reconciliation": {
+      "eth_getTransactionByHash": null,
+      "eth_getTransactionReceipt": null,
+      "genlayer_receipt": "Timed out waiting for transaction to reach FINALIZED (current status: 0)",
+      "contract_address": null
+    }
+  },
+  "exact_estimate_request_shape": {
+    "method": "eth_estimateGas",
+    "params": [{
+      "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+      "to": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+      "value": "0x0",
+      "data_bytes": 58276,
+      "data_keccak256": "0x83ef240ff0aee408463c0bfc320586a9a029219d41574ee1a2ab1534efffbf14"
+    }]
+  },
+  "nonce_context": {
+    "before_latest": "0x11c",
+    "before_pending": "0x11c",
+    "after_latest": "0x11c",
+    "after_pending": "0x11c"
+  },
+  "diagnostic_scope": "No eth_sendTransaction, eth_sendRawTransaction, signing, or deployment call was issued during this diagnostic phase."
+}

@@ -33,6 +33,8 @@ Bradbury (chain ID 4221). The deployed V6 contract is
    OPEN/PENDING, demonstrating atomic non-resolution.
 8. Exact source, deployment, proof transaction IDs, and the separate outer EVM
    / GenLayer protocol identifiers are in `beacon-v6-reviewer-manifest.json`.
+9. The historical Bradbury payload-limit diagnosis and compact deployment
+   estimate are preserved in `v6/pubdata-diagnostic/`.
 
 The public UI is configured for the V6 address but continues to display the
 actual live challenged state and does not claim finalized multi-challenge

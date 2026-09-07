@@ -1,0 +1,74 @@
+{
+  "captured_at": "2026-09-07",
+  "network": {
+    "name": "GenLayer Testnet Bradbury",
+    "chain_id": 4221,
+    "rpc": "https://rpc-bradbury.genlayer.com"
+  },
+  "deployment_encoding": {
+    "path": "genlayer-js 1.1.8 bundled by GenLayer CLI 0.39.1",
+    "operation": "eth_estimateGas only",
+    "consensus_contract": "0x0112Bf6e83497965A5fdD6Dad1E447a6E004271D",
+    "add_transaction_abi": "six arguments",
+    "from": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
+    "recipient": "0x0000000000000000000000000000000000000000",
+    "initial_validators": 5,
+    "max_rotations": 3,
+    "valid_until": "0x0",
+    "value": "0x0",
+    "nonce_in_estimate_request": false
+  },
+  "same_observation_window": {
+    "block_before": "0x1402abf",
+    "block_after": "0x1402ac7",
+    "latest_nonce_before": "0x11c",
+    "pending_nonce_before": "0x11c",
+    "latest_nonce_after": "0x11c",
+    "pending_nonce_after": "0x11c",
+    "note": "The SDK path sends no explicit block tag; requests were made sequentially in one observation window while Bradbury advanced blocks."
+  },
+  "estimates": [
+    {
+      "source": "contracts/beacon.py",
+      "source_bytes": 43124,
+      "source_sha256": "5f99961a335247b4b108cdb7a575d356242461fbec411fd10c207018331a809d",
+      "serialized_deploy_payload_bytes": 43132,
+      "outer_calldata_bytes": 43364,
+      "calldata_keccak256": "0x1187d03625d2017c57a49aa2c1e282efda8048650b7b08a5a90315574e8a82ec",
+      "estimate_result_hex": "0x20b4e28",
+      "estimated_gas": 34295336,
+      "http_status": 200,
+      "rpc_error": null
+    },
+    {
+      "source": "contracts/beacon_v5.py",
+      "source_bytes": 52329,
+      "source_sha256": "b5077515361badc7c04d792d3f61c331f5d9b1c21edcd7cbc27e4576f80fc3e0",
+      "serialized_deploy_payload_bytes": 52337,
+      "outer_calldata_bytes": 52580,
+      "calldata_keccak256": "0xf5f88a41ada63b19d37e1725c02da7671015875ee5419a19b8b85300b3588426",
+      "estimate_result_hex": "0x279c92c",
+      "estimated_gas": 41535788,
+      "http_status": 200,
+      "rpc_error": null
+    },
+    {
+      "source": "contracts/beacon_v6.py",
+      "source_bytes": 58020,
+      "source_sha256": "f8a784b27ff3432e7c6d406f1230c73ea9fec1f4d8563cc3f9250e131c0d6d26",
+      "serialized_deploy_payload_bytes": 58028,
+      "outer_calldata_bytes": 58276,
+      "calldata_keccak256": "0x83ef240ff0aee408463c0bfc320586a9a029219d41574ee1a2ab1534efffbf14",
+      "estimate_result_hex": null,
+      "estimated_gas": null,
+      "http_status": 200,
+      "rpc_error": {
+        "code": -32603,
+        "message": "invalid transaction: BlockPubdataLimitReached",
+        "data": null,
+        "nested_fields_observed": false
+      }
+    }
+  ],
+  "interpretation": "V4 and V5 succeed in the same request-shape observation window while V6 fails at its larger serialized payload."
+}
