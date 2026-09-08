@@ -46,18 +46,20 @@ page.
 
 ## F-002 and platform residual
 
-V7 canonicalizes hostname case, rejects trailing-dot ambiguity, userinfo,
+V7.1 canonicalizes hostname case, rejects trailing-dot ambiguity, userinfo,
 fragments, explicit ports, malformed authorities, localhost/internal names,
-and all literal IP hosts. A response must expose a non-empty final URL; its
+and all literal IP hosts. When a response exposes a non-empty final URL, its
 HTTPS final host must match the requested authority exactly, so unauthorized
-redirects fail closed. Official-domain checks use exact host or a dot-boundary
-subdomain match.
+redirects fail closed. For the pinned GenLayer response shape, which may omit
+final URL metadata, only a 2xx response with no `Location` header is accepted;
+3xx responses and explicit `Location` headers fail closed. Official-domain
+checks use exact host or a dot-boundary subdomain match.
 
 The contract runtime inspected for this candidate does not expose DNS resolution
 or resolved peer IPs. V7 does not claim DNS-rebinding or hostname-to-private-IP
-protection. Those controls remain a GenLayer web-sandbox/platform dependency;
-the contract's syntactic and final-host checks still fail closed when the
-runtime omits the final URL.
+protection. Those controls remain a GenLayer web-sandbox/platform dependency.
+If the sandbox internally follows a redirect but exposes neither final URL nor
+redirect history, ultimate-host verification cannot be proven at contract level.
 
 ## Historical release boundary
 

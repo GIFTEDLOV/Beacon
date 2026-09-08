@@ -69,10 +69,58 @@ def test_v7_zero_address_is_rejected(direct_vm, direct_deploy):
 def test_v7_missing_final_response_url_fails_closed(direct_deploy):
     direct_deploy("contracts/beacon_v7.py")
     module = v7_module()
-    assert module._response_host_matches(SimpleNamespace(), "https://example.com/evidence") is False
+    runtime_response = SimpleNamespace(status=200, headers={}, body=b"evidence")
+    assert module._response_host_matches(runtime_response, "https://example.com/evidence") is True
+    assert module._response_host_matches(
+        SimpleNamespace(status_code=200, headers={}, body=b"evidence"),
+        "https://example.com/evidence",
+    ) is True
+    assert module._response_host_matches(
+        SimpleNamespace(status=302, headers={}, body=b""),
+        "https://example.com/evidence",
+    ) is False
+    assert module._response_host_matches(
+        SimpleNamespace(status=200, headers={"Location": b"https://attacker.example/"}, body=b""),
+        "https://example.com/evidence",
+    ) is False
+    assert module._response_host_matches(
+        SimpleNamespace(url="https://example.com/final", status=200, headers={}, body=b""),
+        "https://example.com/evidence",
+    ) is True
+    assert module._response_host_matches(
+        SimpleNamespace(url="https://attacker.example/final", status=200, headers={}, body=b""),
+        "https://example.com/evidence",
+    ) is False
+    assert module._response_host_matches(
+        SimpleNamespace(url="https://example.com.attacker.example/final", status=200, headers={}, body=b""),
+        "https://example.com/evidence",
+    ) is False
+    assert module._response_host_matches(
+        SimpleNamespace(status=200, headers={}, body=b"evidence"),
+        "http://example.com/evidence",
+    ) is False
     assert module._is_https_source("https://localhost./") is False
     assert module._is_https_source("https://metadata.google.internal./") is False
     assert module._is_https_source("https://circle.com.attacker.com/") is True
+
+
+def test_v7_semantic_pipeline_accepts_genlayer_response_shape_for_all_roles(
+    direct_vm, direct_deploy
+):
+    urls = [
+        "https://developers.circle.com/stablecoins/usdc-contract-addresses",
+        "https://developers.circle.com/circle-mint/concepts/how-minting-works",
+        "https://developers.circle.com/stablecoins/what-is-usdc",
+        "https://developers.circle.com/cctp/references/technical-guide",
+        "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
+    ]
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract, submission_args(urls=urls))
+    passport = evaluate_v6(direct_vm, contract)
+    for role in ("issuer", "redemption", "backing", "security", "governance"):
+        assert passport[f"{role}_authority_status"] == "VERIFIED"
+        assert passport[f"{role}_asset_binding_status"] == "VERIFIED"
+    assert passport["semantic_source_status"] == "OK"
 
 
 def test_v7_url_authority_matrix_fails_closed(direct_deploy):
@@ -96,11 +144,11 @@ def test_v7_url_authority_matrix_fails_closed(direct_deploy):
     assert module._authorized_domain("circle.com.attacker.com", "circle.com") is False
     assert module._authorized_domain("sub.circle.com", "circle.com") is True
     assert module._response_host_matches(
-        SimpleNamespace(url="https://attacker.example/evidence"),
+        SimpleNamespace(url="https://attacker.example/evidence", status=200, headers={}, body=b""),
         "https://allowed.example/evidence",
     ) is False
     assert module._response_host_matches(
-        SimpleNamespace(url="https://allowed.example/evidence"),
+        SimpleNamespace(url="https://allowed.example/evidence", status=200, headers={}, body=b""),
         "https://allowed.example/request",
     ) is True
 

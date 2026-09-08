@@ -276,8 +276,14 @@ def _body_text(w):
   return y.decode("utf-8")
  return str(y)
 def _response_host_matches(w,_a):
+ if not _is_https_source(_a):
+  return False
  _b=getattr(w,"url","")
- return isinstance(_b,str)and bool(_b)and _is_https_source(_b)and _host(_b)==_host(_a)
+ _c=_status_code(w)
+ _d=getattr(w,"headers",{})
+ if not 200<=_c<300 or any(str(_e).lower()=="location"for _e in(_d or {})):
+  return False
+ return isinstance(_b,str)and bool(_b)and _is_https_source(_b)and _host(_b)==_host(_a)if _b else True
 def _canonical_json(vv):
  return json.dumps(vv,sort_keys=True,separators=(",",":"),ensure_ascii=True)
 def _digest(vv):

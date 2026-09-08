@@ -150,10 +150,12 @@ claim a V7 deployment or finalized V7 reassessment.
 - Evidence extraction and semantic output are bounded and schema-validated.
 - Volatile intermediate fields are not consensus targets when they do not change policy.
 - Validator, HTTP, parser, and LLM errors fail closed.
-- V7 rejects missing final response hosts, URL authority confusion, trailing-dot
-  ambiguity, userinfo, explicit ports, and literal IP hosts. DNS resolution and
-  private-egress enforcement remain platform responsibilities because the
-  pinned GenLayer contract runtime exposes no DNS-resolution API.
+- V7.1 rejects URL authority confusion, trailing-dot ambiguity, userinfo,
+  explicit ports, and literal IP hosts. It accepts the pinned GenLayer web
+  response shape when a legitimate 2xx response has no final-URL metadata and
+  no `Location` header, while rejecting 3xx/explicit redirect signals and
+  mismatched final hosts. DNS resolution, private-egress enforcement, and
+  redirect-following without exposed history remain platform responsibilities.
 - A single objective source cannot exceed `WATCH`.
 - Critical unknown semantic fields can force `REJECT` and `0` bps.
 - Fees are fixed Testnet V1 anti-spam fees: `1 GEN` for registration and `0.25 GEN` for challenges. They remain protocol-held; they are not described as burned.
