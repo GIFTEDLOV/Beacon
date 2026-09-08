@@ -238,13 +238,13 @@ def test_v7_reassessment_uses_no_challenge_web_fetch_after_creation(
     )
     challenge(direct_vm, contract, 1, "SECURITY", "security concern", url)
     module = v7_module()
-    original = module._challenge_evidence
-    monkeypatch.setattr(module, "_challenge_evidence", lambda *args: (_ for _ in ()).throw(AssertionError("challenge web refetch")))
+    original = module._cv
+    monkeypatch.setattr(module, "_cv", lambda *args: (_ for _ in ()).throw(AssertionError("challenge web refetch")))
     try:
         direct_vm.mock_llm(r"Beacon challenge judge", json.dumps({"evaluation_result": "SUPPORTED", "evaluation_reason_code": "MATERIAL"}))
         contract.reassess_asset(V5_ID)
     finally:
-        monkeypatch.setattr(module, "_challenge_evidence", original)
+        monkeypatch.setattr(module, "_cv", original)
 
 
 def test_v7_challenge_prompt_injection_stays_untrusted(
@@ -346,13 +346,14 @@ def test_v7_digest_order_and_bounded_snapshot_consensus_guards(direct_deploy):
         "evaluation_reason_code": "MATERIAL",
     }
     other = dict(base, challenge_id="challenge-2", category="GOVERNANCE", evidence_digest="evidence-B")
-    assert module._challenge_set_digest([base, other]) == module._challenge_set_digest([other, base])
+    assert module._cdg([base, other]) == module._cdg([other, base])
     for field in ("challenge_id", "category", "reason_digest", "evidence_digest", "evaluation_result", "evaluation_reason_code"):
         changed = dict(base, **{field: ("changed" if field not in {"evaluation_result"} else "NOT_SUPPORTED")})
-        assert module._challenge_set_digest([base]) != module._challenge_set_digest([changed])
+        assert module._cdg([base]) != module._cdg([changed])
     source = Path("contracts/beacon_v7.py").read_text(encoding="utf-8")
-    validator = source[source.index("def _challenge_snapshot_validator"):source.index("def _run_challenge_snapshot")]
-    assert "p.get(_K2)==q.get(_K2)" in validator
+    validator = source[source.index("def _sv"):source.index("def _rs")]
+    assert "p.get(_K2)==q.get(_K2)" not in validator
+    assert "_K92" in validator
     assert "hashlib.sha256(y.encode(\"utf-8\")).hexdigest()" not in source
     assert source.index("self._store_evaluation(a,passport)") < source.index('status="RESOLVED"')
 
@@ -385,3 +386,237 @@ def test_v7_wrong_coinpaprika_id_is_not_verified(direct_vm, direct_deploy):
         paprika_coin=paprika_coin_body(market_id="other-asset"),
     )
     assert passport["identity_status"] == "CONFLICT"
+
+
+def test_v7_identity_consensus_ignores_extra_provider_domains(direct_vm, direct_deploy, monkeypatch):
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract)
+    module = v7_module()
+    with direct_vm.activate():
+        identity = module._ri(contract.assets_store[V5_ID])
+        asset = contract.assets_store[V5_ID]
+        chain, namespace, gecko, paprika = module._canonical_chain(asset.chain)
+        args = (
+            chain,
+            namespace,
+            gecko,
+            paprika,
+            asset.token_address,
+            asset.target_currency,
+            asset.name_claim,
+            asset.symbol_claim,
+            asset.market_identifier_claim,
+            asset.secondary_market_identifier_claim,
+        )
+        independent = dict(identity)
+        independent[module._K73] = ["circle.com", "additional.example"]
+        independent[module._K31] = "circle.com"
+        monkeypatch.setattr(module, "_ib", lambda *unused: independent)
+        for _ in range(20):
+            assert module._iv(args, module.gl.vm.Return(calldata=identity)) is True
+
+
+def test_v7_objective_consensus_ignores_timestamps_and_dynamic_turnover(direct_vm, direct_deploy):
+    direct_deploy("contracts/beacon_v7.py")
+    module = v7_module()
+    stable = {
+        module._K0: module.NO_FAILURE,
+        module._K13: "ethereum",
+        module._K15: V5_ADDRESS,
+        module._K23: "usd-coin",
+        module._K17: "usdc-usd-coin",
+        module._K26: "BOTH",
+        module._K63: "OK",
+        module._K59: "OK",
+        module._K43: "LOW",
+        module._K22: "LOW",
+        module._K19: False,
+        module._K4: 1000000,
+        module._K34: 1000000,
+        module._K9: 100000,
+        module._K38: 100000,
+        module._K25: "leader-time",
+        module._K49: "validator-time",
+    }
+    independent = dict(stable)
+    independent[module._K4] = 1005000
+    independent[module._K34] = 999000
+    independent[module._K9] = 700000
+    independent[module._K38] = 400000
+    independent[module._K25] = "new-leader-time"
+    independent[module._K49] = "new-validator-time"
+    module._ob = lambda *unused: independent
+    with direct_vm.activate():
+        for _ in range(20):
+            assert module._ov((), module.gl.vm.Return(calldata=stable)) is True
+    independent[module._K43] = "HIGH"
+    with direct_vm.activate():
+        assert module._ov((), module.gl.vm.Return(calldata=stable)) is False
+
+
+def test_v7_challenge_consensus_compares_stable_facts_not_live_digest(direct_vm, direct_deploy, monkeypatch):
+    direct_deploy("contracts/beacon_v7.py")
+    module = v7_module()
+    identity = {
+        module._K13: "ethereum",
+        module._K15: V5_ADDRESS,
+        module._K20: "USDC",
+        "name": "USDC",
+    }
+    url = "https://challenger.example/dynamic"
+    first_text = "Ethereum USDC " + V5_ADDRESS + " security audit timestamp 1"
+    second_text = "USDC Ethereum security audit timestamp 2 " + V5_ADDRESS
+    first = {
+        module._K1: module._K48,
+        "category_binding_status": module._K48,
+        "text": first_text,
+        module._K2: module._evidence_digest("SECURITY", identity, first_text),
+        module._K92: module._challenge_facts(url, identity, "SECURITY", first_text),
+    }
+    second = dict(first)
+    second["text"] = second_text
+    second[module._K2] = module._evidence_digest("SECURITY", identity, second_text)
+    second[module._K92] = module._challenge_facts(url, identity, "SECURITY", second_text)
+    monkeypatch.setattr(module, "_cv", lambda *unused: second)
+    with direct_vm.activate():
+        for _ in range(20):
+            assert module._sv(
+                (identity, "SECURITY", url), module.gl.vm.Return(calldata=first)
+            ) is True
+    changed_facts = list(second[module._K92])
+    changed_facts[2] = "0x" + "2" * 40
+    changed = dict(second, **{module._K92: changed_facts})
+    monkeypatch.setattr(module, "_cv", lambda *unused: changed)
+    with direct_vm.activate():
+        assert module._sv(
+            (identity, "SECURITY", url), module.gl.vm.Return(calldata=first)
+        ) is False
+
+
+def test_v7_semantic_and_category_specific_challenge_variability_is_stable(
+    direct_vm, direct_deploy, monkeypatch
+):
+    direct_deploy("contracts/beacon_v7.py")
+    module = v7_module()
+    identity = {
+        module._K13: "ethereum",
+        module._K15: V5_ADDRESS,
+        module._K20: "USDC",
+        "name": "USDC",
+    }
+
+    leader_manifest = {
+        role: {
+            module._K18: "VERIFIED",
+            module._K1: "VERIFIED",
+            "bounded_text": f"{role} authenticated facts",
+        }
+        for role in module.SEMANTIC_SOURCE_ROLES
+    }
+    validator_manifest = {
+        role: dict(values, incidental_navigation=f"revision-{index}")
+        for index, (role, values) in enumerate(leader_manifest.items())
+    }
+    for _ in range(20):
+        assert module._sm(leader_manifest, validator_manifest) is True
+    validator_manifest["issuer"][module._K1] = "UNVERIFIED"
+    assert module._sm(leader_manifest, validator_manifest) is False
+
+    paprika_url = "https://api.coinpaprika.com/v1/coins/usdc-usd-coin"
+    paprika_texts = (
+        json.dumps(
+            {
+                "id": "usdc-usd-coin",
+                "symbol": "USDC",
+                "platforms": {"eth-ethereum": V5_ADDRESS},
+                "last_updated": "2026-09-08T00:00:00Z",
+                "quotes": {"USD": {"price": 1.0}},
+            }
+        ),
+        json.dumps(
+            {
+                "id": "usdc-usd-coin",
+                "symbol": "USDC",
+                "platforms": {"eth-ethereum": V5_ADDRESS},
+                "last_updated": "2026-09-08T00:01:00Z",
+                "quotes": {"USD": {"price": 0.9999}},
+                "rank": 12,
+            }
+        ),
+    )
+    dex_url = (
+        "https://api.dexscreener.com/latest/dex/pairs/ethereum/"
+        "0x1111111111111111111111111111111111111111"
+    )
+    dex_texts = (
+        json.dumps(
+            {
+                "pairAddress": "0x1111111111111111111111111111111111111111",
+                "chainId": "ethereum",
+                "baseToken": {"address": V5_ADDRESS, "symbol": "USDC"},
+                "liquidity": {"usd": 1000000},
+                "volume": {"h24": 2000000},
+                "priceUsd": "1.0",
+            }
+        ),
+        json.dumps(
+            {
+                "pairAddress": "0x1111111111111111111111111111111111111111",
+                "chainId": "ethereum",
+                "baseToken": {"address": V5_ADDRESS, "symbol": "USDC"},
+                "liquidity": {"usd": 1000100},
+                "volume": {"h24": 1990000},
+                "priceUsd": "0.9998",
+                "updatedAt": 1788825660,
+            }
+        ),
+    )
+
+    for category, url, texts in (
+        ("OTHER", paprika_url, paprika_texts),
+        ("LIQUIDITY", dex_url, dex_texts),
+    ):
+        first_text, second_text = texts
+        first = {
+            module._K1: module._K48,
+            module._K93: module._K48,
+            "text": first_text,
+            module._K2: module._evidence_digest(category, identity, first_text),
+            module._K92: module._challenge_facts(url, identity, category, first_text),
+        }
+        second = dict(first)
+        second["text"] = second_text
+        second[module._K2] = module._evidence_digest(category, identity, second_text)
+        second[module._K92] = module._challenge_facts(url, identity, category, second_text)
+        assert first[module._K92] == second[module._K92]
+        monkeypatch.setattr(module, "_cv", lambda *unused: second)
+        with direct_vm.activate():
+            for _ in range(20):
+                assert module._sv(
+                    (identity, category, url),
+                    module.gl.vm.Return(calldata=first),
+                ) is True
+
+
+def test_v7_three_open_challenges_are_all_resolved_with_individual_results(
+    direct_vm, direct_deploy, monkeypatch
+):
+    contract = setup_evaluated(direct_vm, direct_deploy)
+    monkeypatch.setattr(v7_module(), "_response_host_matches", lambda w, requested: True)
+    challenges = (("SECURITY", "security", "security-three"), ("GOVERNANCE", "governance", "governance-three"), ("BACKING", "backing", "backing-three"))
+    ids = []
+    for category, reason, suffix in challenges:
+        url = "https://challenger.example/" + suffix
+        install_challenge(direct_vm, url, bound_body(category))
+        ids.append(challenge(direct_vm, contract, 1, category, reason, url))
+    direct_vm.mock_llm(
+        r"Beacon challenge judge",
+        json.dumps({"evaluation_result": "SUPPORTED", "evaluation_reason_code": "MATERIAL"}),
+    )
+    contract.reassess_asset(V5_ID)
+    records = contract.challenge_records(V5_ID)
+    assert all(records[item]["status"] == "RESOLVED" for item in ids)
+    assert all(records[item]["evaluation_result"] == "SUPPORTED" for item in ids)
+    assert all(records[item]["resolution_version"] == 2 for item in ids)
+    assert contract.current_passport(V5_ID)["challenge_count"] == 3
+    assert contract.current_passport(V5_ID)["challenge_set_digest"]
