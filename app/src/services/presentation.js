@@ -61,6 +61,15 @@ export function passportDisplayState(passport) {
   return { kind: "pending", label: "UNASSESSED" };
 }
 
+export function exactLiveProofState(rows, assetId) {
+  const asset = Array.isArray(rows) ? rows.find((row) => row?.asset_id === assetId) || null : null;
+  const passport = asset?.passport && typeof asset.passport === "object" && Object.keys(asset.passport).length
+    ? asset.passport
+    : null;
+  const available = Boolean(asset && passport && passport.asset_id === assetId && Object.prototype.hasOwnProperty.call(passport, "version"));
+  return { asset, passport: available ? passport : null, available };
+}
+
 export function identityDisplayState(passport = {}, asset = {}) {
   const verified = passport.identity_status === "VERIFIED";
   return {

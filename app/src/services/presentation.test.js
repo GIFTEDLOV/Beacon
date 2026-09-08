@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  exactLiveProofState,
   filterRegistry,
   identityDisplayState,
   parseBeaconPath,
@@ -9,6 +10,16 @@ import {
   validateChallengeInput,
   validateSubmissionFields,
 } from "./presentation.js";
+
+test("live proof reads never fall back to another asset or static release facts", () => {
+  const rows = [
+    { asset_id: "other", passport: { asset_id: "other", version: 9, verdict: "CORE" } },
+    { asset_id: "target", passport: { asset_id: "target" } },
+  ];
+  assert.deepEqual(exactLiveProofState(rows, "missing"), { asset: null, passport: null, available: false });
+  assert.deepEqual(exactLiveProofState(rows, "target"), { asset: rows[1], passport: null, available: false });
+  assert.equal(exactLiveProofState(rows, "other").available, true);
+});
 
 const validSubmission = {
   name: "Beacon Dollar", symbol: "BUSD", chain: "ethereum", token_address: "0x1111111111111111111111111111111111111111", target_currency: "USD", market_identifier: "beacon-dollar", secondary_market_identifier: "beacon-dollar-secondary",

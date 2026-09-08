@@ -4,6 +4,17 @@ Know what deserves to back leverage.
 
 Beacon is a versioned collateral-risk registry for stablecoins and stable-value assets. It answers one practical question: should this asset be accepted as collateral, and under what deterministic maximum-LTV tier?
 
+## Current release story
+
+- V4 is historical Bradbury proof.
+- V5 is historical remediation work and is not the current live contract.
+- V6 is the prior reviewer-remediation deployment at
+  `0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb`; its live evidence is preserved
+  as historical provenance, including the reassessment outcome `UNDETERMINED`.
+- V7 is the current security-hardened candidate in
+  [`contracts/beacon_v7.py`](contracts/beacon_v7.py). It is not deployed and has
+  no address yet.
+
 ## Product
 
 Beacon stores a bounded collateral passport for each submitted asset. GenLayer validators inspect objective market evidence and semantic issuer evidence independently; the contract turns the accepted result into a fixed collateral policy. Beacon is a risk-governance protocol, not a generic AI risk-score application.
@@ -18,7 +29,7 @@ Validators independently inspect untrusted external evidence. Beacon reduces non
 
 ## Asset Identity and Source Authentication
 
-V5 treats the canonical chain namespace plus normalized token address as the
+V7 treats the canonical chain namespace plus normalized token address as the
 root identity. Provider IDs are derived or independently verified through
 address-bound CoinGecko and CoinPaprika endpoints; they are never trusted merely
 because a submitter asserted them. Market data cannot be borrowed from another
@@ -28,16 +39,19 @@ Semantic authority is tied to the verified issuer domain and the exact verified
 chain/address/token identity. A valid HTTPS URL is only transport syntax. An
 unknown or conflicting provider identity, unrelated source domain, phishing
 domain, or source page for another asset fails closed before positive semantic
-evidence can affect the policy. The V5 chain model currently supports
+evidence can affect the policy. The current candidate chain model supports
 `eip155:1` (Ethereum mainnet) with explicit aliases only.
 
 ## Challenge Reassessment
 
 Every open challenge targeting the current Passport version is individually
-evaluated. Category, reason, evidence URL, independently fetched evidence, and
-the authenticated asset identity are all inputs. Results are recorded per
-challenge as `SUPPORTED`, `NOT_SUPPORTED`, or `INSUFFICIENT_EVIDENCE`, with a
-reason code, evidence digest, and resolution version.
+evaluated. V7 authenticates and bounds challenge evidence during challenge
+creation, persists only the consensus-validated bounded representation, and
+never refetches challenge pages during reassessment. Category, reason, bounded
+evidence, and the authenticated asset identity are all inputs. Results are
+recorded per challenge as `SUPPORTED`, `NOT_SUPPORTED`, or
+`INSUFFICIENT_EVIDENCE`, with a reason code, evidence digest, and resolution
+version.
 
 The Passport records deterministic challenge-set provenance without storing an
 unbounded array. A failed reassessment creates no new Passport and changes no
@@ -64,7 +78,7 @@ Validators never choose an LTV directly. Deterministic safety rules can cap or r
 
 Objective evidence uses independent CoinGecko and CoinPaprika market feeds. Beacon normalizes each response into small fields, uses bounded numeric tolerance for changing price facts, and treats source conflict as fail-closed. One available objective source cannot exceed `WATCH`.
 
-Semantic evidence is submitted by role: issuer, redemption, backing, security, and governance. Sources are HTTPS-constrained, bounded, independently refetched by validators, and always treated as untrusted evidence. Deterministic role-specific extraction bounds the material sent to one structured semantic LLM call. Prompt-injection-shaped content cannot change the rubric, schema, or operation. Validator errors fail closed.
+Semantic evidence is submitted by role: issuer, redemption, backing, security, and governance. Sources are HTTPS-constrained, bounded, independently refetched by validators, and always treated as untrusted evidence. Deterministic role-specific extraction bounds the material sent to one structured semantic LLM call. Prompt-injection-shaped content cannot change the rubric, schema, or operation. Validator errors fail closed. V7 challenge evidence is authenticated once at creation, reduced to at most 2,800 UTF-8 bytes, and consumed from storage during reassessment.
 
 The public contract surface is intentionally small:
 
@@ -95,7 +109,7 @@ protections:
 The complete V4 chronology, including failed historical attempts, is preserved
 in [`docs/live-proof/bradbury-pilot.json`](docs/live-proof/bradbury-pilot.json).
 
-## V5 Bradbury Remediation Proof
+## Historical V5 Remediation Proof
 
 The V5 source was frozen at SHA-256
 `b5077515361badc7c04d792d3f61c331f5d9b1c21edcd7cbc27e4576f80fc3e0` and
@@ -124,9 +138,11 @@ Passport. The complete record is in
 [`docs/live-proof/beacon-v5.json`](docs/live-proof/beacon-v5.json); deterministic
 multi-challenge proof is in [`test/test_beacon_v5.py`](test/test_beacon_v5.py).
 
-The in-app [Public proof](/proof) route is configured to expose the V5 candidate
-record, while the deployed public application remains on its historical V4
-configuration until a successful V5 evaluation can be truthfully proven.
+The V5 record remains historical provenance. The V6 reviewer-remediation record
+and its receipts are indexed in
+[`docs/reviewer-remediation-2026-09/README.md`](docs/reviewer-remediation-2026-09/README.md).
+The public proof surface still exposes historical V6 evidence; it does not
+claim a V7 deployment or finalized V7 reassessment.
 
 ## Security / Trust Model
 
@@ -134,6 +150,10 @@ configuration until a successful V5 evaluation can be truthfully proven.
 - Evidence extraction and semantic output are bounded and schema-validated.
 - Volatile intermediate fields are not consensus targets when they do not change policy.
 - Validator, HTTP, parser, and LLM errors fail closed.
+- V7 rejects missing final response hosts, URL authority confusion, trailing-dot
+  ambiguity, userinfo, explicit ports, and literal IP hosts. DNS resolution and
+  private-egress enforcement remain platform responsibilities because the
+  pinned GenLayer contract runtime exposes no DNS-resolution API.
 - A single objective source cannot exceed `WATCH`.
 - Critical unknown semantic fields can force `REJECT` and `0` bps.
 - Fees are fixed Testnet V1 anti-spam fees: `1 GEN` for registration and `0.25 GEN` for challenges. They remain protocol-held; they are not described as burned.
@@ -149,15 +169,17 @@ and semantic URLs without proving that the values described the same asset.
 V4 also selected only the first open challenge's evidence, omitted that
 challenge's category and reason from evaluation, and resolved every open
 challenge anyway. These are confirmed historical defects, not V4 protections.
-V5 adds address-bound provider resolution, authenticated semantic-source rules,
+V5 added address-bound provider resolution, authenticated semantic-source rules,
 fail-closed identity consensus, category-aware individual challenge
-adjudication, and atomic all-challenge reassessment.
+adjudication, and atomic all-challenge reassessment. V7 adds creation-time
+challenge evidence authentication and hard bounds so an OPEN challenge cannot
+later force reassessment to ingest an arbitrary web page.
 
 ## Limitations
 
-- The live V4 proof covers deploy → submit → evaluate → Passport.
-- V5 deployment and submission finalized, but its single authorized evaluation disagreed; therefore no V5 Passport or live multi-challenge proof exists.
-- Challenge/reassessment is implemented and locally tested in V5, but is not included in a live Bradbury release proof.
+- V4, V5, and V6 are historical release evidence; V7 is not deployed.
+- The V6 live reassessment ended `UNDETERMINED`; it is not a finalized Passport v2 proof.
+- V7 still requires Studio/devnet proof after this local security gate; no V7 address is claimed here.
 - Public testnet and validator availability can affect nondeterministic execution.
 - Semantic quality depends on reachable, authoritative evidence sources.
 - The application is currently a public read surface; wallet writes require a funded GenLayer account and exact precondition/finality reconciliation.
@@ -169,8 +191,8 @@ Requirements: Python with the project dependencies, Node.js, and the GenLayer to
 ```bash
 # Contract checks
 python -m pytest -q
-genvm-lint check contracts/beacon_v5.py
-genvm-lint validate contracts/beacon_v5.py
+genvm-lint check contracts/beacon_v7.py
+genvm-lint validate contracts/beacon_v7.py
 
 # Frontend
 cd app
@@ -181,7 +203,8 @@ npm run build
 ```
 
 The public application currently uses Testnet Bradbury (`chain ID 4221`,
-`https://rpc-bradbury.genlayer.com`) and the historical V4 contract above.
-V5 is not production-bound because its evaluation did not reach consensus.
+`https://rpc-bradbury.genlayer.com`) and the historical V6 contract above.
+V7 is a local security-hardened candidate only; it has not been deployed or
+bound to production.
 Copy [`app/.env.example`](app/.env.example) to a local environment only when
 overriding the checked-in defaults.
