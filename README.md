@@ -13,7 +13,8 @@ Beacon is a versioned collateral-risk registry for stablecoins and stable-value 
   as historical provenance, including the reassessment outcome `UNDETERMINED`.
 - V7 is the current checkpointed-consensus candidate in
   [`contracts/beacon_v7.py`](contracts/beacon_v7.py). This structural
-  remediation is source-only; it is not deployed and has no address yet.
+  remediation is source-only at this stage; it is not deployed and has no
+  address yet.
 
 ## Product
 
@@ -36,11 +37,13 @@ because a submitter asserted them. Market data cannot be borrowed from another
 token, and same-symbol assets remain distinct by address.
 
 Semantic authority is tied to the verified issuer domain and the exact verified
-chain/address/token identity. A valid HTTPS URL is only transport syntax. An
-unknown or conflicting provider identity, unrelated source domain, phishing
-domain, or source page for another asset fails closed before positive semantic
-evidence can affect the policy. The current candidate chain model supports
-`eip155:1` (Ethereum mainnet) with explicit aliases only.
+chain/address/token identity. The issuer source is an exact-address anchor;
+the other Circle role sources prove their role and unambiguous USDC relevance
+against that already authenticated identity anchor. A valid HTTPS URL is only
+transport syntax. An unknown or conflicting provider identity, unrelated source
+domain, phishing domain, or source page for another asset fails closed before
+positive semantic evidence can affect the policy. The current candidate chain
+model supports `eip155:1` (Ethereum mainnet) with explicit aliases only.
 
 ## Challenge Reassessment
 
@@ -79,9 +82,13 @@ Validators never choose an LTV directly. Deterministic safety rules can cap or r
 External evidence is checkpointed into small consensus writes. CoinGecko and
 CoinPaprika identity checkpoints, one semantic-source checkpoint per role, and
 one market snapshot per provider independently authenticate and persist bounded
-facts. `evaluate_asset` performs zero web fetches and uses only those stored
-facts plus one structured semantic LLM decision; stale or incomplete
-checkpoints fail closed. One available objective source cannot exceed `WATCH`.
+facts. Semantic checkpoint validators compare the authenticated stable facts
+(authority, role, chain, address anchor, symbol and binding predicates), not
+rendering-dependent excerpts or live response digests. Official Circle Markdown
+sources are preferred for the five semantic roles. `evaluate_asset` performs
+zero web fetches and uses only those stored facts plus one structured semantic
+LLM decision; stale or incomplete checkpoints fail closed. One available
+objective source cannot exceed `WATCH`.
 
 Semantic evidence is submitted by role: issuer, redemption, backing, security, and governance. Sources are HTTPS-constrained, bounded, independently refetched by validators, and always treated as untrusted evidence. Deterministic role-specific extraction bounds the material sent to one structured semantic LLM call. Prompt-injection-shaped content cannot change the rubric, schema, or operation. Validator errors fail closed. V7 challenge evidence is authenticated once at creation, reduced to at most 2,800 UTF-8 bytes, and consumed from storage during reassessment.
 

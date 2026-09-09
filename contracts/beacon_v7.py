@@ -381,6 +381,8 @@ def _bm(_m,i,_a=True,_k=""):
  _g=ROLE_TERMS.get(_k.lower(),"").split()
  _f=not _g or any(_l in _i for _l in _g)
  return bool(_b and _f and(_c and _d if _a else True))
+def _sfb(_m,i,k,au):
+ return(au,k,i.get(_K13,""),i.get(_K52,""),i.get(_K15,"").lower(),i.get(_K20,"").upper(),i.get("name",""),i.get(_K31,""),_bm(_m,i,k==_K85 or au==_K64,k),bool(_rt(_m,k)))
 def _rt(_d,_b):
  _a=_d.lower()
  return sorted(set(_c for _c in ROLE_TERMS.get(_b.lower(),"").split()if _c and _c in _a))
@@ -398,7 +400,7 @@ def _ed(_a,i,_b):
  return _digest({"k":_a,"c":i.get(_K13,""),"a":i.get(_K15,""),"s":i.get(_K20,""),"n":i.get("name",""),"t":_b,})
 def _se(_c,_b,i):
  au=_au(_c,_b,i)
- r={_K18:au,_K1:_K3,"text":"",_K2:"",}
+ r={_K18:au,_K1:_K3,_F:(),"text":"",_K2:"",}
  if au==_K3:return r
  try:
   w=gl.nondet.web.get(_c);a=_stc(w)
@@ -409,6 +411,7 @@ def _se(_c,_b,i):
   if not y.strip()or len(y.encode("utf-8"))>MAX_RESPONSE_LENGTH:r[_K0]=SOURCE_IDENTITY_UNVERIFIED;return r
   if _bm(y,i,_b==_K85 or au==_K64,_b):
    r[_K1]=_K48
+   r[_F]=_sfb(y,i,_b,au)
    r["text"]=_re(y,_b)
    if len(r["text"].encode("utf-8"))>MAX_EVIDENCE_LENGTH:r[_K0]=INSUFFICIENT_EVIDENCE;r["text"]="";return r
    r[_K2]=_ed(_b,i,r["text"])
@@ -446,7 +449,7 @@ def _scl(url,role,i):
  e=_se(url,role,i)
  if _K0 in e:
   return{_K0:e[_K0],_K18:e.get(_K18,_K3),_K1:e.get(_K1,_K3),_F:(),_T:"",_D:""}
- t=e.get(_T,"");return{_K18:e.get(_K18,_K3),_K1:e.get(_K1,_K3),_F:(_bm(t,i,role==_K85 or _au("https://"+i.get(_K31,""),role,i)==_K64,role),bool(_rt(t,role)),bool(i.get(_K15,"")),i.get(_K13,""),i.get(_K20,"")),_T:t,_D:e.get(_K2,"")}
+ t=e.get(_T,"");return{_K18:e.get(_K18,_K3),_K1:e.get(_K1,_K3),_F:e.get(_F,()),_T:t,_D:e.get(_K2,"")}
 def _sev(z,lr):
  try:
   if not isinstance(lr,gl.vm.Return)or not isinstance(lr.calldata,dict):return False

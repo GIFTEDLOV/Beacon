@@ -132,11 +132,11 @@ def test_v7_semantic_pipeline_accepts_genlayer_response_shape_for_all_roles(
     direct_vm, direct_deploy
 ):
     urls = [
-        "https://developers.circle.com/stablecoins/usdc-contract-addresses",
-        "https://developers.circle.com/circle-mint/concepts/how-minting-works",
-        "https://developers.circle.com/stablecoins/what-is-usdc",
-        "https://developers.circle.com/cctp/references/technical-guide",
-        "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
+        "https://developers.circle.com/stablecoins/usdc-contract-addresses.md",
+        "https://developers.circle.com/circle-mint/concepts/how-minting-works.md",
+        "https://developers.circle.com/stablecoins/what-is-usdc.md",
+        "https://developers.circle.com/cctp/references/technical-guide.md",
+        "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification.md",
     ]
     contract = direct_deploy("contracts/beacon_v7.py")
     submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin", urls=urls))
@@ -145,6 +145,60 @@ def test_v7_semantic_pipeline_accepts_genlayer_response_shape_for_all_roles(
         assert passport[f"{role}_authority_status"] == "VERIFIED"
         assert passport[f"{role}_asset_binding_status"] == "VERIFIED"
     assert passport["semantic_source_status"] == "OK"
+
+
+def test_v7_semantic_checkpoint_equivalence_uses_stable_role_facts(
+    direct_deploy,
+):
+    direct_deploy("contracts/beacon_v7.py")
+    module = v7_module()
+    identity = {
+        "canonical_chain": "ethereum",
+        "canonical_namespace": "eip155:1",
+        "canonical_address": V5_ADDRESS,
+        "symbol": "USDC",
+        "name": "USDC",
+        "official_issuer_domain": "circle.com",
+    }
+    role_terms = {
+        "issuer": "Circle USDC Ethereum " + V5_ADDRESS + " issuer issue operator",
+        "redemption": "Circle USDC redemption mint burn eligible terms",
+        "backing": "Circle USDC reserve backing cash treasury collateral",
+        "security": "Circle USDC security audit exploit vulnerability",
+        "governance": "Circle USDC governance admin owner control",
+    }
+    for role, body in role_terms.items():
+        expected = module._sfb(body, identity, role, "VERIFIED")
+        assert expected[-2] is True
+        for iteration in range(20):
+            variant = (
+                "generated navigation iteration " + str(iteration)
+                + " harmless metadata header footer\n"
+                + body
+                + " unrelated documentation text"
+            )
+            assert module._sfb(variant, identity, role, "VERIFIED") == expected
+
+
+def test_v7_semantic_checkpoint_facts_fail_closed_for_wrong_asset_role_or_authority(
+    direct_deploy,
+):
+    direct_deploy("contracts/beacon_v7.py")
+    module = v7_module()
+    identity = {
+        "canonical_chain": "ethereum",
+        "canonical_namespace": "eip155:1",
+        "canonical_address": V5_ADDRESS,
+        "symbol": "USDC",
+        "name": "USDC",
+        "official_issuer_domain": "circle.com",
+    }
+    good = "Circle USDC Ethereum " + V5_ADDRESS + " issuer issue operator"
+    assert module._sfb(good, identity, "issuer", "VERIFIED")[-2] is True
+    assert module._sfb(good.replace(V5_ADDRESS, "0x" + "2" * 40), identity, "issuer", "VERIFIED")[-2] is False
+    assert module._sfb(good.replace("Ethereum", "Polygon"), identity, "issuer", "VERIFIED")[-2] is False
+    assert module._sfb("Circle USDC reserve backing cash", identity, "issuer", "VERIFIED")[-2] is False
+    assert module._sfb(good, identity, "issuer", "UNVERIFIED")[0] == "UNVERIFIED"
 
 
 def test_v7_final_evaluation_uses_checkpoints_without_web_fetch(
