@@ -11,9 +11,9 @@ Beacon is a versioned collateral-risk registry for stablecoins and stable-value 
 - V6 is the prior reviewer-remediation deployment at
   `0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb`; its live evidence is preserved
   as historical provenance, including the reassessment outcome `UNDETERMINED`.
-- V7 is the current security-hardened candidate in
-  [`contracts/beacon_v7.py`](contracts/beacon_v7.py). It is not deployed and has
-  no address yet.
+- V7 is the current checkpointed-consensus candidate in
+  [`contracts/beacon_v7.py`](contracts/beacon_v7.py). This structural
+  remediation is source-only; it is not deployed and has no address yet.
 
 ## Product
 
@@ -76,13 +76,21 @@ Validators never choose an LTV directly. Deterministic safety rules can cap or r
 
 ## Architecture
 
-Objective evidence uses independent CoinGecko and CoinPaprika market feeds. Beacon normalizes each response into small fields, uses bounded numeric tolerance for changing price facts, and treats source conflict as fail-closed. One available objective source cannot exceed `WATCH`.
+External evidence is checkpointed into small consensus writes. CoinGecko and
+CoinPaprika identity checkpoints, one semantic-source checkpoint per role, and
+one market snapshot per provider independently authenticate and persist bounded
+facts. `evaluate_asset` performs zero web fetches and uses only those stored
+facts plus one structured semantic LLM decision; stale or incomplete
+checkpoints fail closed. One available objective source cannot exceed `WATCH`.
 
 Semantic evidence is submitted by role: issuer, redemption, backing, security, and governance. Sources are HTTPS-constrained, bounded, independently refetched by validators, and always treated as untrusted evidence. Deterministic role-specific extraction bounds the material sent to one structured semantic LLM call. Prompt-injection-shaped content cannot change the rubric, schema, or operation. Validator errors fail closed. V7 challenge evidence is authenticated once at creation, reduced to at most 2,800 UTF-8 bytes, and consumed from storage during reassessment.
 
 The public contract surface is intentionally small:
 
-- Writes: `submit_asset`, `evaluate_asset`, `challenge_asset`, `reassess_asset`
+- Writes: `submit_asset`, `verify_coingecko_identity`,
+  `verify_coinpaprika_identity`, `verify_semantic_source`,
+  `refresh_coingecko_market`, `refresh_coinpaprika_market`, `evaluate_asset`,
+  `challenge_asset`, `reassess_asset`
 - Views: `asset`, `assets`, `asset_ids`, `asset_count`, `current_passport`, `passport_by_version`, `passport_history`, `challenge_records`
 
 Passports are versioned and prior versions are immutable. Challenges target a specific passport version and reassessment creates a new version. Evaluation failures remain distinct from a normal business `REJECT`.

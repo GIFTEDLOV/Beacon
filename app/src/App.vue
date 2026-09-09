@@ -105,6 +105,8 @@
           <div class="policy-band"><div><span class="section-index">COLLATERAL POLICY</span><strong class="policy-verdict" :class="riskClass(displayState(detailPassport).label)">{{ displayState(detailPassport).label }}</strong></div><div><span class="section-index">MAXIMUM LTV</span><strong class="policy-number">{{ detailPassport?.max_ltv_bps ?? 0 }} <small>BPS</small></strong></div><div><span class="section-index">CONFIDENCE</span><strong class="policy-small">{{ detailPassport?.confidence || 'UNKNOWN' }}</strong></div><div><span class="section-index">FAILURE STATE</span><strong class="policy-small">{{ detailPassport?.failure_state || 'NOT_EVALUATED' }}</strong></div></div>
           <div class="source-legend"><span class="source-tag on-chain">ON-CHAIN</span> identity, verdict, LTV, versions <span class="source-tag validator">VALIDATOR-DERIVED</span> risk fields and status <span class="source-tag external">EXTERNAL EVIDENCE</span> linked source material</div>
 
+          <section class="section-block checkpoint-panel"><div class="section-heading block-heading"><div><span class="section-index">04 / CHECKPOINTS</span><h2>External evidence checkpoints</h2></div><span class="source-tag validator">ONE SOURCE / ONE WRITE</span></div><p class="form-note">Beacon verifies each provider, semantic role and market snapshot before the final Passport evaluation. A failed checkpoint remains isolated; no automatic rebroadcast is attempted.</p><div v-if="!checkpointState" class="state-block">Checkpoint state is unavailable. No staged completion is inferred.</div><div v-else class="checkpoint-grid"><div class="checkpoint-card"><span class="section-index">IDENTITY</span><div v-for="item in identityCheckpoints" :key="item.key" class="checkpoint-row"><div><strong>{{ item.label }}</strong><small>{{ checkpointValue('identity', item.key, 'status') }}</small></div><button v-if="checkpointValue('identity', item.key, 'status') !== 'VERIFIED'" class="button button-line" :disabled="writing" @click="item.run(detailAsset.asset_id)">Verify</button><span v-else class="source-tag on-chain">VERIFIED</span></div></div><div class="checkpoint-card"><span class="section-index">SEMANTIC SOURCES</span><div v-for="item in semanticCheckpoints" :key="item.key" class="checkpoint-row"><div><strong>{{ item.label }}</strong><small>{{ checkpointValue('semantic', item.key, 'binding_status') }} / {{ checkpointValue('semantic', item.key, 'authority_status') }}</small></div><button v-if="checkpointValue('semantic', item.key, 'binding_status') !== 'VERIFIED'" class="button button-line" :disabled="writing || !identityReady" @click="verifySemantic(detailAsset.asset_id, item.role)">Verify</button><span v-else class="source-tag on-chain">VERIFIED</span></div></div><div class="checkpoint-card"><span class="section-index">OBJECTIVE SNAPSHOTS</span><div v-for="item in marketCheckpoints" :key="item.key" class="checkpoint-row"><div><strong>{{ item.label }}</strong><small>{{ checkpointValue('market', item.key, 'source_status') }}</small></div><button v-if="checkpointValue('market', item.key, 'source_status') !== 'OK'" class="button button-line" :disabled="writing || !identityReady" @click="item.run(detailAsset.asset_id)">Refresh</button><span v-else class="source-tag on-chain">READY</span></div></div></div></section>
+
           <section class="passport-artifact"><div class="passport-corner top-left"></div><div class="passport-corner top-right"></div><div class="passport-corner bottom-left"></div><div class="passport-corner bottom-right"></div><div class="passport-artifact-head"><span class="section-index">BEACON / MACHINE-READABLE RECORD</span><span class="mono">PASSPORT V{{ detailPassport?.version || 0 }}</span></div><div class="passport-artifact-title"><span>BEACON</span><h2>COLLATERAL<br />PASSPORT</h2></div><div class="passport-artifact-grid"><div><span class="section-index">ASSET ID</span><code>{{ detailAsset.asset_id }}</code></div><div><span class="section-index">VERDICT</span><strong :class="riskClass(displayState(detailPassport).label)">{{ displayState(detailPassport).label }}</strong></div><div><span class="section-index">MAX LTV</span><strong>{{ detailPassport?.max_ltv_bps ?? 0 }} BPS</strong></div><div><span class="section-index">POLICY BASIS</span><span>{{ detailPassport?.policy_basis || '—' }}</span></div><div><span class="section-index">EVIDENCE DIGEST</span><CopyHash :value="detailPassport?.evidence_digest || '—'" label="Copy evidence digest" /></div><div><span class="section-index">EVALUATION MARKER</span><span>{{ detailPassport?.evaluated_at || detailPassport?.market_timestamp || '—' }}</span></div></div><div class="passport-calibration"><span></span><span></span><span></span><span></span><small>V6 / BRADBURY / {{ detailPassport?.objective_coverage || 'UNKNOWN' }}</small></div></section>
 
           <section class="section-block"><div class="section-heading block-heading"><div><span class="section-index">03 / RISK MATRIX</span><h2>Policy-critical dimensions</h2></div><span class="source-tag validator">VALIDATOR-DERIVED</span></div><div v-if="detailPassport?.version" class="risk-matrix"><RiskCell v-for="(field, index) in primaryRiskFields" :key="field.key" :index="index + 1" :label="field.label" :value="detailPassport[field.key]" :provenance="field.provenance" /></div><div v-else class="state-block">No finalized passport has been written yet.</div></section>
@@ -156,6 +158,7 @@ const loading = ref(false);
 const error = ref("");
 const detailAsset = ref(null);
 const detailPassport = ref(null);
+const checkpointState = ref(null);
 const historyRows = ref([]);
 const challengeRows = ref([]);
 const challengeAssetState = ref(null);
@@ -180,6 +183,21 @@ const proofLiveAvailable = computed(() => liveProofState.value.available);
 const categories = CONTRACT_CATEGORIES;
 const filterOptions = ["ALL", "CORE", "STANDARD", "WATCH", "REJECT", "EVALUATION_FAILURE"];
 const submitSteps = ["IDENTIFY", "OBJECTIVE SOURCES", "SEMANTIC SOURCES", "REVIEW", "BROADCAST"];
+const identityCheckpoints = [
+  { key: "COINGECKO", label: "CoinGecko", run: (id) => verifyCoingecko(id) },
+  { key: "COINPAPRIKA", label: "CoinPaprika", run: (id) => verifyCoinpaprika(id) }
+];
+const semanticCheckpoints = [
+  { key: "issuer", role: "ISSUER", label: "Issuer" },
+  { key: "redemption", role: "REDEMPTION", label: "Redemption" },
+  { key: "reserve_backing", role: "BACKING", label: "Backing" },
+  { key: "security", role: "SECURITY", label: "Security" },
+  { key: "governance", role: "GOVERNANCE", label: "Governance" }
+];
+const marketCheckpoints = [
+  { key: "COINGECKO", label: "CoinGecko market", run: (id) => refreshCoingecko(id) },
+  { key: "COINPAPRIKA", label: "CoinPaprika market", run: (id) => refreshCoinpaprika(id) }
+];
 const primaryRiskFields = [
   { key: "peg_risk", label: "PEG", provenance: "OBJECTIVE / BOUNDED" },
   { key: "liquidity_risk", label: "LIQUIDITY", provenance: "OBJECTIVE / BOUNDED" },
@@ -199,6 +217,7 @@ const provenanceFields = [
 const filteredAssets = computed(() => filterRegistry(assets.value, search.value, filter.value));
 const formErrors = computed(() => validateSubmissionFields(form, submitStep.value === 4 ? 0 : submitStep.value));
 const challengeErrors = computed(() => validateChallengeInput(challengeForm));
+const identityReady = computed(() => checkpointValue("identity", "COINGECKO", "status") === "VERIFIED" && checkpointValue("identity", "COINPAPRIKA", "status") === "VERIFIED");
 const openChallengeCount = computed(() => challengeRows.value.filter((challenge) => challenge.status === "OPEN" && Number(challenge.target_version) === Number(detailPassport.value?.version || 0)).length);
 const evidenceSources = computed(() => detailAsset.value ? [
   { label: "ISSUER", url: detailAsset.value.issuer_url, authority: detailPassport.value?.issuer_authority_status, binding: detailPassport.value?.issuer_asset_binding_status },
@@ -212,6 +231,10 @@ const displayState = (passport) => passportDisplayState(passport);
 const identityDisplay = computed(() => identityDisplayState(detailPassport.value || {}, detailAsset.value || {}));
 const navClass = (name) => ({ "nav-active": route.value.name === name });
 const openDetail = (id) => navigate(`/assets/${encodeURIComponent(id)}`);
+
+function checkpointValue(kind, key, field) {
+  return checkpointState.value?.[kind]?.[key]?.[field] || "PENDING";
+}
 
 function riskClass(value) {
   return String(value || "unknown").toLowerCase().replaceAll("_", "-");
@@ -252,6 +275,7 @@ async function loadDetail(id) {
   loading.value = true;
   error.value = "";
   detailAsset.value = null;
+  checkpointState.value = null;
   try {
     const [asset, passport, history, challenges] = await Promise.all([
       registry.asset(id),
@@ -259,6 +283,7 @@ async function loadDetail(id) {
       registry.passportHistory(id),
       registry.challengeRecords(id)
     ]);
+    try { checkpointState.value = await registry.checkpointState(id); } catch { checkpointState.value = null; }
     detailAsset.value = Object.keys(asset || {}).length ? asset : null;
     detailPassport.value = passport;
     historyRows.value = Object.values(history || {}).sort((a, b) => Number(a.version) - Number(b.version));
@@ -357,7 +382,31 @@ function advanceSubmit() {
 }
 
 function evaluateAsset(id) {
-  runWrite("evaluate_asset", id, () => registry.evaluateAsset(id), () => registry.currentPassport(id));
+  runWrite("evaluate_asset", id, () => registry.evaluateAsset(id), () => registry.currentPassport(id), `/assets/${encodeURIComponent(id)}`);
+}
+
+function checkpointWrite(operation, id, action) {
+  runWrite(operation, id, action, () => registry.checkpointState(id), `/assets/${encodeURIComponent(id)}`);
+}
+
+function verifyCoingecko(id) {
+  checkpointWrite("verify_coingecko_identity", id, () => registry.verifyCoingeckoIdentity(id));
+}
+
+function verifyCoinpaprika(id) {
+  checkpointWrite("verify_coinpaprika_identity", id, () => registry.verifyCoinpaprikaIdentity(id));
+}
+
+function verifySemantic(id, role) {
+  checkpointWrite("verify_semantic_source", id, () => registry.verifySemanticSource(id, role));
+}
+
+function refreshCoingecko(id) {
+  checkpointWrite("refresh_coingecko_market", id, () => registry.refreshCoingeckoMarket(id));
+}
+
+function refreshCoinpaprika(id) {
+  checkpointWrite("refresh_coinpaprika_market", id, () => registry.refreshCoinpaprikaMarket(id));
 }
 
 function submitChallenge() {

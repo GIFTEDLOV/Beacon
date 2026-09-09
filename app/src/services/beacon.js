@@ -44,6 +44,7 @@ export default class BeaconRegistry {
   async passportHistory(id) { return this.read("passport_history", [id]); }
   async passportByVersion(id, version) { return this.read("passport_by_version", [id, version]); }
   async challengeRecords(id) { return this.read("challenge_records", [id]); }
+  async checkpointState(id) { return this.read("checkpoint_state", [id]); }
   _key(operation, id) { return `beacon.tx.${this.contractAddress}.${operation}.${id || "global"}`; }
   _persist(operation, id, hash) { store()?.setItem(this._key(operation, id), hash); }
   _getPersisted(operation, id) { return store()?.getItem(this._key(operation, id)); }
@@ -74,7 +75,49 @@ export default class BeaconRegistry {
     return this._write("evaluate_asset", canonicalId, [canonicalId], async () => {
       const current = await this.asset(canonicalId);
       if (!current || Number(current.current_version) !== 0 || current.lifecycle_status !== "SUBMITTED") throw new Error("Precondition failed: asset is not awaiting first evaluation.");
+      const checkpoints = await this.checkpointState(canonicalId);
+      const identities = checkpoints?.identity || {};
+      const semantic = checkpoints?.semantic || {};
+      const market = checkpoints?.market || {};
+      if (checkpoints?.asset?.identity_status !== "VERIFIED" || identities.COINGECKO?.status !== "VERIFIED" || identities.COINPAPRIKA?.status !== "VERIFIED") throw new Error("Precondition failed: both provider identity checkpoints must be VERIFIED.");
+      if (!["issuer", "redemption", "reserve_backing", "security", "governance"].every((role) => semantic[role]?.authority_status === "VERIFIED" && semantic[role]?.binding_status === "VERIFIED")) throw new Error("Precondition failed: all five semantic source checkpoints must be VERIFIED.");
+      if (market.COINGECKO?.source_status !== "OK" || market.COINPAPRIKA?.source_status !== "OK") throw new Error("Precondition failed: both objective market checkpoints must be ready.");
     }, () => this.currentPassport(canonicalId));
+  }
+  async verifyCoingeckoIdentity(id) {
+    const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
+    return this._write("verify_coingecko_identity", canonicalId, [canonicalId], async () => {
+      const current = await this.asset(canonicalId);
+      if (!current || Number(current.current_version) !== 0 || current.lifecycle_status !== "SUBMITTED") throw new Error("Precondition failed: asset is not awaiting identity checkpoints.");
+    }, () => this.checkpointState(canonicalId));
+  }
+  async verifyCoinpaprikaIdentity(id) {
+    const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
+    return this._write("verify_coinpaprika_identity", canonicalId, [canonicalId], async () => {
+      const current = await this.asset(canonicalId);
+      if (!current || Number(current.current_version) !== 0 || current.lifecycle_status !== "SUBMITTED") throw new Error("Precondition failed: asset is not awaiting identity checkpoints.");
+    }, () => this.checkpointState(canonicalId));
+  }
+  async verifySemanticSource(id, role) {
+    const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
+    return this._write("verify_semantic_source", canonicalId, [canonicalId, role], async () => {
+      const current = await this.asset(canonicalId);
+      if (!current || Number(current.current_version) !== 0 || current.identity_status !== "VERIFIED") throw new Error("Precondition failed: dual provider identity checkpoints are incomplete.");
+    }, () => this.checkpointState(canonicalId));
+  }
+  async refreshCoingeckoMarket(id) {
+    const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
+    return this._write("refresh_coingecko_market", canonicalId, [canonicalId], async () => {
+      const current = await this.asset(canonicalId);
+      if (!current || Number(current.current_version) !== 0 || current.identity_status !== "VERIFIED") throw new Error("Precondition failed: dual provider identity checkpoints are incomplete.");
+    }, () => this.checkpointState(canonicalId));
+  }
+  async refreshCoinpaprikaMarket(id) {
+    const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
+    return this._write("refresh_coinpaprika_market", canonicalId, [canonicalId], async () => {
+      const current = await this.asset(canonicalId);
+      if (!current || Number(current.current_version) !== 0 || current.identity_status !== "VERIFIED") throw new Error("Precondition failed: dual provider identity checkpoints are incomplete.");
+    }, () => this.checkpointState(canonicalId));
   }
   async challengeAsset(id, category, reason, evidenceUrl) {
     const args = [id, 0, category, reason, evidenceUrl];

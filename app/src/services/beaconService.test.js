@@ -50,6 +50,12 @@ test("evaluation uses the canonical asset ID returned by Beacon state", async ()
       reads.push({ functionName, args });
       if (functionName === "asset_ids") return [canonical];
       if (functionName === "asset") return { current_version: 0, lifecycle_status: "SUBMITTED" };
+      if (functionName === "checkpoint_state") return {
+        asset: { identity_status: "VERIFIED" },
+        identity: { COINGECKO: { status: "VERIFIED" }, COINPAPRIKA: { status: "VERIFIED" } },
+        semantic: Object.fromEntries(["issuer", "redemption", "reserve_backing", "security", "governance"].map((role) => [role, { authority_status: "VERIFIED", binding_status: "VERIFIED" }])),
+        market: { COINGECKO: { source_status: "OK" }, COINPAPRIKA: { source_status: "OK" } },
+      };
       if (functionName === "current_passport") return { version: 1, verdict: "WATCH" };
       return {};
     },

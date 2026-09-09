@@ -17,7 +17,6 @@ from test.test_beacon_v5 import (
     submit,
 )
 from test.test_beacon_v6 import (
-    evaluate_v6,
     gecko_body,
     install_v6_mocks,
     paprika_coin_body,
@@ -31,9 +30,34 @@ def v7_module():
 
 def setup_evaluated(direct_vm, direct_deploy):
     contract = direct_deploy("contracts/beacon_v7.py")
-    submit(direct_vm, contract)
-    evaluate_v6(direct_vm, contract)
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
+    evaluate_v7(direct_vm, contract)
     return contract
+
+
+def evaluate_v7(direct_vm, contract, **kwargs):
+    finish = kwargs.pop("finish", True)
+    semantic = kwargs.pop("semantic", semantic_result())
+    install_v6_mocks(direct_vm, semantic=semantic, **kwargs)
+    direct_vm._web_mocks.insert(0, (re.compile(r"api\.coingecko\.com/api/v3/coins/"), {"status": kwargs.get("gecko_status", 200), "body": kwargs.get("gecko", gecko_body())}))
+    paprika = json.loads(kwargs.get("paprika_coin", paprika_coin_body())) if isinstance(kwargs.get("paprika_coin"), str) else json.loads(paprika_coin_body())
+    paprika.setdefault("quotes", {"USD": {"price": 1, "volume_24h": 10000000, "market_cap": 100000000}})
+    paprika.setdefault("last_updated", "2026-09-03T12:00:01Z")
+    direct_vm._web_mocks.insert(0, (re.compile(r"api\.coinpaprika\.com/v1/coins/"), {"status": 200, "body": json.dumps(paprika)}))
+    contract.verify_coingecko_identity(V5_ID)
+    contract.verify_coinpaprika_identity(V5_ID)
+    if contract.asset(V5_ID)["identity_status"] != "VERIFIED":
+        return contract.checkpoint_state(V5_ID)
+    for role in ("ISSUER", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE"):
+        contract.verify_semantic_source(V5_ID, role)
+    direct_vm._web_mocks.insert(0, (re.compile(r"api\.coingecko\.com/api/v3/coins/"), {"status": kwargs.get("gecko_status", 200), "body": kwargs.get("gecko", gecko_body())}))
+    direct_vm._web_mocks.insert(0, (re.compile(r"api\.coinpaprika\.com/v1/coins/"), {"status": 200, "body": json.dumps(paprika)}))
+    contract.refresh_coingecko_market(V5_ID)
+    contract.refresh_coinpaprika_market(V5_ID)
+    if not finish:
+        return contract.checkpoint_state(V5_ID)
+    contract.evaluate_asset(V5_ID)
+    return contract.current_passport(V5_ID)
 
 
 def install_challenge(direct_vm, url, body, *, status=200, llm=None):
@@ -115,12 +139,117 @@ def test_v7_semantic_pipeline_accepts_genlayer_response_shape_for_all_roles(
         "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification",
     ]
     contract = direct_deploy("contracts/beacon_v7.py")
-    submit(direct_vm, contract, submission_args(urls=urls))
-    passport = evaluate_v6(direct_vm, contract)
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin", urls=urls))
+    passport = evaluate_v7(direct_vm, contract)
     for role in ("issuer", "redemption", "backing", "security", "governance"):
         assert passport[f"{role}_authority_status"] == "VERIFIED"
         assert passport[f"{role}_asset_binding_status"] == "VERIFIED"
     assert passport["semantic_source_status"] == "OK"
+
+
+def test_v7_final_evaluation_uses_checkpoints_without_web_fetch(
+    direct_vm, direct_deploy, monkeypatch
+):
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
+    evaluate_v7(direct_vm, contract, finish=False)
+    module = v7_module()
+
+    def unexpected_fetch(*_args, **_kwargs):
+        raise AssertionError("final evaluation performed an external web fetch")
+
+    monkeypatch.setattr(module.gl.nondet.web, "get", unexpected_fetch)
+    direct_vm.mock_llm(
+        r"Beacon rubric",
+        json.dumps(semantic_result()),
+    )
+    contract.evaluate_asset(V5_ID)
+    assert contract.asset(V5_ID)["current_version"] == 1
+    assert contract.current_passport(V5_ID)["identity_status"] == "VERIFIED"
+
+
+def test_v7_final_evaluation_requires_all_checkpoints(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
+    install_v6_mocks(direct_vm)
+    contract.verify_coingecko_identity(V5_ID)
+    contract.verify_coinpaprika_identity(V5_ID)
+    with pytest.raises(Exception, match="evidence checkpoints incomplete"):
+        contract.evaluate_asset(V5_ID)
+    assert contract.asset(V5_ID)["current_version"] == 0
+    assert contract.asset(V5_ID)["lifecycle_status"] == "SUBMITTED"
+
+
+def test_v7_final_evaluation_has_zero_external_calls_in_source():
+    source = Path("contracts/beacon_v7.py").read_text(encoding="utf-8")
+    body = source[source.index("def evaluate_asset"):source.index("def challenge_asset")]
+    assert "nondet.web" not in body
+    assert "_json_get" not in body
+    assert "_ep" in body
+
+
+def test_v7_identity_checkpoint_failure_is_isolated(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
+    install_v6_mocks(direct_vm)
+    contract.verify_coingecko_identity(V5_ID)
+    direct_vm._web_mocks.insert(0, (re.compile(r"api\.coinpaprika\.com/v1/coins/"), {"status": 504, "body": ""}))
+    contract.verify_coinpaprika_identity(V5_ID)
+    state = contract.checkpoint_state(V5_ID)
+    assert state["identity"]["COINGECKO"]["status"] == "VERIFIED"
+    assert state["identity"]["COINPAPRIKA"]["status"] == "UNVERIFIED"
+    assert state["asset"]["identity_status"] == "UNVERIFIED"
+
+
+def test_v7_semantic_checkpoint_failure_keeps_prior_roles(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
+    install_v6_mocks(direct_vm)
+    contract.verify_coingecko_identity(V5_ID)
+    contract.verify_coinpaprika_identity(V5_ID)
+    for role in ("ISSUER", "REDEMPTION", "BACKING", "SECURITY"):
+        contract.verify_semantic_source(V5_ID, role)
+    direct_vm._web_mocks.insert(0, (re.compile(r"^https://"), {"status": 504, "body": ""}))
+    contract.verify_semantic_source(V5_ID, "GOVERNANCE")
+    semantic = contract.checkpoint_state(V5_ID)["semantic"]
+    assert all(semantic[role]["binding_status"] == "VERIFIED" for role in ("issuer", "redemption", "reserve_backing", "security"))
+    assert semantic["governance"]["binding_status"] == "UNVERIFIED"
+
+
+def test_v7_market_checkpoint_failure_keeps_identity_and_sources(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
+    state = evaluate_v7(direct_vm, contract, finish=False)
+    assert state["identity"]["COINGECKO"]["status"] == "VERIFIED"
+    assert state["semantic"]["governance"]["binding_status"] == "VERIFIED"
+    direct_vm._web_mocks.insert(0, (re.compile(r"api\.coingecko\.com/api/v3/coins/"), {"status": 429, "body": ""}))
+    contract.refresh_coingecko_market(V5_ID)
+    after = contract.checkpoint_state(V5_ID)
+    assert after["identity"]["COINPAPRIKA"]["status"] == "VERIFIED"
+    assert after["semantic"]["issuer"]["binding_status"] == "VERIFIED"
+    assert after["market"]["COINGECKO"]["source_status"] == "UNAVAILABLE"
+
+
+def test_v7_five_xx_and_malformed_checkpoint_failures_are_isolated(direct_vm, direct_deploy):
+    contract = direct_deploy("contracts/beacon_v7.py")
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
+    install_v6_mocks(direct_vm)
+    contract.verify_coingecko_identity(V5_ID)
+    direct_vm._web_mocks.insert(0, (re.compile(r"api\.coinpaprika\.com/v1/coins/"), {"status": 500, "body": ""}))
+    contract.verify_coinpaprika_identity(V5_ID)
+    state = contract.checkpoint_state(V5_ID)
+    assert state["identity"]["COINGECKO"]["status"] == "VERIFIED"
+    assert state["identity"]["COINPAPRIKA"]["status"] == "UNVERIFIED"
+
+    direct_vm._web_mocks.pop(0)
+    contract.verify_coinpaprika_identity(V5_ID)
+    for role in ("ISSUER", "REDEMPTION", "BACKING", "SECURITY"):
+        contract.verify_semantic_source(V5_ID, role)
+    direct_vm._web_mocks.insert(0, (re.compile(r"^https://"), {"status": 200, "body": "{malformed"}))
+    contract.verify_semantic_source(V5_ID, "GOVERNANCE")
+    semantic = contract.checkpoint_state(V5_ID)["semantic"]
+    assert all(semantic[role]["binding_status"] == "VERIFIED" for role in ("issuer", "redemption", "reserve_backing", "security"))
+    assert semantic["governance"]["binding_status"] == "UNVERIFIED"
 
 
 def test_v7_url_authority_matrix_fails_closed(direct_deploy):
@@ -355,7 +484,7 @@ def test_v7_digest_order_and_bounded_snapshot_consensus_guards(direct_deploy):
     assert "p.get(_K2)==q.get(_K2)" not in validator
     assert "_K92" in validator
     assert "hashlib.sha256(y.encode(\"utf-8\")).hexdigest()" not in source
-    assert source.index("self._store_evaluation(a,passport)") < source.index('status="RESOLVED"')
+    assert source.index("self._seval(a,passport)") < source.index('status="RESOLVED"')
 
 
 def test_v7_identity_regressions_preserve_dual_provider_binding(direct_vm, direct_deploy):
@@ -364,56 +493,40 @@ def test_v7_identity_regressions_preserve_dual_provider_binding(direct_vm, direc
     submit(direct_vm, contract, submission_args(address=wrong_address))
     wrong_id = "eip155:1:" + wrong_address
     install_v6_mocks(direct_vm, semantic=semantic_result())
-    contract.evaluate_asset(wrong_id)
-    passport = contract.current_passport(wrong_id)
-    assert passport["identity_status"] == "UNVERIFIED"
+    contract.verify_coingecko_identity(wrong_id)
+    contract.verify_coinpaprika_identity(wrong_id)
+    assert contract.asset(wrong_id)["identity_status"] == "UNVERIFIED"
 
 
 def test_v7_wrong_coingecko_id_is_not_verified(direct_vm, direct_deploy):
     contract = direct_deploy("contracts/beacon_v7.py")
     submit(direct_vm, contract, submission_args(market_claim="usd-coin"))
-    passport = evaluate_v6(direct_vm, contract, gecko=gecko_body(market_id="other-asset"))
-    assert passport["identity_status"] == "CONFLICT"
+    passport = evaluate_v7(direct_vm, contract, gecko=gecko_body(market_id="other-asset"))
+    assert passport["asset"]["identity_status"] == "UNVERIFIED"
 
 
 def test_v7_wrong_coinpaprika_id_is_not_verified(direct_vm, direct_deploy):
     contract = direct_deploy("contracts/beacon_v7.py")
     submit(direct_vm, contract, submission_args(secondary_claim="usdc-usd-coin"))
-    passport = evaluate_v6(
+    passport = evaluate_v7(
         direct_vm,
         contract,
         paprika=paprika_contract_body(market_id="other-asset"),
         paprika_coin=paprika_coin_body(market_id="other-asset"),
     )
-    assert passport["identity_status"] == "CONFLICT"
+    assert passport["asset"]["identity_status"] == "UNVERIFIED"
 
 
 def test_v7_identity_consensus_ignores_extra_provider_domains(direct_vm, direct_deploy, monkeypatch):
     contract = direct_deploy("contracts/beacon_v7.py")
-    submit(direct_vm, contract)
+    submit(direct_vm, contract, submission_args(symbol_claim="USDC", market_claim="usd-coin", secondary_claim="usdc-usd-coin"))
     module = v7_module()
     with direct_vm.activate():
-        identity = module._ri(contract.assets_store[V5_ID])
-        asset = contract.assets_store[V5_ID]
-        chain, namespace, gecko, paprika = module._canonical_chain(asset.chain)
-        args = (
-            chain,
-            namespace,
-            gecko,
-            paprika,
-            asset.token_address,
-            asset.target_currency,
-            asset.name_claim,
-            asset.symbol_claim,
-            asset.market_identifier_claim,
-            asset.secondary_market_identifier_claim,
-        )
-        independent = dict(identity)
-        independent[module._K73] = ["circle.com", "additional.example"]
-        independent[module._K31] = "circle.com"
-        monkeypatch.setattr(module, "_ib", lambda *unused: independent)
+        args = (module.COINGECKO, "usd-coin", "eth-ethereum", V5_ADDRESS, "usd-coin")
+        identity = module._provider_identity(*args)
+        independent = dict(identity, **{module._K62: ["circle.com", "additional.example"]})
         for _ in range(20):
-            assert module._iv(args, module.gl.vm.Return(calldata=identity)) is True
+            assert module._provider_validator(args, module.gl.vm.Return(calldata=independent)) is True
 
 
 def test_v7_objective_consensus_ignores_timestamps_and_dynamic_turnover(direct_vm, direct_deploy):
@@ -421,6 +534,8 @@ def test_v7_objective_consensus_ignores_timestamps_and_dynamic_turnover(direct_v
     module = v7_module()
     stable = {
         module._K0: module.NO_FAILURE,
+        module._K21: module.CHECKPOINT_OK,
+        "provider": module.COINGECKO,
         module._K13: "ethereum",
         module._K15: V5_ADDRESS,
         module._K23: "usd-coin",
@@ -436,7 +551,6 @@ def test_v7_objective_consensus_ignores_timestamps_and_dynamic_turnover(direct_v
         module._K9: 100000,
         module._K38: 100000,
         module._K25: "leader-time",
-        module._K49: "validator-time",
     }
     independent = dict(stable)
     independent[module._K4] = 1005000
@@ -444,14 +558,14 @@ def test_v7_objective_consensus_ignores_timestamps_and_dynamic_turnover(direct_v
     independent[module._K9] = 700000
     independent[module._K38] = 400000
     independent[module._K25] = "new-leader-time"
-    independent[module._K49] = "new-validator-time"
-    module._ob = lambda *unused: independent
+    module._objective_checkpoint_leader = lambda *unused: independent
     with direct_vm.activate():
+        args = (module.COINGECKO, "usd-coin", "eth-ethereum", V5_ADDRESS, "usd-coin", "USDC", "USD")
         for _ in range(20):
-            assert module._ov((), module.gl.vm.Return(calldata=stable)) is True
+            assert module._objective_checkpoint_validator(args, module.gl.vm.Return(calldata=stable)) is True
     independent[module._K43] = "HIGH"
     with direct_vm.activate():
-        assert module._ov((), module.gl.vm.Return(calldata=stable)) is False
+        assert module._objective_checkpoint_validator(args, module.gl.vm.Return(calldata=stable)) is False
 
 
 def test_v7_challenge_consensus_compares_stable_facts_not_live_digest(direct_vm, direct_deploy, monkeypatch):
@@ -470,12 +584,12 @@ def test_v7_challenge_consensus_compares_stable_facts_not_live_digest(direct_vm,
         module._K1: module._K48,
         "category_binding_status": module._K48,
         "text": first_text,
-        module._K2: module._evidence_digest("SECURITY", identity, first_text),
+            module._K2: module._ed("SECURITY", identity, first_text),
         module._K92: module._challenge_facts(url, identity, "SECURITY", first_text),
     }
     second = dict(first)
     second["text"] = second_text
-    second[module._K2] = module._evidence_digest("SECURITY", identity, second_text)
+    second[module._K2] = module._ed("SECURITY", identity, second_text)
     second[module._K92] = module._challenge_facts(url, identity, "SECURITY", second_text)
     monkeypatch.setattr(module, "_cv", lambda *unused: second)
     with direct_vm.activate():
@@ -581,12 +695,12 @@ def test_v7_semantic_and_category_specific_challenge_variability_is_stable(
             module._K1: module._K48,
             module._K93: module._K48,
             "text": first_text,
-            module._K2: module._evidence_digest(category, identity, first_text),
+            module._K2: module._ed(category, identity, first_text),
             module._K92: module._challenge_facts(url, identity, category, first_text),
         }
         second = dict(first)
         second["text"] = second_text
-        second[module._K2] = module._evidence_digest(category, identity, second_text)
+        second[module._K2] = module._ed(category, identity, second_text)
         second[module._K92] = module._challenge_facts(url, identity, category, second_text)
         assert first[module._K92] == second[module._K92]
         monkeypatch.setattr(module, "_cv", lambda *unused: second)

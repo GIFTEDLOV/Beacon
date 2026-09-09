@@ -184,6 +184,13 @@ h1, h2, h3 { font-weight: 400; }
 .policy-number small { color: var(--beacon-faint); font: 10px var(--mono); letter-spacing: 0.1em; }
 .policy-small { color: var(--beacon-ink); font: 400 14px var(--mono); letter-spacing: 0.06em; }
 .source-legend { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; padding: 16px 0 30px; color: var(--beacon-faint); font-size: 11px; line-height: 1.8; }
+.checkpoint-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.checkpoint-card { border: 1px solid var(--beacon-line); padding: 16px; background: rgba(8, 20, 24, .34); }
+.checkpoint-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--beacon-line); }
+.checkpoint-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.checkpoint-row strong, .checkpoint-row small { display: block; }
+.checkpoint-row small { margin-top: 5px; color: var(--beacon-faint); font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.checkpoint-row .button { padding: 7px 9px; font-size: 9px; }
 .passport-artifact { position: relative; min-height: 360px; padding: 24px 30px 26px; border: 1px solid var(--beacon-line-strong); overflow: hidden; background: linear-gradient(120deg, rgba(104, 210, 190, 0.05), transparent 50%); }
 .passport-artifact::before { position: absolute; inset: 14px; border: 1px solid rgba(228, 244, 237, 0.05); pointer-events: none; content: ""; }
 .passport-corner { position: absolute; z-index: 1; width: 12px; height: 12px; border-color: var(--beacon-teal); }
