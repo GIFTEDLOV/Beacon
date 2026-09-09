@@ -99,7 +99,7 @@ _K91='chain'
 _K92='stable_facts'
 _K93='category_binding_status'
 _ID="id";_P="provider";_A="address";_N="name";_T="text";_D="digest";_F="facts";_PL="platform";_CS="contracts";_Q="quotes";_LU="last_updated";_MD="market_data";_CP="current_price";_TV="total_volume";_MKT="market_cap";_CG="https://api.coingecko.com/api/v3/coins/";_CPR="https://api.coinpaprika.com/v1/coins/"
-_R1="FAILURE_STATE";_R2="SEVERE_PEG_FAILURE";_R3="REDEMPTION_UNAVAILABLE";_R4="ACTIVE_UNRESOLVED_CRITICAL_SECURITY";_R5="HIGH_PEG_OR_REDEMPTION_RISK";_R6="OBJECTIVE_SOURCE_COVERAGE_CAP";_R7="MULTIPLE_CRITICAL_UNKNOWN_FIELDS";_R8="MULTIPLE_UNKNOWN_SOURCE_PROVENANCE";_R9="RISK_TIER";_R10="UNKNOWN_RISK_FIELD";_R11="ALL_DIMENSIONS_LOW_HIGH_CONFIDENCE";_R12="INSUFFICIENT_INDEPENDENT_CRITICAL_PROVENANCE";_R13="NO_HIGH_RISK_FIELDS";_R14="NON_CRITICAL_HIGH_OR_LOW_CONFIDENCE"
+_R1,_R2,_R3,_R4,_R5,_R6,_R7,_R8,_R9,_R10,_R11,_R12,_R13,_R14="FAILURE_STATE|SEVERE_PEG_FAILURE|REDEMPTION_UNAVAILABLE|ACTIVE_UNRESOLVED_CRITICAL_SECURITY|HIGH_PEG_OR_REDEMPTION_RISK|OBJECTIVE_SOURCE_COVERAGE_CAP|MULTIPLE_CRITICAL_UNKNOWN_FIELDS|MULTIPLE_UNKNOWN_SOURCE_PROVENANCE|RISK_TIER|UNKNOWN_RISK_FIELD|ALL_DIMENSIONS_LOW_HIGH_CONFIDENCE|INSUFFICIENT_INDEPENDENT_CRITICAL_PROVENANCE|NO_HIGH_RISK_FIELDS|NON_CRITICAL_HIGH_OR_LOW_CONFIDENCE".split("|")
 LOW="LOW"
 MEDIUM=_K90
 HIGH="HIGH"
@@ -184,6 +184,8 @@ class MarketSnapshotRecord:
  asset_id:str;provider:str;source_status:str;price_micro_units:u256;peg_deviation_bps:i256;liquidity_turnover_bps:u256;peg_risk:str;liquidity_risk:str;severe_peg_failure:bool;market_timestamp:str;observed_at:str;version:u256
 def _failure(_a):
  return{_K0:_a}
+def _ue(_a):
+ raise gl.vm.UserError("[EXPECTED] "+_a)
 def _stc(w):
  return int(w.status_code if hasattr(w,"status_code")else w.status)
 def _bt(w):
@@ -722,24 +724,24 @@ class Beacon(gl.Contract):
   pass
  def _require_exact_fee(self,_a,_b):
   if gl.message.value!=_a:
-   raise gl.vm.UserError("[EXPECTED] exact "+_b+" fee required")
+   _ue("exact "+_b+" fee required")
  def _validate_submission(self,_i,_f,_g,_c,_b,_d,_a,_j):
   _,_e,_,_=_canonical_chain(_g)
   if not _is_token_address(_c):
-   raise gl.vm.UserError("[EXPECTED] invalid token address")
+    _ue("invalid token address")
   if not isinstance(_b,str)or not re.fullmatch(r"[A-Za-z]{3,12}",_b):
-   raise gl.vm.UserError("[EXPECTED] invalid target currency")
+    _ue("invalid target currency")
   if _i and(not isinstance(_i,str)or len(_i.strip())>80):
-   raise gl.vm.UserError("[EXPECTED] invalid name claim")
+    _ue("invalid name claim")
   if _f and(not isinstance(_f,str)or not re.fullmatch(r"[A-Za-z0-9]{1,16}",_f)):
-   raise gl.vm.UserError("[EXPECTED] invalid symbol claim")
+    _ue("invalid symbol claim")
   for _h in(_d,_a):
    if _h and(not isinstance(_h,str)or not re.fullmatch(r"[a-z0-9][a-z0-9._:-]{1,63}",_h.lower())):
-    raise gl.vm.UserError("[EXPECTED] invalid market identifier claim")
+    _ue("invalid market identifier claim")
   if _d and _a and _d.lower()==_a.lower():
-   raise gl.vm.UserError("[EXPECTED] objective claims require independent identifiers")
+    _ue("objective claims require independent identifiers")
   if any(not _is_https_source(_k)for _k in _j)or len({_k.lower()for _k in _j})!=5:
-   raise gl.vm.UserError("[EXPECTED] invalid or reused semantic source")
+   _ue("invalid or reused semantic source")
   return _e,_c.lower(),_b.upper(),_i.strip(),_f.upper(),_d.lower(),_a.lower()
  def _store_identity(self,a,i):
   a.identity_status=i.get(_K6,IDENTITY_UNVERIFIED)
@@ -759,7 +761,7 @@ class Beacon(gl.Contract):
  def _vp(self,asset_id,provider):
   if asset_id not in self.assets_store:raise gl.vm.UserError(_K55)
   a=self.assets_store[asset_id]
-  if a.current_version!=0 or a.lifecycle_status!=SUBMITTED:raise gl.vm.UserError("[EXPECTED] asset is not awaiting identity checkpoints")
+  if a.current_version!=0 or a.lifecycle_status!=SUBMITTED:_ue("asset is not awaiting identity checkpoints")
   _,_,pc,pp=_canonical_chain(a.chain)
   claim=a.market_identifier_claim if provider==COINGECKO else a.secondary_market_identifier_claim
   z=(provider,pc,pp,a.token_address,claim)
@@ -768,7 +770,7 @@ class Beacon(gl.Contract):
   try:
    r=gl.vm.run_nondet_unsafe(leader,validator);r=r if isinstance(r,dict)else{_K0:CONSENSUS_VALIDATION_FAILURE}
   except Exception:r={_K0:CONSENSUS_VALIDATION_FAILURE}
-  if r.get(_K0)==CONSENSUS_VALIDATION_FAILURE:raise gl.vm.UserError("[EXPECTED] identity checkpoint consensus failed")
+  if r.get(_K0)==CONSENSUS_VALIDATION_FAILURE:_ue("identity checkpoint consensus failed")
   self._ki(a,provider,r)
   self._store_identity(a,_derive_identity(a,self_ = self))
  @gl.public.write
@@ -791,24 +793,24 @@ class Beacon(gl.Contract):
   return r
  def _verify_semantic(self,asset_id,role):
   role=SEMANTIC_ROLE_ALIASES.get(str(role).strip().upper(),str(role).strip().lower())
-  if role not in SEMANTIC_SOURCE_ROLES:raise gl.vm.UserError("[EXPECTED] invalid semantic role")
+  if role not in SEMANTIC_SOURCE_ROLES:_ue("invalid semantic role")
   if asset_id not in self.assets_store:raise gl.vm.UserError(_K55)
   a=self.assets_store[asset_id]
-  if a.current_version!=0 or a.identity_status!=IDENTITY_VERIFIED:raise gl.vm.UserError("[EXPECTED] identity checkpoints incomplete")
+  if a.current_version!=0 or a.identity_status!=IDENTITY_VERIFIED:_ue("identity checkpoints incomplete")
   r=_sck({_K85:a.issuer_url,_K78:a.redemption_url,_K66:a.reserve_backing_url,_K79:a.security_url,_K77:a.governance_url}[role],role,_ci(a))
-  if r.get(_K0)==CONSENSUS_VALIDATION_FAILURE:raise gl.vm.UserError("[EXPECTED] semantic checkpoint consensus failed")
+  if r.get(_K0)==CONSENSUS_VALIDATION_FAILURE:_ue("semantic checkpoint consensus failed")
   self._ks(a,role,r)
  @gl.public.write
  def verify_semantic_source(self,asset_id:str,role:str)->None:self._verify_semantic(asset_id,role)
  def _rm(self,asset_id,provider):
   if asset_id not in self.assets_store:raise gl.vm.UserError(_K55)
   a=self.assets_store[asset_id]
-  if a.current_version!=0 or a.identity_status!=IDENTITY_VERIFIED:raise gl.vm.UserError("[EXPECTED] identity checkpoints incomplete")
+  if a.current_version!=0 or a.identity_status!=IDENTITY_VERIFIED:_ue("identity checkpoints incomplete")
   i=_derive_identity(a,self_ = self)
-  if i.get(_K6)!=IDENTITY_VERIFIED:raise gl.vm.UserError("[EXPECTED] identity checkpoints incomplete")
+  if i.get(_K6)!=IDENTITY_VERIFIED:_ue("identity checkpoints incomplete")
   pc,pp=i[_K23],CHAIN_ADAPTERS[_K37]["coinpaprika_platform"];claim=pc if provider==COINGECKO else i[_K17]
   r=_oc(provider,pc,pp,i[_K15],claim,i[_K20],a.target_currency)
-  if r.get(_K0)==CONSENSUS_VALIDATION_FAILURE:raise gl.vm.UserError("[EXPECTED] market checkpoint consensus failed")
+  if r.get(_K0)==CONSENSUS_VALIDATION_FAILURE:_ue("market checkpoint consensus failed")
   self._km(a,provider,r)
  @gl.public.write
  def refresh_coingecko_market(self,asset_id:str)->None:self._rm(asset_id,COINGECKO)
@@ -835,7 +837,7 @@ class Beacon(gl.Contract):
   v=self._validate_submission(name_claim,symbol_claim,chain,token_address,target_currency,market_identifier_claim,secondary_market_identifier_claim,(issuer_url,redemption_url,reserve_backing_url,security_url,governance_url))
   _c,a,_g,_f,_e,_b,_a=v
   _d=_asset_id(_c,a)
-  if _d in self.assets_store:raise gl.vm.UserError("[EXPECTED] asset already submitted")
+  if _d in self.assets_store:_ue("asset already submitted")
   self.assets_store[_d]=AssetRecord(asset_id=_d,name="",symbol="",chain=_c,token_address=a,target_currency=_g,market_identifier="",secondary_market_identifier="",name_claim=_f,symbol_claim=_e,market_identifier_claim=_b,secondary_market_identifier_claim=_a,issuer_url=issuer_url,redemption_url=redemption_url,reserve_backing_url=reserve_backing_url,security_url=security_url,governance_url=governance_url,identity_status=IDENTITY_UNVERIFIED,identity_digest="",official_issuer_domain="",submitter=gl.message.sender_address.as_hex,lifecycle_status=SUBMITTED,current_version=0,current_verdict="",current_ltv_bps=0)
   self.asset_id_store.append(_d)
   return _d
@@ -843,12 +845,12 @@ class Beacon(gl.Contract):
  def evaluate_asset(self,asset_id:str)->None:
   if asset_id not in self.assets_store:raise gl.vm.UserError(_K55)
   a=self.assets_store[asset_id]
-  if a.lifecycle_status==CHALLENGED:raise gl.vm.UserError("[EXPECTED] challenged asset requires reassessment")
-  if a.current_version!=0:raise gl.vm.UserError("[EXPECTED] asset already evaluated")
+  if a.lifecycle_status==CHALLENGED:_ue("challenged asset requires reassessment")
+  if a.current_version!=0:_ue("asset already evaluated")
   i=_derive_identity(a,self_ = self)
   s=_st(self,a)
   if i.get(_K6)!=IDENTITY_VERIFIED or _so(self,a,i).get(_K0)!=NO_FAILURE or not _mv(s.get(_K12,{})):
-   raise gl.vm.UserError("[EXPECTED] evidence checkpoints incomplete")
+   _ue("evidence checkpoints incomplete")
   self._store_identity(a,i)
   _a=self._ep(a,1,i,[])
   self._seval(a,_a)
@@ -857,20 +859,20 @@ class Beacon(gl.Contract):
   self._require_exact_fee(u256(CHALLENGE_FEE_WEI),"challenge")
   if asset_id not in self.assets_store:raise gl.vm.UserError(_K55)
   a=self.assets_store[asset_id]
-  if a.current_version==0 or a.current_verdict not in(CORE,STANDARD,WATCH,REJECT):raise gl.vm.UserError("[EXPECTED] asset has no current verdict")
-  if target_version!=a.current_version:raise gl.vm.UserError("[EXPECTED] challenge must target current version")
-  if category not in CHALLENGE_CATEGORIES:raise gl.vm.UserError("[EXPECTED] invalid challenge category")
-  if not isinstance(reason,str)or not 1<=len(reason.strip())<=512:raise gl.vm.UserError("[EXPECTED] invalid challenge reason")
-  if not _is_https_source(evidence_url):raise gl.vm.UserError("[EXPECTED] invalid challenge evidence source")
-  if a.identity_status!=IDENTITY_VERIFIED:raise gl.vm.UserError("[EXPECTED] challenge requires verified identity")
+  if a.current_version==0 or a.current_verdict not in(CORE,STANDARD,WATCH,REJECT):_ue("asset has no current verdict")
+  if target_version!=a.current_version:_ue("challenge must target current version")
+  if category not in CHALLENGE_CATEGORIES:_ue("invalid challenge category")
+  if not isinstance(reason,str)or not 1<=len(reason.strip())<=512:_ue("invalid challenge reason")
+  if not _is_https_source(evidence_url):_ue("invalid challenge evidence source")
+  if a.identity_status!=IDENTITY_VERIFIED:_ue("challenge requires verified identity")
   _d=gl.message.sender_address.as_hex
   _a=asset_id+"#"+str(target_version)+"#"+category+"#"+_d.lower()
-  if _a in self.challenges:raise gl.vm.UserError("[EXPECTED] duplicate challenge")
+  if _a in self.challenges:_ue("duplicate challenge")
   _b=self.challenge_ids_by_asset[asset_id]if asset_id in self.challenge_ids_by_asset else []
   _e=sum(1 for _c in _b if self.challenges[_c].status=="OPEN"and self.challenges[_c].target_version==target_version)
-  if _e>=_MO:raise gl.vm.UserError("[EXPECTED] maximum open challenges reached")
+  if _e>=_MO:_ue("maximum open challenges reached")
   _f=_rs(_ci(a),category,evidence_url)
-  if _K0 in _f or not _vs(_f,_ci(a),category):raise gl.vm.UserError("[EXPECTED] challenge evidence unavailable or unverified")
+  if _K0 in _f or not _vs(_f,_ci(a),category):_ue("challenge evidence unavailable or unverified")
   r=reason.strip()
   self.challenges[_a]=ChallengeRecord(challenge_id=_a,asset_id=asset_id,challenger=_d,target_version=target_version,category=category,reason=r,evidence_url=evidence_url,created_at=_dt(),status="OPEN",evaluation_status=CHALLENGE_PENDING,evaluation_result="",evaluation_reason_code="",evidence_digest=_f[_K2],evidence_excerpt=_f["text"],resolution_version=0,reason_digest=_digest({_K74:r}))
   self.challenge_ids_by_asset.get_or_insert_default(asset_id).append(_a)
@@ -880,22 +882,22 @@ class Beacon(gl.Contract):
  def reassess_asset(self,asset_id:str)->None:
   if asset_id not in self.assets_store:raise gl.vm.UserError(_K55)
   a=self.assets_store[asset_id]
-  if a.lifecycle_status!=CHALLENGED:raise gl.vm.UserError("[EXPECTED] asset is not challenged")
+  if a.lifecycle_status!=CHALLENGED:_ue("asset is not challenged")
   _a=a.current_version
   e=sorted([self.challenges[_b]for _b in self.challenge_ids_by_asset[asset_id]if self.challenges[_b].status=="OPEN"and self.challenges[_b].target_version==_a],key=lambda c:c.challenge_id)
-  if not e:raise gl.vm.UserError("[EXPECTED] no eligible open challenge")
-  if len(e)>_MO:raise gl.vm.UserError("[EXPECTED] maximum open challenges exceeded")
+  if not e:_ue("no eligible open challenge")
+  if len(e)>_MO:_ue("maximum open challenges exceeded")
   i=_derive_identity(a,self_ = self)
-  if i.get(_K6)!=IDENTITY_VERIFIED:raise gl.vm.UserError("[EXPECTED] reassessment identity unavailable")
+  if i.get(_K6)!=IDENTITY_VERIFIED:_ue("reassessment identity unavailable")
   self._store_identity(a,i)
   f=[]
   for c in e:
-   if not _scv(i,c):raise gl.vm.UserError("[EXPECTED] reassessment challenge evidence invalid")
+   if not _scv(i,c):_ue("reassessment challenge evidence invalid")
    r=_rc(i,c)
-   if _K0 in r or not _vcr({_d:r.get(_d)for _d in(_K7,_K5)})or r.get(_K2)!=c.evidence_digest:raise gl.vm.UserError("[EXPECTED] reassessment challenge evaluation failed")
+   if _K0 in r or not _vcr({_d:r.get(_d)for _d in(_K7,_K5)})or r.get(_K2)!=c.evidence_digest:_ue("reassessment challenge evaluation failed")
    f.append(_ca(c,r))
   passport=self._ep(a,_a+1,i,f)
-  if passport.failure_state!=NO_FAILURE:raise gl.vm.UserError("[EXPECTED] reassessment evidence unavailable")
+  if passport.failure_state!=NO_FAILURE:_ue("reassessment evidence unavailable")
   self._seval(a,passport)
   for fi in f:
    ex=self.challenges[fi[_K46]]
