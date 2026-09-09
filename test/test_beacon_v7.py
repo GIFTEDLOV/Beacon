@@ -180,6 +180,29 @@ def test_v7_semantic_checkpoint_equivalence_uses_stable_role_facts(
             assert module._sfb(variant, identity, role, "VERIFIED") == expected
 
 
+def test_v7_semantic_equivalence_does_not_use_bounded_excerpt_for_binding(
+    direct_deploy,
+):
+    direct_deploy("contracts/beacon_v7.py")
+    module = v7_module()
+    identity = {
+        "canonical_chain": "ethereum",
+        "canonical_namespace": "eip155:1",
+        "canonical_address": V5_ADDRESS,
+        "symbol": "USDC",
+        "name": "USDC",
+        "official_issuer_domain": "circle.com",
+    }
+    full = "issuer issue circle usdc operator " + ("incidental " * 700) + "Ethereum " + V5_ADDRESS
+    excerpt = module._re(full, "issuer")
+    assert V5_ADDRESS not in excerpt
+    assert module._sfb(full, identity, "issuer", "VERIFIED")[-2] is True
+    assert module._sfb(excerpt, identity, "issuer", "VERIFIED")[-2] is False
+    source = Path("contracts/beacon_v7.py").read_text(encoding="utf-8")
+    assert "_f=_sfb(y,i,_b,au)" in source
+    assert "r[_F]=_f" in source
+
+
 def test_v7_semantic_checkpoint_facts_fail_closed_for_wrong_asset_role_or_authority(
     direct_deploy,
 ):

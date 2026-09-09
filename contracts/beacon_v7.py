@@ -4,100 +4,7 @@ import json
 import re
 from dataclasses import asdict,dataclass
 from genlayer import *
-_K0='failure_state'
-_K1='asset_binding_status'
-_K2='evidence_digest'
-_K3='UNVERIFIED'
-_K4='price_micro_units'
-_K5='evaluation_reason_code'
-_K6='identity_status'
-_K7='evaluation_result'
-_K8='coinpaprika_binding_status'
-_K9='liquidity_turnover_bps'
-_K10='binding_status'
-_K11='coingecko_binding_status'
-_K12='manifest'
-_K13='canonical_chain'
-_K14='critical_security_incident'
-_K15='canonical_address'
-_K16='peg_deviation_bps'
-_K17='secondary_market_id'
-_K18='authority_status'
-_K19='severe_peg_failure'
-_K20='symbol'
-_K21='source_status'
-_K22='liquidity_risk'
-_K23='primary_market_id'
-_K24='evidence_sufficient'
-_K25='market_timestamp'
-_K26='objective_coverage'
-_K27='redemption_provenance'
-_K28='UNKNOWN'
-_K29='redemption_status'
-_K30='canonical_token_address'
-_K31='official_issuer_domain'
-_K32='backing_provenance'
-_K33='secondary_peg_deviation_bps'
-_K34='secondary_price_micro_units'
-_K35='admin_governance_risk'
-_K36='governance_provenance'
-_K37='ethereum'
-_K38='secondary_liquidity_turnover_bps'
-_K39='security_provenance'
-_K40='identity_digest'
-_K41='market_id'
-_K42='redemption_risk'
-_K43='peg_risk'
-_K44='issuer_provenance'
-_K45='[EXPECTED] unsupported chain'
-_K46='challenge_id'
-_K47='coinpaprika_id'
-_K48='VERIFIED'
-_K49='secondary_market_timestamp'
-_K50='INDEPENDENT'
-_K51='algorithmic_backing'
-_K52='canonical_namespace'
-_K53='dependency_risk'
-_K54='target_currency'
-_K55='[EXPECTED] unknown asset'
-_K56='coingecko_id'
-_K57='severe_instability'
-_K58='critical_unknown_fields'
-_K59='secondary_source_status'
-_K60='security_risk'
-_K61='canonical_symbol'
-_K62='official_domains'
-_K63='primary_source_status'
-_K64='INDEPENDENT_VERIFIED'
-_K65='backing_risk'
-_K66='reserve_backing'
-_K67='canonical_name'
-_K68='category'
-_K69='reason_digest'
-_K70='IDENTITY_MISMATCH'
-_K71='asset_platform_id'
-_K72='contract_address'
-_K73='issuer_domains'
-_K74='reason'
-_K75='target_version'
-_K76='confidence'
-_K77='governance'
-_K78='redemption'
-_K79='security'
-_K80='semantic'
-_K81='AVAILABLE'
-_K82='SUPPORTED'
-_K83='evidence_url'
-_K84='namespace'
-_K85='issuer'
-_K86='INVALID'
-_K87='COINGECKO'
-_K88='eip155:1'
-_K89='sources'
-_K90='MEDIUM'
-_K91='chain'
-_K92='stable_facts'
-_K93='category_binding_status'
+_K0,_K1,_K2,_K3,_K4,_K5,_K6,_K7,_K8,_K9,_K10,_K11,_K12,_K13,_K14,_K15,_K16,_K17,_K18,_K19,_K20,_K21,_K22,_K23,_K24,_K25,_K26,_K27,_K28,_K29,_K30,_K31,_K32,_K33,_K34,_K35,_K36,_K37,_K38,_K39,_K40,_K41,_K42,_K43,_K44,_K45,_K46,_K47,_K48,_K49,_K50,_K51,_K52,_K53,_K54,_K55,_K56,_K57,_K58,_K59,_K60,_K61,_K62,_K63,_K64,_K65,_K66,_K67,_K68,_K69,_K70,_K71,_K72,_K73,_K74,_K75,_K76,_K77,_K78,_K79,_K80,_K81,_K82,_K83,_K84,_K85,_K86,_K87,_K88,_K89,_K90,_K91,_K92,_K93="failure_state|asset_binding_status|evidence_digest|UNVERIFIED|price_micro_units|evaluation_reason_code|identity_status|evaluation_result|coinpaprika_binding_status|liquidity_turnover_bps|binding_status|coingecko_binding_status|manifest|canonical_chain|critical_security_incident|canonical_address|peg_deviation_bps|secondary_market_id|authority_status|severe_peg_failure|symbol|source_status|liquidity_risk|primary_market_id|evidence_sufficient|market_timestamp|objective_coverage|redemption_provenance|UNKNOWN|redemption_status|canonical_token_address|official_issuer_domain|backing_provenance|secondary_peg_deviation_bps|secondary_price_micro_units|admin_governance_risk|governance_provenance|ethereum|secondary_liquidity_turnover_bps|security_provenance|identity_digest|market_id|redemption_risk|peg_risk|issuer_provenance|[EXPECTED] unsupported chain|challenge_id|coinpaprika_id|VERIFIED|secondary_market_timestamp|INDEPENDENT|algorithmic_backing|canonical_namespace|dependency_risk|target_currency|[EXPECTED] unknown asset|coingecko_id|severe_instability|critical_unknown_fields|secondary_source_status|security_risk|canonical_symbol|official_domains|primary_source_status|INDEPENDENT_VERIFIED|backing_risk|reserve_backing|canonical_name|category|reason_digest|IDENTITY_MISMATCH|asset_platform_id|contract_address|issuer_domains|reason|target_version|confidence|governance|redemption|security|semantic|AVAILABLE|SUPPORTED|evidence_url|namespace|issuer|INVALID|COINGECKO|eip155:1|sources|MEDIUM|chain|stable_facts|category_binding_status".split("|")
 _ID="id";_P="provider";_A="address";_N="name";_T="text";_D="digest";_F="facts";_PL="platform";_CS="contracts";_Q="quotes";_LU="last_updated";_MD="market_data";_CP="current_price";_TV="total_volume";_MKT="market_cap";_CG="https://api.coingecko.com/api/v3/coins/";_CPR="https://api.coinpaprika.com/v1/coins/"
 _R1,_R2,_R3,_R4,_R5,_R6,_R7,_R8,_R9,_R10,_R11,_R12,_R13,_R14="FAILURE_STATE|SEVERE_PEG_FAILURE|REDEMPTION_UNAVAILABLE|ACTIVE_UNRESOLVED_CRITICAL_SECURITY|HIGH_PEG_OR_REDEMPTION_RISK|OBJECTIVE_SOURCE_COVERAGE_CAP|MULTIPLE_CRITICAL_UNKNOWN_FIELDS|MULTIPLE_UNKNOWN_SOURCE_PROVENANCE|RISK_TIER|UNKNOWN_RISK_FIELD|ALL_DIMENSIONS_LOW_HIGH_CONFIDENCE|INSUFFICIENT_INDEPENDENT_CRITICAL_PROVENANCE|NO_HIGH_RISK_FIELDS|NON_CRITICAL_HIGH_OR_LOW_CONFIDENCE".split("|")
 LOW="LOW"
@@ -384,7 +291,16 @@ def _bm(_m,i,_a=True,_k=""):
  _f=not _g or any(_l in _i for _l in _g)
  return bool(_b and _f and(_c and _d if _a else True))
 def _sfb(_m,i,k,au):
- return(au,k,i.get(_K13,""),i.get(_K52,""),i.get(_K15,"").lower(),i.get(_K20,"").upper(),i.get("name",""),i.get(_K31,""),_bm(_m,i,k==_K85 or au==_K64,k),bool(_rt(_m,k)))
+ _x=_m.lower();_a=i.get(_K15,"").lower();_s=i.get(_K20,"").upper();_n=i.get("name","");_c=i.get(_K13,"")
+ _ch=any(_q in _x for _q in CHAIN_TERMS.get(_c,()))
+ _sy=bool(_s and re.search(r"\b"+re.escape(_s.lower())+r"\b",_x))
+ _na=not _n or _n.lower() in _x or _n.lower()==_s.lower()
+ _ad=bool(_a and _a in _x)
+ _rl=not ROLE_TERMS.get(k.lower(),"") or bool(_rt(_m,k))
+ _need=k==_K85 or au==_K64
+ _as=bool(_sy and _na and(_ch if _need else True))
+ _bi=bool(_as and(_ad if _need else True))
+ return(au,k,_c,i.get(_K52,""),_a,_s,_n,i.get(_K31,""),_ad if _need else True,_ch if _need else True,_sy,_na,_bi,_rl)
 def _rt(_d,_b):
  _a=_d.lower()
  return sorted(set(_c for _c in ROLE_TERMS.get(_b.lower(),"").split()if _c and _c in _a))
@@ -411,9 +327,10 @@ def _se(_c,_b,i):
   try:y=_bt(w)
   except (UnicodeError,TypeError):r[_K0]=INVALID_SOURCE;return r
   if not y.strip()or len(y.encode("utf-8"))>MAX_RESPONSE_LENGTH:r[_K0]=SOURCE_IDENTITY_UNVERIFIED;return r
-  if _bm(y,i,_b==_K85 or au==_K64,_b):
+  _f=_sfb(y,i,_b,au)
+  if _f[-2] and _f[-1]:
    r[_K1]=_K48
-   r[_F]=_sfb(y,i,_b,au)
+   r[_F]=_f
    r["text"]=_re(y,_b)
    if len(r["text"].encode("utf-8"))>MAX_EVIDENCE_LENGTH:r[_K0]=INSUFFICIENT_EVIDENCE;r["text"]="";return r
    r[_K2]=_ed(_b,i,r["text"])
