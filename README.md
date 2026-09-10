@@ -4,17 +4,37 @@ Know what deserves to back leverage.
 
 Beacon is a versioned collateral-risk registry for stablecoins and stable-value assets. It answers one practical question: should this asset be accepted as collateral, and under what deterministic maximum-LTV tier?
 
-## Current release story
+## Current submission status
 
-- V4 is historical Bradbury proof.
-- V5 is historical remediation work and is not the current live contract.
-- V6 is the prior reviewer-remediation deployment at
-  `0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb`; its live evidence is preserved
-  as historical provenance, including the reassessment outcome `UNDETERMINED`.
-- V7 is the current checkpointed-consensus candidate in
-  [`contracts/beacon_v7.py`](contracts/beacon_v7.py). This structural
-  remediation is source-only at this stage; it is not deployed and has no
-  address yet.
+Beacon's latest source candidate is complete and locally validated, but the exact final source has not been successfully redeployed on Testnet Bradbury. This README intentionally does not claim a final V7 contract address or a finalized V7 Passport v2.
+
+- Repository branch: `v6-reassessment-hardening`
+- Current branch head before this README update: `50f978c2cee14bbd8f568e9705eb383da0fe596d`
+- Final source-fix commit: `2a4629bac65616300b205378e234838ef717d71d`
+- Final `contracts/beacon_v7.py` SHA-256: `45ac294a11321200ace5e3d26798da7f00646ccb4e04bf6c6616ffb38a619468`
+- Public app: https://beacon-rho-brown.vercel.app
+- Current public production remains pinned to historical V6 evidence; the final V7 candidate was not promoted.
+- Latest recorded local gates: `173` Python tests passed, `23` frontend tests passed, GenVM lint passed, GenVM validation passed, frontend build passed, security audit passed, and secret scan passed.
+
+The remaining release gap is live Bradbury execution. Multiple same-intent outer-EVM deployment attempts for the final source were accepted by RPC/mempool surfaces but never produced an underlying-chain receipt. No `NewTransaction` event was emitted, no GenLayer protocol transaction ID was created, and no final V7 contract state change occurred. The authoritative mined nonce remained unchanged while RPC pending-state visibility oscillated. The repository preserves the reconciliation and root-cause evidence under [`docs/reviewer-remediation-2026-09/final-submission/`](docs/reviewer-remediation-2026-09/final-submission/).
+
+## Reviewer remediation summary
+
+The latest source addresses the two steward concerns at the contract-design level.
+
+### 1. Authenticated asset and semantic-source binding
+
+V7 treats the canonical chain namespace plus normalized token address as the root asset identity. CoinGecko and CoinPaprika provider IDs are independently verified against that exact address before market data is accepted. Same-symbol assets remain distinct by address, and a wrong address cannot borrow another token's provider identity.
+
+Semantic authority is chained to that authenticated identity. The issuer source is the exact-address semantic anchor; the other Circle role sources prove their role and unambiguous USDC relevance against the already authenticated canonical asset. Validators compare stable, decision-bearing claims rather than rendering-sensitive page windows or exact live-response digests.
+
+### 2. Every open challenge is evaluated independently
+
+Every OPEN challenge targeting the current Passport version is processed individually from its category, reason, authenticated stored evidence, and canonical asset identity. Challenge evidence is authenticated and bounded at creation time. Reassessment does not refetch challenge pages, and challenge outcomes are stored independently as `SUPPORTED`, `NOT_SUPPORTED`, or `INSUFFICIENT_EVIDENCE` with a reason code, evidence digest, and resolution version.
+
+The Passport records deterministic challenge-set provenance. A failed reassessment is atomic: it creates no new Passport and does not partially resolve challenges. Supported findings can only make the policy more conservative; unsupported or insufficient challenges cannot improve the collateral tier.
+
+The source and deterministic tests cover multi-challenge reassessment, including two simultaneous open challenges. A successful final live V7 two-challenge Bradbury reassessment was not completed, so no Passport v2 is claimed for this final source.
 
 ## Product
 
@@ -26,184 +46,132 @@ Collateral admission is often assembled manually from fragmented signals: peg st
 
 ## Why GenLayer
 
-Validators independently inspect untrusted external evidence. Beacon reduces nondeterministic evidence into bounded policy fields and uses an Equivalence Principle design that compares stable, decision-critical results rather than raw prose, ordering, timestamps, or volatile intermediate values. Consensus determines whether the evaluation is accepted; the Intelligent Contract remains the policy authority. The accepted passport is persisted on-chain.
+Validators independently inspect untrusted external evidence. Beacon reduces nondeterministic evidence into bounded policy fields and uses an Equivalence Principle design that compares stable, decision-critical results rather than raw prose, ordering, timestamps, or volatile intermediate values. Consensus determines whether the evaluation is accepted; the Intelligent Contract remains the policy authority. Accepted passports are persisted on-chain and versioned.
 
-## Asset Identity and Source Authentication
-
-V7 treats the canonical chain namespace plus normalized token address as the
-root identity. Provider IDs are derived or independently verified through
-address-bound CoinGecko and CoinPaprika endpoints; they are never trusted merely
-because a submitter asserted them. Market data cannot be borrowed from another
-token, and same-symbol assets remain distinct by address.
-
-Semantic authority is tied to the verified issuer domain and the exact verified
-chain/address/token identity. The issuer source is an exact-address anchor;
-the other Circle role sources prove their role and unambiguous USDC relevance
-against that already authenticated identity anchor. A valid HTTPS URL is only
-transport syntax. An unknown or conflicting provider identity, unrelated source
-domain, phishing domain, or source page for another asset fails closed before
-positive semantic evidence can affect the policy. The current candidate chain
-model supports `eip155:1` (Ethereum mainnet) with explicit aliases only.
-
-## Challenge Reassessment
-
-Every open challenge targeting the current Passport version is individually
-evaluated. V7 authenticates and bounds challenge evidence during challenge
-creation, persists only the consensus-validated bounded representation, and
-never refetches challenge pages during reassessment. Category, reason, bounded
-evidence, and the authenticated asset identity are all inputs. Results are
-recorded per challenge as `SUPPORTED`, `NOT_SUPPORTED`, or
-`INSUFFICIENT_EVIDENCE`, with a reason code, evidence digest, and resolution
-version.
-
-The Passport records deterministic challenge-set provenance without storing an
-unbounded array. A failed reassessment creates no new Passport and changes no
-challenge status. Unsupported or insufficient challenges do not improve risk;
-supported findings can only make the policy more conservative.
-
-## How Beacon Works
+## How Beacon works
 
 ```text
-SUBMIT → OBJECTIVE EVIDENCE → SEMANTIC EVIDENCE → VALIDATOR CONSENSUS
-        → DETERMINISTIC POLICY → COLLATERAL PASSPORT
+SUBMIT
+  -> VERIFY COINGECKO IDENTITY
+  -> VERIFY COINPAPRIKA IDENTITY
+  -> CHECKPOINT ISSUER / REDEMPTION / BACKING / SECURITY / GOVERNANCE
+  -> CHECKPOINT COINGECKO / COINPAPRIKA MARKET DATA
+  -> EVALUATE STORED FACTS
+  -> COLLATERAL PASSPORT
+  -> CHALLENGE(S)
+  -> REASSESS ALL OPEN CHALLENGES
+  -> NEW PASSPORT VERSION
 ```
 
 The policy map is fixed:
 
-- `CORE` → `8000` max-LTV basis points
-- `STANDARD` → `6500` max-LTV basis points
-- `WATCH` → `2000` max-LTV basis points
-- `REJECT` → `0` max-LTV basis points
+- `CORE` -> `8000` max-LTV basis points
+- `STANDARD` -> `6500` max-LTV basis points
+- `WATCH` -> `2000` max-LTV basis points
+- `REJECT` -> `0` max-LTV basis points
 
 Validators never choose an LTV directly. Deterministic safety rules can cap or reject a result when evidence is conflicted, unavailable, severely unstable, or critically unknown.
 
 ## Architecture
 
-External evidence is checkpointed into small consensus writes. CoinGecko and
-CoinPaprika identity checkpoints, one semantic-source checkpoint per role, and
-one market snapshot per provider independently authenticate and persist bounded
-facts. Semantic checkpoint validators compare the authenticated stable facts
-(authority, role, chain, address anchor, symbol and binding predicates), not
-rendering-dependent excerpts or live response digests. Official Circle Markdown
-sources are preferred for the five semantic roles. `evaluate_asset` performs
-zero web fetches and uses only those stored facts plus one structured semantic
-LLM decision; stale or incomplete checkpoints fail closed. One available
-objective source cannot exceed `WATCH`.
+External evidence is checkpointed into small consensus writes. CoinGecko and CoinPaprika identity checkpoints, one semantic-source checkpoint per role, and one market snapshot per provider independently authenticate and persist bounded facts. `evaluate_asset` performs zero web fetches and evaluates the stored checkpoint state with one bounded structured semantic judgment. Stale or incomplete checkpoints fail closed.
 
-Semantic evidence is submitted by role: issuer, redemption, backing, security, and governance. Sources are HTTPS-constrained, bounded, independently refetched by validators, and always treated as untrusted evidence. Deterministic role-specific extraction bounds the material sent to one structured semantic LLM call. Prompt-injection-shaped content cannot change the rubric, schema, or operation. Validator errors fail closed. V7 challenge evidence is authenticated once at creation, reduced to at most 2,800 UTF-8 bytes, and consumed from storage during reassessment.
+Official Circle Markdown sources are used for the five semantic roles:
 
-The public contract surface is intentionally small:
+- Issuer: `https://developers.circle.com/stablecoins/usdc-contract-addresses.md`
+- Redemption: `https://developers.circle.com/circle-mint/concepts/how-minting-works.md`
+- Backing: `https://developers.circle.com/stablecoins/what-is-usdc.md`
+- Security: `https://developers.circle.com/cctp/references/technical-guide.md`
+- Governance: `https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification.md`
 
-- Writes: `submit_asset`, `verify_coingecko_identity`,
-  `verify_coinpaprika_identity`, `verify_semantic_source`,
-  `refresh_coingecko_market`, `refresh_coinpaprika_market`, `evaluate_asset`,
-  `challenge_asset`, `reassess_asset`
-- Views: `asset`, `assets`, `asset_ids`, `asset_count`, `current_passport`, `passport_by_version`, `passport_history`, `challenge_records`
+The public contract surface is intentionally small.
 
-Passports are versioned and prior versions are immutable. Challenges target a specific passport version and reassessment creates a new version. Evaluation failures remain distinct from a normal business `REJECT`.
+Writes:
 
-## Historical V4 Bradbury Proof
+- `submit_asset`
+- `verify_coingecko_identity`
+- `verify_coinpaprika_identity`
+- `verify_semantic_source`
+- `refresh_coingecko_market`
+- `refresh_coinpaprika_market`
+- `evaluate_asset`
+- `challenge_asset`
+- `reassess_asset`
 
-V4 remains immutable historical proof on Testnet Bradbury. It is not the V5
-contract and it is not evidence that V4 had the V5 identity or challenge
-protections:
+Views include asset records, asset IDs, current and historical passports, and challenge records.
 
-- Public app: https://beacon-rho-brown.vercel.app
+## Security and trust model
+
+- Submitted URLs are untrusted input; validators independently retrieve permitted evidence.
+- HTTPS syntax alone is not treated as publisher authentication.
+- Asset identity is rooted in chain namespace plus token address.
+- Provider IDs must bind back to the exact canonical asset before market data is accepted.
+- The issuer source provides the direct exact-address semantic anchor.
+- Other semantic roles inherit the authenticated canonical-asset anchor and must still satisfy role-specific authority and binding checks.
+- Rendering-dependent excerpts and exact live-response digests are not decision-bearing consensus targets.
+- Validator, HTTP, parser, and semantic-output failures fail closed.
+- One available objective source cannot exceed `WATCH`.
+- Critical unknown semantic fields can force `REJECT` and `0` bps.
+- Challenge evidence is bounded before storage and is not refetched during reassessment.
+- Fees are fixed testnet anti-spam values: `1 GEN` for registration and `0.25 GEN` per challenge. The project does not describe these values as burned.
+
+## Historical Bradbury evidence
+
+### V4
+
+V4 remains immutable historical proof on Testnet Bradbury:
+
 - Contract: `0xaA0EEB41C30C54104F4106E06acCF4395Ec96b54`
 - Source SHA-256: `5f99961a335247b4b108cdb7a575d356242461fbec411fd10c207018331a809d`
 - Deployment transaction: `0xc5dacaf4e67b4cb8fec89d6d13677f4bedf636ab7a65cd05290262b3b16cb1a4`
 - Submit transaction: `0x2f70c0b99e9aa3cd3e5edc32359de406e893cc6e5374e4043082b3492414dc47`
 - Evaluate transaction: `0x38d46549976fa719b717dcfb43d8584fe26b1d722639be7c04a66221307270e7`
-- Evaluation: `FINALIZED`, `FINISHED_WITH_RETURN`, overall `AGREE`
-- Validator receipts: `4 AGREE / 1 DETERMINISTIC_VIOLATION`
-- Passport: version `1`, verdict `REJECT`, `0` bps
-- Policy basis: `MULTIPLE_CRITICAL_UNKNOWN_FIELDS`
+- Evaluation reached `FINALIZED` with `FINISHED_WITH_RETURN`.
+- Passport version `1`: `REJECT`, `0` bps, policy basis `MULTIPLE_CRITICAL_UNKNOWN_FIELDS`.
 
-`REJECT` is a valid fail-closed business outcome. The live result was not manipulated into a favorable USDC result, and the evaluation receipt was not unanimous.
+The full V4 chronology is preserved in [`docs/live-proof/bradbury-pilot.json`](docs/live-proof/bradbury-pilot.json).
 
-The complete V4 chronology, including failed historical attempts, is preserved
-in [`docs/live-proof/bradbury-pilot.json`](docs/live-proof/bradbury-pilot.json).
+### V5
 
-## Historical V5 Remediation Proof
+The final V5 source was deployed to `0xd52daA517259ca08dF2f4839C0d8962E0A3148c8`. Canonical Ethereum USDC was submitted and identity resolution agreed, but the one authorized V5 evaluation ended `UNDETERMINED`; no Passport was created and no retry was sent. The complete record is preserved in [`docs/live-proof/beacon-v5.json`](docs/live-proof/beacon-v5.json).
 
-The V5 source was frozen at SHA-256
-`b5077515361badc7c04d792d3f61c331f5d9b1c21edcd7cbc27e4576f80fc3e0` and
-`52,329` bytes. The final frozen V5 source was deployed to
-`0xd52daA517259ca08dF2f4839C0d8962E0A3148c8` by transaction
-`0xd96311f0072722af9cfa71e2c1552722bfacb55d19ef58ee7cbf685fd72ec204`.
-The deployment finalized with `FINISHED_WITH_RETURN` and `AGREE`; the deployed
-source payload matched the frozen local source byte-for-byte and by hash.
-Earlier pre-freeze V5 candidate deployments are unreleased, are not referenced
-by the application, and are not included in this final candidate's proof.
+### V6 reviewer-remediation proof
 
-Canonical Ethereum USDC was submitted once using the address-rooted asset ID
-`eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48` in transaction
-`0xecee1abd2cf6b4d29fdf97384737a36811901b2c8642e01b2387eb7c096aa376`.
-Submission finalized with `FINISHED_WITH_RETURN` and `AGREE`. The agreed
-identity-stage output derived CoinGecko `usd-coin`, CoinPaprika
-`usdc-usd-coin`, and Circle authority for the exact address.
+Historical V6 deployment:
 
-The one authorized V5 evaluation was transaction
-`0xca4f1e7d1cc63231dcbe64d8525843f7602004184335aa2f23ffe14796829e7e`. It
-finished execution but reached `UNDETERMINED` / `DISAGREE` with
-`3 TIMEOUT / 14 DETERMINISTIC_VIOLATION` validator outcomes. The asset remained
-`SUBMITTED`, no Passport was created, and no retry was sent. Accordingly, V5
-was not bound to production, and no live challenge was sent without a current
-Passport. The complete record is in
-[`docs/live-proof/beacon-v5.json`](docs/live-proof/beacon-v5.json); deterministic
-multi-challenge proof is in [`test/test_beacon_v5.py`](test/test_beacon_v5.py).
+`0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb`
 
-The V5 record remains historical provenance. The V6 reviewer-remediation record
-and its receipts are indexed in
-[`docs/reviewer-remediation-2026-09/README.md`](docs/reviewer-remediation-2026-09/README.md).
-The public proof surface still exposes historical V6 evidence; it does not
-claim a V7 deployment or finalized V7 reassessment.
+V6 provided important live proof for exact-address identity binding, including a canonical Ethereum USDC positive case and a wrong-address negative case. Its attempted live multi-challenge reassessment ended `UNDETERMINED`, so it is not presented as a successful Passport v2 proof. The V6 receipts, state readbacks, and reviewer evidence are indexed in [`docs/reviewer-remediation-2026-09/README.md`](docs/reviewer-remediation-2026-09/README.md).
 
-## Security / Trust Model
+### V7 final candidate
 
-- Submitted URLs are untrusted input; validators refetch them independently.
-- Evidence extraction and semantic output are bounded and schema-validated.
-- Volatile intermediate fields are not consensus targets when they do not change policy.
-- Validator, HTTP, parser, and LLM errors fail closed.
-- V7.1 rejects URL authority confusion, trailing-dot ambiguity, userinfo,
-  explicit ports, and literal IP hosts. It accepts the pinned GenLayer web
-  response shape when a legitimate 2xx response has no final-URL metadata and
-  no `Location` header, while rejecting 3xx/explicit redirect signals and
-  mismatched final hosts. DNS resolution, private-egress enforcement, and
-  redirect-following without exposed history remain platform responsibilities.
-- A single objective source cannot exceed `WATCH`.
-- Critical unknown semantic fields can force `REJECT` and `0` bps.
-- Fees are fixed Testnet V1 anti-spam fees: `1 GEN` for registration and `0.25 GEN` for challenges. They remain protocol-held; they are not described as burned.
+The current final candidate is [`contracts/beacon_v7.py`](contracts/beacon_v7.py), source SHA-256:
 
-## Historical Engineering Evidence
+`45ac294a11321200ace5e3d26798da7f00646ccb4e04bf6c6616ffb38a619468`
 
-V1 exposed an underlying-chain pubdata limit during deployment. V2 and V3 deployments and submissions succeeded, while evaluation attempts exposed excessive semantic fetch work, volatile turnover comparison, and overly strict semantic equivalence. V4 retains the proven objective and bounded-fetch design while using independent policy-field comparison with a complete validator exception boundary. These earlier versions remain historical evidence, not release contracts.
+This candidate incorporates checkpointed external evidence, stable semantic equivalence, exact-address issuer anchoring, and bounded stored challenge evidence. It passed the recorded local gates. It does **not** have a final Bradbury deployment address because the final outer-EVM deployment attempts never produced a chain receipt or GenLayer protocol transaction.
 
-## Changes After Steward Review
+## Current limitation
 
-V4 accepted independently supplied chain, token address, market IDs, symbols,
-and semantic URLs without proving that the values described the same asset.
-V4 also selected only the first open challenge's evidence, omitted that
-challenge's category and reason from evaluation, and resolved every open
-challenge anyway. These are confirmed historical defects, not V4 protections.
-V5 added address-bound provider resolution, authenticated semantic-source rules,
-fail-closed identity consensus, category-aware individual challenge
-adjudication, and atomic all-challenge reassessment. V7 adds creation-time
-challenge evidence authentication and hard bounds so an OPEN challenge cannot
-later force reassessment to ingest an arbitrary web page.
+The final gap is operational, not hidden: there is no successfully finalized Bradbury deployment for the exact V7 source above, and therefore no final live V7 Passport v1/v2 proof. The project preserves this fact instead of substituting an older contract address or claiming an unmined deployment.
 
-## Limitations
+Public testnet, RPC, mempool, validator, and external-source availability can affect live nondeterministic execution. Historical deployments remain evidence of prior iterations and are not represented as the current V7 release.
 
-- V4, V5, and V6 are historical release evidence; V7 is not deployed.
-- The V6 live reassessment ended `UNDETERMINED`; it is not a finalized Passport v2 proof.
-- V7 still requires Studio/devnet proof after this local security gate; no V7 address is claimed here.
-- Public testnet and validator availability can affect nondeterministic execution.
-- Semantic quality depends on reachable, authoritative evidence sources.
-- The application is currently a public read surface; wallet writes require a funded GenLayer account and exact precondition/finality reconciliation.
+## Reviewer evidence
+
+Reviewer-remediation materials are under:
+
+[`docs/reviewer-remediation-2026-09/`](docs/reviewer-remediation-2026-09/)
+
+The latest final-submission working evidence is under:
+
+[`docs/reviewer-remediation-2026-09/final-submission/`](docs/reviewer-remediation-2026-09/final-submission/)
+
+This includes source-fix evidence, root-cause analysis, and chain-write reconciliation records. Historical failed attempts are intentionally preserved.
 
 ## Developer
 
-Requirements: Python with the project dependencies, Node.js, and the GenLayer tooling used for local validation.
+Requirements: Python with project dependencies, Node.js, and the GenLayer tooling used for local validation.
 
 ```bash
 # Contract checks
@@ -219,9 +187,4 @@ npm run typecheck
 npm run build
 ```
 
-The public application currently uses Testnet Bradbury (`chain ID 4221`,
-`https://rpc-bradbury.genlayer.com`) and the historical V6 contract above.
-V7 is a local security-hardened candidate only; it has not been deployed or
-bound to production.
-Copy [`app/.env.example`](app/.env.example) to a local environment only when
-overriding the checked-in defaults.
+The public application uses Testnet Bradbury (`chain ID 4221`, `https://rpc-bradbury.genlayer.com`) and remains pinned to historical V6 release evidence. The final V7 candidate has not been deployed or bound to production.
