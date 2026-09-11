@@ -11,6 +11,7 @@ const FREEZE_PATH = path.join(ROOT, "deploy", "v8", "FROZEN_SHA256SUMS.txt");
 const PROFILE_PATH = process.env.V8_FEE_PROFILE_PATH || path.join(ROOT, "deploy", "v8", "fee-profile.json");
 const STATE_PATH = path.join(ROOT, "deploy", "v8", "deployment-state.json");
 const RPC = process.env.GENLAYER_RPC_URL || "https://rpc-bradbury.genlayer.com";
+type DeploymentState = { txId?: string; sourceSha256?: string; [key: string]: unknown };
 
 function fail(message: string): never {
   throw new Error(message);
@@ -40,11 +41,39 @@ function persist(state: Record<string, unknown>): void {
   writeFileSync(STATE_PATH, `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
 
+function priorSubmission(): DeploymentState | null {
+  try {
+    const state = JSON.parse(readFileSync(STATE_PATH, "utf8")) as DeploymentState;
+    return typeof state?.txId === "string" && state.txId ? state : null;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    fail(`Cannot read persisted deployment state: ${STATE_PATH}`);
+  }
+}
+
+async function reconcile(client: any, txId: string, sourceSha256: string): Promise<void> {
+  const receipt = await client.waitForFinalization({ hash: txId, fullTransaction: true });
+  const status = String((receipt as any).statusName ?? (receipt as any).status_name ?? (receipt as any).status ?? "").toUpperCase();
+  if (status !== "FINALIZED" || !isSuccessful(receipt)) fail(`Deployment did not finalize successfully for ${txId}.`);
+  const address = (receipt as any).data?.contract_address ?? (receipt as any).txDataDecoded?.contractAddress;
+  if (!address) fail(`Deployment finalized without a contract address for ${txId}.`);
+  persist({ txId, contractAddress: address, sourcePath: "contracts/beacon_v8.py", sourceSha256, status, execution: (receipt as any).txExecutionResultName ?? "FINISHED_WITH_RETURN", finalizedAt: new Date().toISOString(), network: "Bradbury", chainId: 4221 });
+  console.log(JSON.stringify({ txId, contractAddress: address, sourceSha256, status, execution: (receipt as any).txExecutionResultName ?? "FINISHED_WITH_RETURN" }));
+}
+
 export default async function main(): Promise<void> {
   const code = new Uint8Array(readFileSync(SOURCE_PATH));
   const actualSha = createHash("sha256").update(code).digest("hex");
   const expectedSha = frozenSha();
   if (actualSha !== expectedSha) fail(`V8 source SHA mismatch before submission: expected ${expectedSha}, got ${actualSha}`);
+
+  const prior = priorSubmission();
+  if (prior) {
+    if (prior.sourceSha256 && prior.sourceSha256.toLowerCase() !== actualSha) fail("Persisted deployment source SHA does not match the frozen V8 source.");
+    const readClient = createClient({ chain: testnetBradbury, endpoint: RPC });
+    await reconcile(readClient, prior.txId!, actualSha);
+    return;
+  }
 
   const profile = readFeeProfile();
   const fees = deploymentFees(profile.deploy!);
@@ -58,14 +87,7 @@ export default async function main(): Promise<void> {
 
   // Persist the protocol transaction ID before polling or any further action.
   persist({ txId, sourcePath: "contracts/beacon_v8.py", sourceSha256: actualSha, submittedAt: new Date().toISOString(), network: "Bradbury", chainId: 4221 });
-
-  const receipt = await client.waitForFinalization({ hash: txId, fullTransaction: true });
-  const status = String((receipt as any).statusName ?? (receipt as any).status_name ?? (receipt as any).status ?? "").toUpperCase();
-  if (status !== "FINALIZED" || !isSuccessful(receipt)) fail(`Deployment did not finalize successfully for ${txId}.`);
-  const address = (receipt as any).data?.contract_address ?? (receipt as any).txDataDecoded?.contractAddress;
-  if (!address) fail(`Deployment finalized without a contract address for ${txId}.`);
-  persist({ txId, contractAddress: address, sourcePath: "contracts/beacon_v8.py", sourceSha256: actualSha, status, execution: (receipt as any).txExecutionResultName ?? "FINISHED_WITH_RETURN", finalizedAt: new Date().toISOString(), network: "Bradbury", chainId: 4221 });
-  console.log(JSON.stringify({ txId, contractAddress: address, sourceSha256: actualSha, status, execution: (receipt as any).txExecutionResultName ?? "FINISHED_WITH_RETURN" }));
+  await reconcile(client, txId, actualSha);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) await main();
