@@ -2,6 +2,23 @@ export const V4_CONTRACT_ADDRESS = "0xaA0EEB41C30C54104F4106E06acCF4395Ec96b54";
 export const V5_CONTRACT_ADDRESS = "0xd52daA517259ca08dF2f4839C0d8962E0A3148c8";
 export const V6_CONTRACT_ADDRESS = "0xE3706dc54B2Ca0a33941753Bc214f95670Fee7Fb";
 export const BRADBURY_RPC = "https://rpc-bradbury.genlayer.com";
+export const V8_CONTRACT_ADDRESS = import.meta.env?.VITE_CONTRACT_ADDRESS || "";
+export const V8_RELEASE_PROOF = Object.freeze({
+  network: "Testnet Bradbury",
+  chainId: 4221,
+  contractAddress: V8_CONTRACT_ADDRESS,
+  sourcePath: "contracts/beacon_v8.py",
+  sourceSha256: "",
+  deploymentTx: "",
+  assetId: "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+  passportVersion: 0,
+  verdict: "NOT_YET_DEPLOYED",
+  maxLtvBps: 0,
+  deploymentStatus: "NOT_RUN",
+  liveStatus: "NOT_RUN",
+  evaluateStatus: "NOT_RUN",
+  validatorSummary: "NOT_RUN",
+});
 
 export const V4_RELEASE_PROOF = Object.freeze({
   network: "Testnet Bradbury",

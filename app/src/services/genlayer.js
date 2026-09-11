@@ -1,39 +1,34 @@
-import {
-  createAccount as createGenLayerAccount,
-  createClient,
-  generatePrivateKey,
-} from "genlayer-js";
+import { createClient } from "genlayer-js";
 import { testnetBradbury } from "genlayer-js/chains";
-import { BRADBURY_RPC } from "./releaseProof.js";
 
-const ACCOUNT_KEY = "beacon.account.privateKey";
+export const BRADBURY_CHAIN = testnetBradbury;
+export const BRADBURY_RPC = "https://rpc-bradbury.genlayer.com";
 
-function storage() {
-  return typeof localStorage === "undefined" ? null : localStorage;
+function endpoint() {
+  return import.meta.env?.VITE_GENLAYER_RPC || BRADBURY_RPC;
 }
 
-export function getAccount() {
-  const privateKey = storage()?.getItem(ACCOUNT_KEY);
-  return privateKey ? createGenLayerAccount(privateKey) : null;
+function ethereumProvider() {
+  return typeof window === "undefined" ? null : window.ethereum || null;
 }
 
-export function createAccount() {
-  const privateKey = generatePrivateKey();
-  storage()?.setItem(ACCOUNT_KEY, privateKey);
-  return createGenLayerAccount(privateKey);
+// Account-free reads are the source of truth for every rendered state.
+export function createReadClient() {
+  return createClient({ chain: BRADBURY_CHAIN, endpoint: endpoint() });
 }
 
-export function removeAccount() {
-  storage()?.removeItem(ACCOUNT_KEY);
+// Writes are explicitly wallet/provider-backed. No private key is generated or
+// stored by the Beacon frontend.
+export async function createWriteClient() {
+  const provider = ethereumProvider();
+  if (!provider?.request) throw new Error("Connect a wallet to submit a Beacon transaction.");
+  let accounts = await provider.request({ method: "eth_accounts" });
+  if (!Array.isArray(accounts) || !accounts[0]) accounts = await provider.request({ method: "eth_requestAccounts" });
+  if (!Array.isArray(accounts) || !accounts[0]) throw new Error("The connected wallet returned no account.");
+  return createClient({ chain: BRADBURY_CHAIN, endpoint: endpoint(), account: accounts[0], provider });
 }
 
-export function createGenLayerClient(account = getAccount()) {
-  const endpoint = import.meta.env?.VITE_GENLAYER_RPC || BRADBURY_RPC;
-  return createClient({
-    chain: testnetBradbury,
-    ...(account ? { account } : {}),
-    endpoint,
-  });
+// Kept as a small compatibility alias for tooling that only needs a read client.
+export function createGenLayerClient() {
+  return createReadClient();
 }
-
-export const account = getAccount();

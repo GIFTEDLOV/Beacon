@@ -18,8 +18,9 @@ test("contract service sends exact configured fees and hardened argument shapes"
       if (functionName === "asset") return { current_version: 1, current_verdict: "CORE", lifecycle_status: "EVALUATED" };
       return { asset_id: "ethereum:0x1111111111111111111111111111111111111111" };
     },
+    async estimateTransactionFeesForWrite() { return { distribution: { leaderTimeunitsAllocation: 1n }, feeValue: 2n }; },
     async writeContract(request) { writes.push(request); return `0x${writes.length}`; },
-    async waitForTransactionReceipt() { return { status: "FINALIZED", consensus_data: { leader_receipt: [{ execution_result: "SUCCESS" }] } }; },
+    async waitForFinalization() { return { statusName: "FINALIZED", txExecutionResultName: "FINISHED_WITH_RETURN" }; },
   };
   const registry = new BeaconRegistry({ address, client });
   await registry.submitAsset(fields);
@@ -52,15 +53,16 @@ test("evaluation uses the canonical asset ID returned by Beacon state", async ()
       if (functionName === "asset") return { current_version: 0, lifecycle_status: "SUBMITTED" };
       if (functionName === "checkpoint_state") return {
         asset: { identity_status: "VERIFIED" },
-        identity: { COINGECKO: { status: "VERIFIED" }, COINPAPRIKA: { status: "VERIFIED" } },
-        semantic: Object.fromEntries(["issuer", "redemption", "reserve_backing", "security", "governance"].map((role) => [role, { authority_status: "VERIFIED", binding_status: "VERIFIED" }])),
+        identity: { COINGECKO: { binding_status: "VERIFIED" }, COINPAPRIKA: { binding_status: "VERIFIED" } },
+        semantic: Object.fromEntries(["ISSUER", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE"].map((role) => [role, { authority_status: "VERIFIED", asset_binding_status: "VERIFIED" }])),
         market: { COINGECKO: { source_status: "OK" }, COINPAPRIKA: { source_status: "OK" } },
       };
       if (functionName === "current_passport") return { version: 1, verdict: "WATCH" };
       return {};
     },
+    async estimateTransactionFeesForWrite() { return { distribution: { leaderTimeunitsAllocation: 1n }, feeValue: 2n }; },
     async writeContract(request) { writes.push(request); return "0xevaluate"; },
-    async waitForTransactionReceipt() { return { status: "FINALIZED", consensus_data: { leader_receipt: [{ execution_result: "SUCCESS" }] } }; },
+    async waitForFinalization() { return { statusName: "FINALIZED", txExecutionResultName: "FINISHED_WITH_RETURN" }; },
   };
   const registry = new BeaconRegistry({ address, client });
 

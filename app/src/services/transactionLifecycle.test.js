@@ -9,14 +9,14 @@ import {
 } from "./transactionLifecycle.js";
 
 const successReceipt = {
-  status: "FINALIZED",
-  consensus_data: { leader_receipt: [{ execution_result: "SUCCESS" }] },
+  statusName: "FINALIZED",
+  txExecutionResultName: "FINISHED_WITH_RETURN",
 };
 
 test("accepts only finalized successful execution", () => {
   assert.equal(isFinalizedSuccessful(successReceipt), true);
-  assert.equal(isFinalizedSuccessful({ status: "ACCEPTED", execution_result: "SUCCESS" }), false);
-  assert.equal(isFinalizedSuccessful({ status: "FINALIZED", execution_result: "REVERT" }), false);
+  assert.equal(isFinalizedSuccessful({ statusName: "ACCEPTED", txExecutionResultName: "FINISHED_WITH_RETURN" }), false);
+  assert.equal(isFinalizedSuccessful({ statusName: "FINALIZED", txExecutionResultName: "FINISHED_WITH_ERROR" }), false);
 });
 
 test("writes once, persists the hash, reconciles the same hash, then reads state", async () => {
@@ -81,7 +81,7 @@ test("does not read expected state after non-successful finality", async () => {
       readPrecondition: async () => {},
       broadcast: async () => "0xrejected",
       persistHash: async () => {},
-      reconcile: async () => ({ status: "FINALIZED", execution_result: "REVERT" }),
+      reconcile: async () => ({ statusName: "FINALIZED", txExecutionResultName: "FINISHED_WITH_ERROR" }),
       readExpectedState: async () => { expectedReads += 1; return {}; },
     }),
     (error) => error instanceof LifecycleError && error.phase === "finality" && error.hash === "0xrejected",

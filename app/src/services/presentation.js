@@ -10,7 +10,7 @@ export const FAILURE_STATES = [
   "INVALID_SEMANTIC_OUTPUT",
   "CONSENSUS_VALIDATION_FAILURE",
 ];
-export const CHALLENGE_CATEGORIES = ["PEG", "LIQUIDITY", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE", "DEPENDENCY", "OTHER"];
+export const CHALLENGE_CATEGORIES = ["PEG", "LIQUIDITY", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE", "OTHER"];
 
 function isHttpsPublicLooking(value) {
   try {
@@ -33,7 +33,7 @@ export function validateSubmissionFields(fields, step = 0) {
   if (step === 0 || step === 2) {
     if (!/^[A-Za-z][A-Za-z0-9]{2,11}$/.test(fields.target_currency || "")) errors.push("Target currency format is invalid.");
     for (const claim of [fields.market_identifier, fields.secondary_market_identifier]) {
-      if (claim && !/^[a-z0-9][a-z0-9._:-]{1,63}$/i.test(claim)) errors.push("Market ID claims must use a bounded identifier format.");
+      if (!claim || !/^[a-z0-9][a-z0-9._:-]{1,63}$/i.test(claim)) errors.push("Both authenticated market ID claims are required and must be bounded.");
     }
     if (fields.market_identifier && fields.secondary_market_identifier && fields.market_identifier.toLowerCase() === fields.secondary_market_identifier.toLowerCase()) errors.push("Objective claims must be independent.");
   }
@@ -70,20 +70,21 @@ export function exactLiveProofState(rows, assetId) {
   return { asset, passport: available ? passport : null, available };
 }
 
-export function identityDisplayState(passport = {}, asset = {}) {
-  const verified = passport.identity_status === "VERIFIED";
+export function identityDisplayState(passport = {}, asset = {}, checkpoint = {}) {
+  const verified = (passport.identity_status || asset.identity_status) === "VERIFIED";
+  const identity = checkpoint.identity || {};
   return {
     status: passport.identity_status || asset.identity_status || "UNVERIFIED",
-    canonicalChain: verified ? passport.canonical_chain || "UNVERIFIED" : "UNVERIFIED",
-    canonicalNamespace: verified ? passport.canonical_namespace || "UNVERIFIED" : "UNVERIFIED",
-    canonicalAddress: verified ? passport.canonical_token_address || "UNVERIFIED" : "UNVERIFIED",
-    canonicalName: verified ? passport.canonical_name || "UNVERIFIED" : "UNVERIFIED",
-    canonicalSymbol: verified ? passport.canonical_symbol || "UNVERIFIED" : "UNVERIFIED",
-    coingeckoId: verified ? passport.coingecko_id || passport.primary_market_id || "UNVERIFIED" : "UNVERIFIED",
-    coinpaprikaId: verified ? passport.coinpaprika_id || passport.secondary_market_id || "UNVERIFIED" : "UNVERIFIED",
-    coingeckoBinding: verified ? passport.coingecko_binding_status || "UNVERIFIED" : "UNVERIFIED",
-    coinpaprikaBinding: verified ? passport.coinpaprika_binding_status || "UNVERIFIED" : "UNVERIFIED",
-    submittedChain: asset.chain || "—",
+    canonicalChain: verified ? passport.canonical_chain || asset.canonical_chain || "UNVERIFIED" : "UNVERIFIED",
+    canonicalNamespace: verified ? passport.canonical_namespace || asset.canonical_namespace || "UNVERIFIED" : "UNVERIFIED",
+    canonicalAddress: verified ? passport.canonical_token_address || asset.token_address || "UNVERIFIED" : "UNVERIFIED",
+    canonicalName: verified ? passport.canonical_name || asset.canonical_name || "UNVERIFIED" : "UNVERIFIED",
+    canonicalSymbol: verified ? passport.canonical_symbol || asset.canonical_symbol || "UNVERIFIED" : "UNVERIFIED",
+    coingeckoId: verified ? passport.coingecko_id || asset.coingecko_id_claim || "UNVERIFIED" : "UNVERIFIED",
+    coinpaprikaId: verified ? passport.coinpaprika_id || asset.coinpaprika_id_claim || "UNVERIFIED" : "UNVERIFIED",
+    coingeckoBinding: verified ? passport.coingecko_binding_status || identity.COINGECKO?.binding_status || "UNVERIFIED" : "UNVERIFIED",
+    coinpaprikaBinding: verified ? passport.coinpaprika_binding_status || identity.COINPAPRIKA?.binding_status || "UNVERIFIED" : "UNVERIFIED",
+    submittedChain: asset.canonical_chain || asset.chain || "—",
     submittedAddress: asset.token_address || "—",
   };
 }
