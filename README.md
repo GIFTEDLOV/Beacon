@@ -18,6 +18,7 @@ The live-proven release is GenLayer Studionet, chain `61999`:
 | Source SHA-256 | `698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c` |
 | Source bytes | `44394` |
 | Deployment result | `FINALIZED` / `FINISHED_WITH_RETURN` |
+| Production app | `https://beacon-rho-brown.vercel.app` |
 
 The complete live ledger and read-only verification command are in
 [`docs/v8-final/STUDIONET_LIVE_PROOF.md`](docs/v8-final/STUDIONET_LIVE_PROOF.md).
@@ -62,14 +63,20 @@ checkpoint state and applies the deterministic mapping:
 
 Failure and unavailable evidence never become a favorable tier.
 
-## Frontend and deployment
+## Frontend and production
 
 The frontend uses one stable Studionet adapter and reads authoritative state
 from the contract. Writes precondition, sign once, persist the GenLayer
 transaction ID immediately, reconcile that same ID, and require
 `FINALIZED` plus `FINISHED_WITH_RETURN` before reading final state. `ACCEPTED`
-or `FINALIZED` alone is not user-facing success. Production configuration is
-prepared in `app/.env.production`; no production deployment was performed.
+or `FINALIZED` alone is not user-facing success.
+
+Production is live at `https://beacon-rho-brown.vercel.app` and is configured
+for GenLayer Studionet chain `61999` and contract
+`0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1`. The published V8 release was
+smoke-checked for the app shell, `/proof`, active compiled configuration, and
+live read-only state. Canonical USDC identity, both provider bindings, Passport
+V2, and both resolved challenges were verified through production.
 
 The deployment path reads only the frozen stable source and uses the official
 stable `genlayer-js` 1.1.8 route. It cannot be redirected to an older source or
@@ -91,10 +98,12 @@ Stable local contract tests use the isolated harness:
 .\tools\run-studionet-tests.ps1
 ```
 
-This executes the stable Studionet V8 suite and source-parity checks. The
-historical V4/V5/V6/V7 suites remain labeled under History and are not release
-gates. The original 194 failures were grouped as a localnet/default-runner and
-obsolete historical-harness problem; see
+The final release matrix records `29 passed` contract tests, `21 passed`
+frontend tests, successful frontend typecheck/build, source parity, and clean
+bounded security/dependency audits. The historical V4/V5/V6/V7 suites remain
+labeled under History and are not release gates. The original 194 failures were
+grouped as a localnet/default-runner and obsolete historical-harness problem;
+see
 [`docs/v8-final/LOCAL_TEST_FAILURE_CLASSIFICATION.md`](docs/v8-final/LOCAL_TEST_FAILURE_CLASSIFICATION.md).
 
 ## History
