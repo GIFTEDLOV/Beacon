@@ -40,12 +40,29 @@ zero evidence refetches, V2 creation, two independent populated outcomes, and
 both resolutions. A separate failure-in-challenge-two test proves atomic
 rollback: no V2 is created and challenge one remains OPEN.
 
-These local tests are supplemented by the completed multi-validator Studionet
-proof. Deployment finalized successfully, canonical USDC reached VERIFIED,
-all five semantic roles were verified, Passport V1 was created, and the exact
-two-challenge reassessment produced Passport V2. The read-only verifier and
-full ledger are in [`STUDIONET_LIVE_PROOF.md`](STUDIONET_LIVE_PROOF.md).
+## Live and production proof
 
-The historical Studio-dev and Bradbury failures remain documented under their
-original diagnostic artifacts and are not used as evidence for this stable
-Studionet release.
+The completed multi-validator Studionet proof is on chain `61999` at
+`0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1`. Deployment finalized
+successfully, canonical USDC reached `VERIFIED`, both provider bindings were
+verified, all five semantic roles were verified, Passport V1 was created, and
+the exact two-challenge reassessment produced Passport V2 with
+`challenge_count = 2`. Both challenge records are independently `RESOLVED /
+SUPPORTED / MATERIAL / version 2`.
+
+The frozen contract source is `contracts/beacon_v8_studionet.py`, 44,394 bytes,
+SHA-256
+`698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c`.
+Public GitHub source parity is verified.
+
+Final release validation records `29 passed` contract tests, `21 passed`
+frontend tests, frontend typecheck/build PASS, and clean dependency/security
+checks. The production application is live at
+`https://beacon-rho-brown.vercel.app` and reads the same Studionet contract.
+Production smoke checks confirmed the app shell, `/proof`, compiled active
+configuration, canonical USDC state, Passport V2, and both resolved challenges.
+
+The read-only verifier and full ledger are in
+[`STUDIONET_LIVE_PROOF.md`](STUDIONET_LIVE_PROOF.md). The historical Studio-dev
+and Bradbury failures remain documented under their original diagnostic
+artifacts and are not used as evidence for this stable Studionet release.
