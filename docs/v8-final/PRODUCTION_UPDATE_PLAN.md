@@ -1,19 +1,28 @@
-# Production update plan
+# Production update record
 
-Status: prepared locally; no external production deployment or publication was
-performed.
+Status: completed.
 
-`app/.env.production` now points to the live-proven Studionet V8 contract and
-the frontend adapter is pinned to stable genlayer-js 1.1.8. The public site
-itself was not changed.
+The Beacon V8 frontend is published at
+`https://beacon-rho-brown.vercel.app` and is configured for the live-proven
+GenLayer Studionet deployment:
 
-After publication authorization:
+- Network: Studionet
+- Chain ID: `61999`
+- Contract: `0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1`
+- Frozen contract source SHA-256:
+  `698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c`
 
-1. publish the prepared stable Studionet repository release;
-2. build and typecheck the frontend;
-3. publish the frontend through the approved production path; and
-4. reload the public site and verify reads against the same contract address.
+The final publication sequence was completed: the audited V8 release was
+published to GitHub `main`, frontend tests/typecheck/build passed, production
+was deployed and promoted on Vercel, and read-only production smoke checks
+confirmed the app shell, `/proof`, compiled active configuration, canonical
+USDC identity, both provider bindings, Passport V2, and both resolved V2
+challenge records.
 
-No frontend code may reconstruct Passport risk state. Every write must persist
-and reconcile the same GenLayer transaction ID, require `FINALIZED` plus
-`FINISHED_WITH_RETURN`, and read final contract state before the next action.
+The frontend never reconstructs Passport risk state. Every write preconditions,
+signs once, persists and reconciles the same GenLayer transaction ID, requires
+`FINALIZED` plus `FINISHED_WITH_RETURN`, and reads authoritative contract state
+before the next action.
+
+Historical pre-publication deployment notes remain in Git history; this file is
+the current production record.
