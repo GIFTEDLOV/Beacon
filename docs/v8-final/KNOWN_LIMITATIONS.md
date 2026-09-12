@@ -11,6 +11,12 @@
   the required stable `genlayer-py==0.18.0`; the isolated harness installs the
   exact pair with `--no-deps` and records the exception in `TOOLCHAIN.md`.
 - No mutation-test framework is configured: `MUTATION_TESTS = NOT_CONFIGURED`.
-- The public GitHub branch and production hosting were not changed in this
-  local release-preparation task. Historical V4/V5/V6/V7 and Bradbury/Studio-
-  dev diagnostics remain under their original history paths.
+- Browser-console automation was unavailable during the final publication
+  environment. This does not affect the live contract proof; production HTTP,
+  `/proof`, compiled active configuration, and live read-only state were
+  verified directly.
+- Historical V4/V5/V6/V7 and Bradbury/Studio-dev diagnostics remain under their
+  original history paths for provenance and are not active release evidence.
+
+The public GitHub `main` branch and Vercel production site are both updated to
+the Beacon V8 Studionet release. There is no known publication blocker.
