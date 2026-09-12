@@ -1,69 +1,92 @@
-# Beacon V8 final local audit
+# Beacon V8 final release audit
 
-Audit date: 2026-09-12. This audit covers the reviewer-visible branch
+Audit date: 2026-09-12. This record covers the reviewer-visible branch
 forensics, proven stable source, local harness, frontend, deployment path,
-freeze artifacts, and the existing Studionet live proof. It does not push
-GitHub or change production.
+freeze artifacts, Studionet live proof, GitHub publication, and Vercel
+production publication.
 
-## Forensic record
+## Release record
 
 | Field | Value |
 |---|---|
-| `LOCAL_BRANCH` | `v8-lean-final` |
-| `LOCAL_HEAD` | `3baafb57c311700c27b00d94941fd19b4e23e57c` plus uncommitted release-prep changes |
-| `REMOTE_MAIN_HEAD` | `03edecbb20acead7705c785f7b15391cf4cb57cf` |
-| `REMOTE_V6_REASSESSMENT_HEAD` | `754f390ab2f2433ff5db1c21092345aedc3600c2` |
-| `REMOTE_MAIN_STATE` | Old rejected implementation remains on public `main`; local V8 fixes are unpublished |
+| `PRE_RELEASE_MAIN_HEAD` | `03edecbb20acead7705c785f7b15391cf4cb57cf` |
+| `V8_PUBLICATION_COMMIT` | `baf5dac3ee09f9c515942ce7f585fa628b1ee0ac` |
+| `PUBLICATION_MODE` | fast-forward; no force-push |
 | `FINAL_SOURCE` | `contracts/beacon_v8_studionet.py` |
 | `FINAL_SOURCE_SHA256` | `698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c` |
 | `FINAL_SOURCE_BYTES` | `44394` |
+| `LIVE_NETWORK` | GenLayer Studionet / chain `61999` |
+| `LIVE_CONTRACT` | `0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1` |
+| `PRODUCTION_URL` | `https://beacon-rho-brown.vercel.app` |
+| `REVIEWER_STATE` | published and reviewer-safe |
 
-The public branch was inspected before release preparation and still exposed
-caller-selected provider IDs/semantic URLs without chain/address authority
-binding and the first-open-challenge reassessment shortcut. The reviewer would
-therefore still reject public `main` until the prepared release is authorized
-and published.
+Before V8 publication, public `main` still exposed the rejected legacy
+implementation. That pre-release state is retained in Git history for audit
+provenance. The current release line exposes the reviewer-fixed V8 source and
+supporting evidence. Documentation-only synchronization commits after the V8
+publication commit do not modify the frozen contract source.
 
 ## Compact issue matrix
 
-| ISSUE | SEVERITY | CURRENT STATE | REVIEWER IMPACT | FIX REQUIRED | TEST | LIVE PROOF |
-|---|---|---|---|---|---|---|
-| Public branch is stale | CRITICAL | `main` is old rejected code | Reviewer can inspect the wrong implementation | Publish prepared release after authorization | release diff/source scan | Not pushed |
-| Provider identity binding | CRITICAL | Exact namespace/address and independent CoinGecko/CoinPaprika records required | Provider IDs cannot borrow identity | Keep stable source frozen | wrong-address/provider-borrowing tests | Both bindings `VERIFIED` |
-| Semantic source authority | CRITICAL | Approved Circle URLs; transport, host, redirect, role, chain, asset, size and prompt checks fail closed | Caller cannot redirect judgment to another asset/source | Keep contract-controlled source set | authority negative matrix | Five roles verified; ISSUER exact-address anchor |
-| Reassessment completeness | CRITICAL | Every eligible OPEN challenge is sorted, validated, independently evaluated, and resolved after Passport storage | No first-challenge shortcut or blanket resolution | Keep stored evidence and per-record outputs | two-challenge and rollback tests | Passport V2 count 2; A/B independently resolved |
-| Consensus equivalence | HIGH | Closed decision witnesses compare decision-bearing facts only | Presentation changes do not split consensus; identity/risk facts do | Keep bounded schemas | equivalence robustness tests | Stable live proof finalized |
-| Storage/atomicity | HIGH | Version-targeted challenge records, digests, and post-Passport resolution ordering | No cross-version leakage or partial resolution | Keep current implementation | duplicate/stale/rollback tests | V2 challenge set digest read back |
-| Stable local harness | HIGH | Original run defaulted to localnet and failed in shared loader; isolated stable harness now explicit | Green/failing results are network/runtime-specific | Use stable pins and explicit Studionet | 27 stable tests pass | Existing live proof is stable Studionet |
-| Stable static typing | MEDIUM | Stable-bundle validation passes; installed linter's Pyright mode lacks typed stubs for the stable wildcard API | Strict RC typing output would misclassify a live-proven stable source | Keep the limitation explicit; do not alter frozen source for linter cosmetics | AST lint/check pass; strict diagnostic recorded | Live execution is successful |
-| Frontend network/finality | HIGH | Stable Studionet adapter, active address, and status distinction prepared | UI cannot target old Bradbury contract or treat ACCEPTED as success | Keep one adapter and same-ID recovery | frontend tests/typecheck/build | UI points at live contract |
-| Deployment source selection | CRITICAL | Stable deployment path reads only frozen Studionet source and verifies SHA | Operator cannot silently deploy old bytes | Freeze SHA and use official SDK call | source parity test | Address/source ledger match |
-| Toolchain metadata | MEDIUM | Stable pins are isolated; upstream `genlayer-test 0.29.2` metadata conflicts with required `genlayer-py 0.18.0` | Naive resolver may select wrong SDK | Install exact pair with documented `--no-deps` exception | harness script | Same stable line as live proof |
-| Mutation framework | LOW | Not configured | No mutation evidence can be claimed | Record `NOT_CONFIGURED` | N/A | N/A |
+| ISSUE | SEVERITY | FINAL STATE | REVIEWER IMPACT | TEST / EVIDENCE | LIVE PROOF |
+|---|---|---|---|---|---|
+| Public branch stale | CRITICAL | RESOLVED | Reviewer now sees V8 on `main` | public source SHA parity | GitHub publication complete |
+| Provider identity binding | CRITICAL | RESOLVED | Provider IDs cannot borrow identity | wrong-address/provider-borrowing tests | Both bindings `VERIFIED` |
+| Semantic source authority | CRITICAL | RESOLVED | Caller cannot redirect judgment to another asset/source | authority negative matrix | Five roles verified; ISSUER exact-address anchor |
+| Reassessment completeness | CRITICAL | RESOLVED | No first-challenge shortcut or blanket resolution | two-challenge and rollback tests | Passport V2 count 2; A/B independently resolved |
+| Consensus equivalence | HIGH | RESOLVED | Presentation changes do not split consensus; identity/risk facts do | equivalence robustness tests | Stable live proof finalized |
+| Storage/atomicity | HIGH | RESOLVED | No cross-version leakage or partial resolution | duplicate/stale/rollback tests | V2 challenge set digest read back |
+| Stable local harness | HIGH | RESOLVED | Release tests are network/runtime-specific and reproducible | 29 contract tests passed | Existing live proof is stable Studionet |
+| Stable static typing | MEDIUM | DOCUMENTED TOOLING LIMITATION | Strict RC typing is not used to misclassify the live-proven stable source | AST lint and stable-bundle validation pass | Live execution successful |
+| Frontend network/finality | HIGH | RESOLVED | UI targets the live Studionet contract and does not treat ACCEPTED as success | 21 frontend tests, typecheck/build pass | Production smoke/readback pass |
+| Deployment source selection | CRITICAL | RESOLVED | Operator cannot silently deploy old bytes | source parity and frozen SHA | Address/source ledger match |
+| Toolchain metadata | MEDIUM | DOCUMENTED PACKAGING EXCEPTION | Stable pins remain explicit | isolated harness | Same stable line as live proof |
+| Mutation framework | LOW | NOT_CONFIGURED | No mutation evidence is claimed | N/A | N/A |
 
-## Reproduced local failure cascade
+## Historical local failure cascade
 
 The original non-live run collected 202 tests and returned `194 failed, 7
 passed, 1 skipped`. `gltest` reported missing configuration, selected
 `http://127.0.0.1:4000/api`, and repeated
 `ImportError: Failed to load contract: unexpected end of memory`. The grouped
-classification is in [`LOCAL_TEST_FAILURE_CLASSIFICATION.md`](LOCAL_TEST_FAILURE_CLASSIFICATION.md).
+classification is preserved in
+[`LOCAL_TEST_FAILURE_CLASSIFICATION.md`](LOCAL_TEST_FAILURE_CLASSIFICATION.md).
+Those results are historical harness failures, not 194 independent V8 contract
+defects.
 
-After the stable harness was isolated, explicitly configured, and given the
-stable fixture endpoint, `test/test_beacon_v8.py` completed with `27 passed`.
-No genuine stable source defect was found and the proven source was not edited.
+The final release validation records `29 passed` contract tests, `21 passed`
+frontend tests, frontend typecheck PASS, frontend build PASS, source parity
+PASS, npm audits with 0 vulnerabilities, clean `pip-audit`, and a clean bounded
+secret scan.
 
-## Existing live proof
+## Live proof
 
 The exact live deployment and full reviewer lifecycle are recorded in
 [`STUDIONET_LIVE_PROOF.md`](STUDIONET_LIVE_PROOF.md). The read-only verifier
-asserts chain 61999, the live address, canonical identity, provider bindings,
-all five semantic roles, Passport V1/V2, and both independent challenge
-resolution records.
+asserts chain `61999`, the live address, canonical identity, both provider
+bindings, all five semantic roles, Passport V1/V2, and both independent
+challenge resolution records.
+
+The final live state contains Passport V2 with `challenge_count = 2`. Both
+challenge records are `RESOLVED` with independent `SUPPORTED` / `MATERIAL`
+results and `resolution_version = 2`.
+
+## Production publication
+
+GitHub `main` was published by fast-forward and the public contract source SHA
+matches the frozen live source. The frontend was then deployed and promoted on
+Vercel at `https://beacon-rho-brown.vercel.app`. Production checks confirmed
+HTTP 200, the app shell, `/proof`, compiled active Studionet configuration,
+canonical USDC identity, both provider bindings, Passport V2, and both V2
+challenge records.
+
+Browser-console automation was unavailable in the publication environment;
+direct HTTP and live read-only verification passed. This is documented as a
+verification limitation, not a release blocker.
 
 ## Release conclusion
 
-The proven source is locally parity-checked and the stable harness is
-reproducible. The implementation is not yet reviewer-safe on GitHub because
-public `main` remains unchanged. Publication and any production deployment
-remain separate, explicitly authorized actions.
+Beacon V8 is published, production is live, the frozen contract source remains
+unchanged, and the repository evidence matches the live Studionet state. No
+known publication blocker remains. The release is ready for reviewer
+resubmission.
