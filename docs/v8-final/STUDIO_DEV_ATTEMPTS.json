@@ -1,0 +1,39 @@
+{
+  "audited_date": "2026-09-12",
+  "endpoint": "https://studio-dev.genlayer.com/api",
+  "chain_id": 61997,
+  "leader_only": false,
+  "attempts": [
+    {
+      "kind": "beacon_v8",
+      "source_header": "5j",
+      "tx_id": "0xa0e5eac0a1e2df20b116d62db72a9016286aca332d84f04a745904275e532aa0",
+      "protocol_lifecycle": "FINALIZED / ACCEPTED",
+      "execution": "FINISHED_WITH_ERROR",
+      "leader_payload": "invalid_contract runner malformed",
+      "votes_committed": 5,
+      "votes_revealed": 5
+    },
+    {
+      "kind": "beacon_v8",
+      "source_header": "9b",
+      "tx_id": "0x9916cd706c810a574509898287708f1054651c382bf4d09971ad5c3d91670913",
+      "protocol_lifecycle": "FINALIZED / ACCEPTED",
+      "execution": "FINISHED_WITH_ERROR",
+      "leader_payload": "invalid_contract runner malformed",
+      "votes_committed": 5,
+      "votes_revealed": 5
+    },
+    {
+      "kind": "official_header_smoke",
+      "source_header": "1jb",
+      "tx_id": "0xddffa28e07f1f30019c4927beee72ccff39537d7999886e6e2c1f74802c36c7e",
+      "protocol_lifecycle": "FINALIZED / ACCEPTED",
+      "execution": "FINISHED_WITH_ERROR",
+      "leader_payload": "invalid_contract runner malformed",
+      "votes_committed": 5,
+      "votes_revealed": 5
+    }
+  ],
+  "multi_validator_beacon_proof": false
+}

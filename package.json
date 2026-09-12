@@ -1,7 +1,11 @@
 {
   "name": "beacon",
   "type": "module",
+  "scripts": {
+    "verify:studionet": "node tools/verify_studionet_release.mjs"
+  },
   "devDependencies": {
-    "genlayer-js": "2.0.0-rc.1"
+    "@types/node": "22.20.2",
+    "genlayer-js": "1.1.8"
   }
 }

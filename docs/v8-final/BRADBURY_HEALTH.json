@@ -1,0 +1,35 @@
+{
+  "audited_date": "2026-09-12",
+  "network": "testnet-bradbury",
+  "chain_id": 4221,
+  "rpc": {
+    "genlayer": {
+      "url": "https://rpc-bradbury.genlayer.com",
+      "chain_id_hex": "0x107d",
+      "latest_block_observed": "0x1485b09",
+      "latest_block_decimal": 21519113
+    },
+    "chain": {
+      "url": "https://rpc.testnet-chain.genlayer.com",
+      "chain_id_hex": "0x107d",
+      "latest_block_observed": "0x1485b09",
+      "latest_block_decimal": 21519113
+    }
+  },
+  "advancing_blocks": {
+    "before_decimal": 21517405,
+    "after_decimal": 21517418,
+    "pass": true
+  },
+  "fee_policy": {
+    "pass": false,
+    "error": "The contract function \"messageFeeParamsBudgetFloor\" reverted. Details: execution reverted",
+    "manager": "0xF205868bf5db79d2162843742D18D0900A9E462a"
+  },
+  "fee_estimate": {
+    "pass": false,
+    "error": "The contract function \"quoteGasPrice\" reverted. Details: execution reverted"
+  },
+  "gen_spend_performed": false,
+  "deployment_attempted": false
+}

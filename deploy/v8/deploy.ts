@@ -2,16 +2,18 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { createAccount, createClient, isSuccessful } from "genlayer-js";
-import { testnetBradbury } from "genlayer-js/chains";
+import { createAccount, createClient } from "genlayer-js";
+import { studionet } from "genlayer-js/chains";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
-const SOURCE_PATH = path.join(ROOT, "contracts", "beacon_v8.py");
+const SOURCE_RELATIVE = "contracts/beacon_v8_studionet.py";
+const SOURCE_PATH = path.join(ROOT, SOURCE_RELATIVE);
 const FREEZE_PATH = path.join(ROOT, "deploy", "v8", "FROZEN_SHA256SUMS.txt");
-const PROFILE_PATH = process.env.V8_FEE_PROFILE_PATH || path.join(ROOT, "deploy", "v8", "fee-profile.json");
+const PROFILE_PATH = path.join(ROOT, "deploy", "v8", "fee-profile.json");
 const STATE_PATH = path.join(ROOT, "deploy", "v8", "deployment-state.json");
-const RPC = process.env.GENLAYER_RPC_URL || "https://rpc-bradbury.genlayer.com";
-type DeploymentState = { txId?: string; sourceSha256?: string; [key: string]: unknown };
+const RPC = "https://studio.genlayer.com/api";
+const CHAIN_ID = 61999;
+type DeploymentState = { txId?: string; sourcePath?: string; sourceSha256?: string; [key: string]: unknown };
 
 function fail(message: string): never {
   throw new Error(message);
@@ -23,18 +25,12 @@ function frozenSha(): string {
   return match?.[1]?.toLowerCase() || fail(`Missing frozen V8 SHA in ${FREEZE_PATH}`);
 }
 
-function readFeeProfile(): { deploy?: { fees?: Record<string, unknown>; distribution?: unknown; feeValue?: unknown } } {
-  const parsed = JSON.parse(readFileSync(PROFILE_PATH, "utf8")) as { deploy?: { fees?: Record<string, unknown>; distribution?: unknown; feeValue?: unknown } };
-  if (parsed?.deploy === undefined) fail(`Fee profile has no deploy entry: ${PROFILE_PATH}`);
-  return parsed;
-}
-
-function deploymentFees(profile: NonNullable<ReturnType<typeof readFeeProfile>["deploy"]>): Record<string, unknown> {
-  const fees = profile.fees || profile;
-  if (!fees || typeof fees !== "object" || !("distribution" in fees) || !("feeValue" in fees)) {
-    fail("Deploy fee profile must contain the exact estimator-returned distribution and feeValue.");
+function verifyStableProfile(): void {
+  const profile = JSON.parse(readFileSync(PROFILE_PATH, "utf8")) as Record<string, any>;
+  if (profile.network !== "studionet" || profile.chainId !== CHAIN_ID || profile.rpc !== RPC) {
+    fail(`Fee profile is not the frozen Studionet profile: ${PROFILE_PATH}`);
   }
-  return fees as Record<string, unknown>;
+  if (profile.feeMode !== "gasless_or_network_default") fail("Studionet deployment requires the recorded gasless/network-default fee mode.");
 }
 
 function persist(state: Record<string, unknown>): void {
@@ -51,14 +47,29 @@ function priorSubmission(): DeploymentState | null {
   }
 }
 
+function statusName(receipt: any): string {
+  return String(receipt?.statusName ?? receipt?.status_name ?? receipt?.status ?? "").toUpperCase();
+}
+
+function executionName(receipt: any): string {
+  return String(receipt?.txExecutionResultName ?? receipt?.tx_execution_result_name ?? receipt?.execution_result ?? "").toUpperCase();
+}
+
+function contractAddress(receipt: any): string {
+  return receipt?.data?.contract_address ?? receipt?.txDataDecoded?.contractAddress ?? receipt?.tx_data_decoded?.contract_address ?? "";
+}
+
 async function reconcile(client: any, txId: string, sourceSha256: string): Promise<void> {
-  const receipt = await client.waitForFinalization({ hash: txId, fullTransaction: true });
-  const status = String((receipt as any).statusName ?? (receipt as any).status_name ?? (receipt as any).status ?? "").toUpperCase();
-  if (status !== "FINALIZED" || !isSuccessful(receipt)) fail(`Deployment did not finalize successfully for ${txId}.`);
-  const address = (receipt as any).data?.contract_address ?? (receipt as any).txDataDecoded?.contractAddress;
+  const receipt = await client.waitForTransactionReceipt({ hash: txId, status: "FINALIZED", interval: 5000, retries: 200 });
+  const status = statusName(receipt);
+  const execution = executionName(receipt);
+  if (status !== "FINALIZED" || execution !== "FINISHED_WITH_RETURN") {
+    fail(`Deployment did not finalize with successful execution for ${txId}: ${JSON.stringify({ status, execution })}`);
+  }
+  const address = contractAddress(receipt);
   if (!address) fail(`Deployment finalized without a contract address for ${txId}.`);
-  persist({ txId, contractAddress: address, sourcePath: "contracts/beacon_v8.py", sourceSha256, status, execution: (receipt as any).txExecutionResultName ?? "FINISHED_WITH_RETURN", finalizedAt: new Date().toISOString(), network: "Bradbury", chainId: 4221 });
-  console.log(JSON.stringify({ txId, contractAddress: address, sourceSha256, status, execution: (receipt as any).txExecutionResultName ?? "FINISHED_WITH_RETURN" }));
+  persist({ txId, contractAddress: address, sourcePath: SOURCE_RELATIVE, sourceSha256, status, execution, finalizedAt: new Date().toISOString(), network: "Studionet", chainId: CHAIN_ID });
+  console.log(JSON.stringify({ txId, contractAddress: address, sourceSha256, status, execution, network: "Studionet", chainId: CHAIN_ID }));
 }
 
 export default async function main(): Promise<void> {
@@ -66,27 +77,28 @@ export default async function main(): Promise<void> {
   const actualSha = createHash("sha256").update(code).digest("hex");
   const expectedSha = frozenSha();
   if (actualSha !== expectedSha) fail(`V8 source SHA mismatch before submission: expected ${expectedSha}, got ${actualSha}`);
+  verifyStableProfile();
 
   const prior = priorSubmission();
   if (prior) {
-    if (prior.sourceSha256 && prior.sourceSha256.toLowerCase() !== actualSha) fail("Persisted deployment source SHA does not match the frozen V8 source.");
-    const readClient = createClient({ chain: testnetBradbury, endpoint: RPC });
-    await reconcile(readClient, prior.txId!, actualSha);
+    if (prior.sourcePath !== SOURCE_RELATIVE || prior.sourceSha256?.toLowerCase() !== actualSha || prior.network !== "Studionet" || prior.chainId !== CHAIN_ID) {
+      fail("Persisted deployment state does not match the frozen Studionet V8 source and network.");
+    }
+    await reconcile(createClient({ chain: studionet, endpoint: RPC }), prior.txId!, actualSha);
     return;
   }
 
-  const profile = readFeeProfile();
-  const fees = deploymentFees(profile.deploy!);
   const privateKey = process.env.GENLAYER_PRIVATE_KEY;
-  if (!privateKey) fail("GENLAYER_PRIVATE_KEY is required for this non-interactive deployment path; no secret was read from disk or printed.");
+  if (!privateKey) fail("GENLAYER_PRIVATE_KEY is required; no secret was read from disk or printed.");
   if (!/^0x[0-9a-fA-F]{64}$/.test(privateKey)) fail("GENLAYER_PRIVATE_KEY has an invalid shape.");
 
   const account = createAccount(privateKey as `0x${string}`);
-  const client = createClient({ chain: testnetBradbury, endpoint: RPC, account });
-  const txId = await client.deployContract({ code, args: [], fees: fees as never });
+  const client = createClient({ chain: studionet, endpoint: RPC, account });
+  const txId = await client.deployContract({ code, args: [] });
 
   // Persist the protocol transaction ID before polling or any further action.
-  persist({ txId, sourcePath: "contracts/beacon_v8.py", sourceSha256: actualSha, submittedAt: new Date().toISOString(), network: "Bradbury", chainId: 4221 });
+  persist({ txId, sourcePath: SOURCE_RELATIVE, sourceSha256: actualSha, submittedAt: new Date().toISOString(), network: "Studionet", chainId: CHAIN_ID });
+  console.log(`STUDIONET_DEPLOY_TX_ID ${txId}`);
   await reconcile(client, txId, actualSha);
 }
 

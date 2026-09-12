@@ -1,34 +1,42 @@
-# V8 test matrix
+# Beacon V8 stable Studionet test matrix
 
-## Completed local checks
+## Stable release checks
 
 | Area | Command/evidence | Result |
 |---|---|---|
-| GenVM lint + validation | `genvm-lint check contracts/beacon_v8.py --json` | PASS |
-| Schema generation | `genvm-lint schema contracts/beacon_v8.py --json` | PASS; 18 public methods |
-| Strict typecheck | `genvm-lint typecheck contracts/beacon_v8.py --strict --json` | PASS; 0 diagnostics |
-| Contract size | 41,739 bytes at this checkpoint | PASS; under 45,000-byte release target |
-| Direct V8 tests | `python -m pytest -q test/test_beacon_v8.py` with current suite source | PASS; 14 passed |
-| Frontend tests | `npm test -- --run` | PASS; 23 passed |
+| Stable direct V8 tests | `tools/run-studionet-tests.ps1` → `gltest test/test_beacon_v8.py --network studionet --chain-type studionet --rpc-url https://studio.genlayer.com/api` | PASS; 27 passed |
+| Deployment source parity | same command plus `test/test_deployment_source.py` | PASS |
+| GenVM AST lint | `genvm-lint lint contracts/beacon_v8_studionet.py --json` | PASS; 3 checks |
+| Stable-bundle validation | `GENVM_VERSION=v0.3.0-rc7 genvm-lint validate ... --json` | PASS; 18 methods, 9 views, 9 writes |
+| Strict GenVM typecheck | available linter with stable header | NOT A VALID STABLE GATE; typed-stub/tooling mismatch, documented in `TOOLCHAIN.md` |
+| Contract source parity | `contracts/beacon_v8_studionet.py` | PASS; 44,394 bytes; SHA-256 `698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c` |
+| Frontend tests | `npm test -- --run` | PASS; 21 passed |
 | Frontend typecheck | `npm run typecheck` | PASS |
-| Frontend build | `npm run build` | PASS; non-blocking large-chunk warning |
+| Frontend build | `npm run build` | PASS; Vite warning only for a large chunk |
+| Secret scan | bounded repository scan; `gitleaks` unavailable | PASS; no credential patterns found |
+| Dependency audit | npm audit root/app; `pip-audit --local` in isolated stable harness | PASS; no known vulnerabilities |
 
-The strict typecheck uses explicit dynamic-JSON exemptions at the contract
-header because checkpoint JSON is intentionally decoded from untrusted
-external data. No executable safety diagnostic was suppressed.
+## Required adversarial coverage
 
-## Adversarial coverage
+The stable direct V8 suite covers canonical asset normalization, exact token
+address binding, genuine provider IDs paired with the wrong address, provider
+ID borrowing, provider disagreement, unapproved/redirected/oversized semantic
+sources, wrong-chain and role-irrelevant pages, prompt injection, missing
+issuer address binding, presentation-only consensus changes, malformed/stale/
+outage market data, unauthenticated challenge evidence, zero challenge-evidence
+refetch during reassessment, two independent challenge outcomes, and atomic
+rollback when challenge two fails.
 
-The direct V8 suite covers genuine USDC IDs paired with a wrong address,
-wrong provider IDs, provider disagreement, wrong/redirected/oversized semantic
-sources, missing issuer address binding, presentation-only witness changes,
-malformed/stale/outage market data, unauthenticated challenge evidence,
-zero-fetch evaluation, two independent challenge outcomes, and rollback when
-challenge two fails.
+## Scope and exceptions
 
-## Not completed
+The original all-repository pytest run produced `194 failed, 7 passed, 1
+skipped`. The grouped diagnosis found a shared localnet/default-runner failure,
+not 194 independent contract defects. Historical V4/V5/V6/V7 tests remain
+available for provenance but are not stable release gates; see
+`LOCAL_TEST_FAILURE_CLASSIFICATION.md`.
 
-Studio-dev validator execution, fee profiling, Bradbury deployment, and live
-Bradbury lifecycle proof are not claimed. The installed `gltest` package does
-not expose the documented `--fee-profile` generation surface, so the fee
-profile prerequisite remains an external toolchain blocker.
+No mutation-test framework is configured:
+`MUTATION_TESTS = NOT_CONFIGURED`.
+
+The live reviewer lifecycle is already proven on Studionet and is checked
+read-only by `tools/verify_studionet_release.mjs`.

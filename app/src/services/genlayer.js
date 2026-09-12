@@ -1,11 +1,11 @@
 import { createClient } from "genlayer-js";
-import { testnetBradbury } from "genlayer-js/chains";
+import { studionet } from "genlayer-js/chains";
 
-export const BRADBURY_CHAIN = testnetBradbury;
-export const BRADBURY_RPC = "https://rpc-bradbury.genlayer.com";
+export const STUDIONET_CHAIN = studionet;
+export const STUDIONET_RPC = "https://studio.genlayer.com/api";
 
 function endpoint() {
-  return import.meta.env?.VITE_GENLAYER_RPC || BRADBURY_RPC;
+  return STUDIONET_RPC;
 }
 
 function ethereumProvider() {
@@ -14,7 +14,7 @@ function ethereumProvider() {
 
 // Account-free reads are the source of truth for every rendered state.
 export function createReadClient() {
-  return createClient({ chain: BRADBURY_CHAIN, endpoint: endpoint() });
+  return createClient({ chain: STUDIONET_CHAIN, endpoint: endpoint() });
 }
 
 // Writes are explicitly wallet/provider-backed. No private key is generated or
@@ -25,7 +25,7 @@ export async function createWriteClient() {
   let accounts = await provider.request({ method: "eth_accounts" });
   if (!Array.isArray(accounts) || !accounts[0]) accounts = await provider.request({ method: "eth_requestAccounts" });
   if (!Array.isArray(accounts) || !accounts[0]) throw new Error("The connected wallet returned no account.");
-  return createClient({ chain: BRADBURY_CHAIN, endpoint: endpoint(), account: accounts[0], provider });
+  return createClient({ chain: STUDIONET_CHAIN, endpoint: endpoint(), account: accounts[0], provider });
 }
 
 // Kept as a small compatibility alias for tooling that only needs a read client.

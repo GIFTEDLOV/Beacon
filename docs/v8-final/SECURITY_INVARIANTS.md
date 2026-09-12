@@ -27,5 +27,5 @@
     more conservative.
 13. The frontend does not maintain a shadow risk state and reads finalized
     contract state after successful writes.
-14. Deployment tooling hashes `contracts/beacon_v8.py` before submission and
-    aborts on missing/mismatched frozen-source data.
+14. Deployment tooling hashes `contracts/beacon_v8_studionet.py` before
+    submission and aborts on missing/mismatched frozen-source data.

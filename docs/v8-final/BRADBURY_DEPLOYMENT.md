@@ -1,14 +1,31 @@
 # Bradbury deployment
 
-No V8 Bradbury deployment was attempted.
+No V8 Bradbury deployment was attempted. The required read-only health gate
+failed before signer inspection or any GEN-spending action.
 
-The read-only network preflight observed chain ID `0x107d` (`4221`) from
-`https://rpc-bradbury.genlayer.com` and current block `0x146248c`. The
-official current SDK fee-policy read then reverted at
+The fresh preflight observed chain ID `4221` from both
+`https://rpc-bradbury.genlayer.com` and
+`https://rpc.testnet-chain.genlayer.com`. Bradbury blocks advanced from
+`21517405` → `21517418` during the health check; the later read was `21519113`.
+The official
+current SDK fee-policy read then reverted at
 `messageFeeParamsBudgetFloor()` in the Bradbury fee manager
-`0xF205868bf5db79d2162843742D18D0900A9E462a`; Studio-dev's corresponding
-fee-policy read succeeded. The V8 deployment entry point is
-[`deploy/v8/deploy.ts`](../../deploy/v8/deploy.ts). It:
+`0xF205868bf5db79d2162843742D18D0900A9E462a`. The official transaction-fee
+estimator also failed because `quoteGasPrice()` reverted. The exact errors are
+recorded in [`FULL_AUDIT.md`](FULL_AUDIT.md) and
+[`BRADBURY_HEALTH.json`](BRADBURY_HEALTH.json).
+
+Captured SDK error heads:
+
+```text
+The contract function "messageFeeParamsBudgetFloor" reverted.
+Details: execution reverted
+
+The contract function "quoteGasPrice" reverted.
+Details: execution reverted
+```
+
+The V8 deployment entry point is [`deploy/v8/deploy.ts`](../../deploy/v8/deploy.ts). It:
 
 - reads exactly `contracts/beacon_v8.py`;
 - hashes the bytes before touching the deployment path;
@@ -18,8 +35,7 @@ fee-policy read succeeded. The V8 deployment entry point is
 - resumes the same transaction ID when polling; and
 - accepts success only for `FINALIZED` plus `FINISHED_WITH_RETURN`.
 
-Because the fee profile was not generated and Bradbury's official fee-policy
-read is reverting, the frozen manifest was not created and no transaction ID
-or V8 contract address exists. Historical V6/V7
-deployment records remain under `docs/reviewer-remediation-2026-09/` and are
-not V8 evidence.
+The frozen manifest was not created because the live validator and Bradbury
+fee gates did not pass. No Bradbury transaction ID or V8 contract address
+exists. Historical deployment records remain under
+`docs/reviewer-remediation-2026-09/` and are not V8 evidence.

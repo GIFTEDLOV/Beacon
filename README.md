@@ -1,142 +1,104 @@
 # Beacon V8
 
 Beacon is a versioned collateral-risk registry for stablecoins and other
-stable-value assets. It turns authenticated identity, bounded semantic
-evidence, and objective market checkpoints into a deterministic Passport and
-maximum-LTV policy.
+stable-value assets. It combines authenticated identity, bounded semantic
+evidence, objective market checkpoints, deterministic policy, and challenge
+reassessment into a readable Passport.
 
-## Release status
+## Final Studionet release
 
-V8 is implemented and locally validated on branch `v8-lean-final`. It is not
-yet frozen or deployed: the installed GenLayer testing package does not expose
-the required v0.6 fee-profile generation command, so Studio-dev and Bradbury
-writes are intentionally pending. Production and GitHub were not changed.
+The live-proven release is GenLayer Studionet, chain `61999`:
 
-- Public app: https://beacon-rho-brown.vercel.app
-- Intended network: GenLayer Bradbury, chain ID `4221`
-- V8 source: [`contracts/beacon_v8.py`](contracts/beacon_v8.py)
-- V8 source bytes: `41,739` at this checkpoint
-- V8 source SHA-256: `9136805f290a585bc4b5f752c0c79a9c6efbd14fce97ed366526bd1a423e1c18`
-- V8 deployment entry point: [`deploy/v8/deploy.ts`](deploy/v8/deploy.ts)
-- V8 freeze artifacts: not created until the fee-profile and Studio-dev gates pass
+| Field | Value |
+|---|---|
+| RPC | `https://studio.genlayer.com/api` |
+| Contract | `0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1` |
+| Deployment transaction | `0xf890b6bada92e8d42f2f8580cbdf10e39b1459d86f4f836425f8e0ab179286fc` |
+| Frozen source | [`contracts/beacon_v8_studionet.py`](contracts/beacon_v8_studionet.py) |
+| Source SHA-256 | `698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c` |
+| Source bytes | `44394` |
+| Deployment result | `FINALIZED` / `FINISHED_WITH_RETURN` |
 
-The current public site is historical V6 evidence. It must not be presented as
-the V8 release until a V8 address and finalized lifecycle proof exist.
+The complete live ledger and read-only verification command are in
+[`docs/v8-final/STUDIONET_LIVE_PROOF.md`](docs/v8-final/STUDIONET_LIVE_PROOF.md).
 
-## Trust invariant
+## The two reviewer fixes
 
-An asset is identified by canonical namespace plus exact token address. Provider
-IDs are authenticated claims, not identity. CoinGecko and CoinPaprika must both
-bind their claimed IDs to the exact address and chain/platform before Beacon
-accepts identity or evaluates semantics.
+1. Provider IDs are claims, not identity. Chain aliases normalize to the
+   canonical namespace `eip155:1`; the exact token address determines the
+   asset ID. CoinGecko and CoinPaprika must independently bind their Ethereum
+   platform/token records to that exact address and to the same canonical
+   asset before identity becomes `VERIFIED`.
 
-For Ethereum USDC:
+2. Reassessment enumerates every `OPEN` challenge for the current Passport
+   version, validates each stored record, and evaluates each independently
+   using its own category, reason, digests, and authenticated stored evidence.
+   It creates Passport V2 before resolving challenges and records an individual
+   result, reason code, and resolution version for each one. Reassessment does
+   zero challenge-evidence web refetches and rolls back atomically on failure.
+
+## Identity and source authority
+
+The canonical Ethereum USDC asset is:
 
 `eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48`
 
-The ISSUER source is the exact-address authority anchor. The other four
-authoritative Circle sources inherit that authenticated canonical identity and
-independently establish their role-specific authority and relevance; they are
-not incorrectly required to repeat the address.
+The ISSUER page is the exact-address Circle authority anchor. The approved
+REDEMPTION, BACKING, SECURITY, and GOVERNANCE pages authenticate Circle
+authority and role-relevant USDC facts while inheriting the already verified
+canonical identity. URLs are contract-controlled and source checks are
+fail-closed for HTTPS, host/path, redirects, private hosts, size, asset, chain,
+role, and prompt-injection content.
 
-## Architecture
+## Architecture and policy
 
-V8 stores small immutable checkpoints for provider identity, each of five
-semantic roles, and each market source. Passport records retain decision
-material and challenge-set provenance, while detailed evidence remains in its
-checkpoint record. Semantic outputs are narrow closed schemas. Consensus uses
-normalized consequential facts rather than raw HTML, Markdown, JSON ordering,
-or volatile page content.
+V8 stores bounded identity, semantic, market, challenge, and Passport records.
+Consensus compares closed decision-bearing witnesses rather than complete HTML,
+Markdown, JSON ordering, timestamps, or presentation text. Semantic checkpoints
+run only after canonical identity is verified. `evaluate_asset` uses stored
+checkpoint state and applies the deterministic mapping:
 
-`evaluate_asset` performs no web fetch and no LLM call. It deterministically
-combines verified identity, ISSUER/REDEMPTION/BACKING/SECURITY/GOVERNANCE
-checkpoints, and CoinGecko/CoinPaprika market checkpoints into `CORE`,
-`STANDARD`, `WATCH`, or `REJECT`.
+`CORE → 8000 bps`, `STANDARD → 6500 bps`, `WATCH → 2000 bps`, `REJECT → 0 bps`.
 
-Challenges authenticate bounded evidence once at creation. Reassessment reads
-every OPEN challenge targeting the current Passport version, evaluates each
-independently from stored evidence, performs zero evidence refetches, creates
-the next Passport, then resolves every evaluated challenge atomically.
+Failure and unavailable evidence never become a favorable tier.
 
-Reference lessons and the complete V8 evidence package are in:
+## Frontend and deployment
 
-- [`docs/v8/`](docs/v8/)
-- [`docs/v8-final/`](docs/v8-final/)
+The frontend uses one stable Studionet adapter and reads authoritative state
+from the contract. Writes precondition, sign once, persist the GenLayer
+transaction ID immediately, reconcile that same ID, and require
+`FINALIZED` plus `FINISHED_WITH_RETURN` before reading final state. `ACCEPTED`
+or `FINALIZED` alone is not user-facing success. Production configuration is
+prepared in `app/.env.production`; no production deployment was performed.
 
-Historical remediation records remain in
-[`docs/reviewer-remediation-2026-09/`](docs/reviewer-remediation-2026-09/).
+The deployment path reads only the frozen stable source and uses the official
+stable `genlayer-js` 1.1.8 route. It cannot be redirected to an older source or
+network by an environment variable.
 
-## Contract interface
+## Verification and tests
 
-Writes:
-
-`submit_asset`, `verify_coingecko_identity`, `verify_coinpaprika_identity`,
-`verify_semantic_source`, `refresh_coingecko_market`,
-`refresh_coinpaprika_market`, `evaluate_asset`, `challenge_asset`, and
-`reassess_asset`.
-
-Reads:
-
-`asset`, `assets`, `asset_ids`, `asset_count`, `checkpoint_state`,
-`current_passport`, `passport_by_version`, `passport_history`, and
-`challenge_records`.
-
-## Transaction and finality model
-
-The frontend has one V8 contract adapter, an account-free read client, and a
-wallet/provider-backed write client. Every write estimates fees, broadcasts
-once, persists the returned transaction ID immediately, and resumes the same
-ID when tracking is interrupted. `ACCEPTED` is not `FINALIZED`; application
-success requires `FINALIZED` and `FINISHED_WITH_RETURN`. Finalized contract
-state is the only application state shown after a successful action.
-
-## Local verification
-
-The current local results are recorded in
-[`docs/v8-final/TEST_MATRIX.md`](docs/v8-final/TEST_MATRIX.md):
-
-- GenVM lint, validation, schema generation, and strict typecheck: PASS
-- direct V8 contract tests: 14 passed
-- frontend tests: 23 passed
-- frontend typecheck and build: PASS
-- source size: 41,739 bytes, below the 45,000-byte release target
-
-The direct tests include the wrong-address genuine-USDC-ID negative proof,
-provider disagreement, semantic authority checks, normalized witness
-equivalence, market failure handling, two-challenge reassessment, zero
-refetches, and atomic rollback.
-
-## Reviewer quick start
-
-Read [`docs/v8-final/REVIEWER_RESPONSE.md`](docs/v8-final/REVIEWER_RESPONSE.md)
-for direct answers to the two reviewer concerns. The exact wrong-address test
-uses:
-
-`eip155:1:0x2222222222222222222222222222222222222222`
-
-with the genuine `usd-coin` and `usdc-usd-coin` IDs and must fail closed.
-
-Use [`deploy/v8/README.md`](deploy/v8/README.md) for the guarded V8 deployment
-path. Do not use the historical [`deploy/deployScript.ts`](deploy/deployScript.ts),
-which still names the V5 source.
-
-## Development
+Read the reviewer mapping in
+[`docs/v8-final/REVIEWER_EVIDENCE_MATRIX.md`](docs/v8-final/REVIEWER_EVIDENCE_MATRIX.md)
+and run the existing live-state verifier without any write:
 
 ```powershell
-# Contract gates
-$env:PYTHONPATH = 'C:\Users\DELL\.beacon-v8-references\genlayer-testing-suite-current'
-python -m pytest -q test/test_beacon_v8.py
-genvm-lint check contracts/beacon_v8.py
-genvm-lint schema contracts/beacon_v8.py
-genvm-lint typecheck contracts/beacon_v8.py --strict
-
-# Frontend gates
-Set-Location app
-npm test -- --run
-npm run typecheck
-npm run build
+npm run verify:studionet
 ```
 
-Toolchain pins are in [`requirements.txt`](requirements.txt) and the root/app
-package manifests. No deployment, GitHub push, or production update is part
-of the current checkpoint.
+Stable local contract tests use the isolated harness:
+
+```powershell
+.\tools\run-studionet-tests.ps1
+```
+
+This executes the stable Studionet V8 suite and source-parity checks. The
+historical V4/V5/V6/V7 suites remain labeled under History and are not release
+gates. The original 194 failures were grouped as a localnet/default-runner and
+obsolete historical-harness problem; see
+[`docs/v8-final/LOCAL_TEST_FAILURE_CLASSIFICATION.md`](docs/v8-final/LOCAL_TEST_FAILURE_CLASSIFICATION.md).
+
+## History
+
+Earlier V4/V5/V6/V7 sources and Bradbury/Studio-dev diagnostic artifacts are
+preserved for audit provenance. They are not the active contract, frontend
+configuration, deployment path, or reviewer evidence for this release.

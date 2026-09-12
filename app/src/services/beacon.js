@@ -4,6 +4,14 @@ import { executeWriteLifecycle, reconcilePersistedWrite } from "./transactionLif
 export const SUBMISSION_FEE_WEI = 1000000000000000000n;
 export const CHALLENGE_FEE_WEI = 250000000000000000n;
 export const CHALLENGE_CATEGORIES = ["PEG", "LIQUIDITY", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE", "OTHER"];
+export const CANONICAL_NAMESPACE = "eip155:1";
+export const CANONICAL_SEMANTIC_SOURCES = Object.freeze({
+  ISSUER: "https://developers.circle.com/stablecoins/usdc-contract-addresses.md",
+  REDEMPTION: "https://developers.circle.com/circle-mint/concepts/how-minting-works.md",
+  BACKING: "https://developers.circle.com/stablecoins/what-is-usdc.md",
+  SECURITY: "https://developers.circle.com/cctp/references/technical-guide.md",
+  GOVERNANCE: "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification.md",
+});
 const VERDICTS = ["CORE", "STANDARD", "WATCH", "REJECT"];
 const STATUS = { SUBMITTED: "SUBMITTED", CHALLENGED: "CHALLENGED" };
 
@@ -16,6 +24,9 @@ function plain(value) {
 
 function requireShape(functionName, value) {
   const arrayRead = functionName === "asset_ids";
+  const scalarRead = functionName === "asset_count";
+  if (scalarRead && !["bigint", "number", "string"].includes(typeof value)) throw new Error(`Beacon returned an invalid ${functionName} response shape.`);
+  if (scalarRead) return value;
   if (arrayRead ? !Array.isArray(value) : (!value || typeof value !== "object" || Array.isArray(value))) throw new Error(`Beacon returned an invalid ${functionName} response shape.`);
   return value;
 }
@@ -37,7 +48,7 @@ export default class BeaconRegistry {
   }
   isConfigured() { return /^0x[0-9a-fA-F]{40}$/.test(this.contractAddress); }
   emptySubmission() {
-    return { name: "", symbol: "", chain: "ethereum", token_address: "", target_currency: "USD", market_identifier: "", secondary_market_identifier: "", issuer_url: "", redemption_url: "", reserve_backing_url: "", security_url: "", governance_url: "" };
+    return { name: "", symbol: "", chain: CANONICAL_NAMESPACE, token_address: "", target_currency: "USD", market_identifier: "usd-coin", secondary_market_identifier: "usdc-usd-coin", issuer_url: CANONICAL_SEMANTIC_SOURCES.ISSUER, redemption_url: CANONICAL_SEMANTIC_SOURCES.REDEMPTION, reserve_backing_url: CANONICAL_SEMANTIC_SOURCES.BACKING, security_url: CANONICAL_SEMANTIC_SOURCES.SECURITY, governance_url: CANONICAL_SEMANTIC_SOURCES.GOVERNANCE };
   }
   async read(functionName, args = []) {
     if (!this.isConfigured()) throw new Error("VITE_CONTRACT_ADDRESS is not configured for Beacon V8.");
@@ -93,29 +104,58 @@ export default class BeaconRegistry {
   _getPersisted(operation, id) { return store()?.getItem(this._key(operation, id)); }
   _reconcile(hash) { return this.readClient.waitForFinalization({ hash, fullTransaction: true }); }
   async _getWriteClient() { if (!this.writeClient) this.writeClient = await createWriteClient(); return this.writeClient; }
-  async _write(operation, id, args, precondition, expected, value = 0n) {
+  async _validatedExpectedState(operation, id) {
+    if (operation === "evaluate_asset") {
+      const passport = await this.currentPassport(id);
+      if (!passport || passport.asset_id !== id || Number(passport.version) !== 1) throw new Error("Final state validation failed: Passport V1 was not read back.");
+      return passport;
+    }
+    if (operation === "reassess_asset") {
+      const passport = await this.currentPassport(id);
+      if (!passport || passport.asset_id !== id || Number(passport.version) < 2) throw new Error("Final state validation failed: reassessed Passport was not read back.");
+      return passport;
+    }
+    if (operation === "challenge_asset") {
+      const asset = await this.asset(id);
+      if (!asset || asset.asset_id !== id || asset.lifecycle_status !== STATUS.CHALLENGED) throw new Error("Final state validation failed: challenged asset was not read back.");
+      return asset;
+    }
+    if (operation === "submit_asset") {
+      const asset = await this.asset(id);
+      if (!asset || asset.asset_id !== id) throw new Error("Final state validation failed: submitted asset was not read back.");
+      return asset;
+    }
+    const state = await this.checkpointState(id);
+    if (!state?.asset || state.asset.asset_id !== id) throw new Error("Final state validation failed: checkpoint state was not read back.");
+    return state;
+  }
+  async _write(operation, id, args, precondition, expected, value = 0n, onStatus = null) {
     return executeWriteLifecycle({
       readPrecondition: precondition,
       broadcast: async () => {
         const client = await this._getWriteClient();
-        const estimate = await client.estimateTransactionFeesForWrite({ address: this.contractAddress, functionName: operation, args, value });
-        const fees = { distribution: estimate.distribution, feeValue: estimate.feeValue };
-        if (estimate.messageAllocations) fees.messageAllocations = estimate.messageAllocations;
-        return client.writeContract({ address: this.contractAddress, functionName: operation, args, value, fees });
+        const write = { address: this.contractAddress, functionName: operation, args, value };
+        if (typeof client.estimateTransactionFeesForWrite === "function") {
+          const estimate = await client.estimateTransactionFeesForWrite({ address: this.contractAddress, functionName: operation, args, value });
+          write.fees = { distribution: estimate.distribution, feeValue: estimate.feeValue };
+          if (estimate.messageAllocations) write.fees.messageAllocations = estimate.messageAllocations;
+        }
+        return client.writeContract(write);
       },
       persistHash: async (hash) => this._persist(operation, id, hash),
       reconcile: (hash) => this._reconcile(hash),
       readExpectedState: expected,
+      onStatus,
     });
   }
-  async recover(operation, id, expected) { return reconcilePersistedWrite({ getPersistedHash: async () => this._getPersisted(operation, id), reconcile: (hash) => this._reconcile(hash), readExpectedState: expected }); }
-  async submitAsset(fields) {
+  async recover(operation, id, _expected, onStatus = null) { return reconcilePersistedWrite({ getPersistedHash: async () => this._getPersisted(operation, id), reconcile: (hash) => this._reconcile(hash), readExpectedState: () => this._validatedExpectedState(operation, id), onStatus }); }
+  async submitAsset(fields, onStatus = null) {
     const token = fields.token_address.toLowerCase();
     const id = `eip155:1:${token}`;
-    const args = [fields.name || "", fields.symbol || "", fields.chain, fields.token_address, fields.target_currency, fields.coingecko_id_claim || fields.market_identifier || "", fields.coinpaprika_id_claim || fields.secondary_market_identifier || "", fields.issuer_url, fields.redemption_url, fields.reserve_backing_url || fields.backing_url, fields.security_url, fields.governance_url];
-    return this._write("submit_asset", id, args, async () => { const current = await this.asset(id); if (current && Object.keys(current).length) throw new Error("Precondition failed: asset already exists."); }, () => this.asset(id), SUBMISSION_FEE_WEI);
+    const args = [fields.name || "", fields.symbol || "", fields.chain, fields.token_address, fields.target_currency, fields.coingecko_id_claim || fields.market_identifier || "", fields.coinpaprika_id_claim || fields.secondary_market_identifier || "", CANONICAL_SEMANTIC_SOURCES.ISSUER, CANONICAL_SEMANTIC_SOURCES.REDEMPTION, CANONICAL_SEMANTIC_SOURCES.BACKING, CANONICAL_SEMANTIC_SOURCES.SECURITY, CANONICAL_SEMANTIC_SOURCES.GOVERNANCE];
+    return this._write("submit_asset", id, args, async () => { const current = await this.asset(id); if (current && Object.keys(current).length) throw new Error("Precondition failed: asset already exists."); }, async () => { const current = await this.asset(id); if (!current || current.asset_id !== id) throw new Error("Final state validation failed: submitted asset was not read back."); return current; }, SUBMISSION_FEE_WEI, onStatus);
   }
-  async evaluateAsset(id) {
+  async evaluateAsset(id, onStatus = null) {
     const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
     return this._write("evaluate_asset", canonicalId, [canonicalId], async () => {
       const current = await this.asset(canonicalId);
@@ -125,41 +165,41 @@ export default class BeaconRegistry {
       if (!Object.values(checkpoints?.identity || {}).every((x) => x.binding_status === "VERIFIED")) throw new Error("Precondition failed: both provider identity checkpoints must be VERIFIED.");
       if (!("ISSUER" in (checkpoints?.semantic || {})) || !["ISSUER", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE"].every((role) => checkpoints.semantic[role]?.authority_status === "VERIFIED" && checkpoints.semantic[role]?.asset_binding_status === "VERIFIED")) throw new Error("Precondition failed: all five semantic source checkpoints must be VERIFIED.");
       if (checkpoints.market?.COINGECKO?.source_status !== "OK" || checkpoints.market?.COINPAPRIKA?.source_status !== "OK") throw new Error("Precondition failed: both objective market checkpoints must be ready.");
-    }, () => this.currentPassport(canonicalId));
+    }, async () => { const passport = await this.currentPassport(canonicalId); if (!passport || passport.asset_id !== canonicalId || Number(passport.version) !== 1) throw new Error("Final state validation failed: Passport V1 was not read back."); return passport; }, 0n, onStatus);
   }
-  async _checkpointWrite(operation, id, extra = []) {
+  async _checkpointWrite(operation, id, extra = [], onStatus = null) {
     const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
     return this._write(operation, canonicalId, [canonicalId, ...extra], async () => {
       const current = await this.asset(canonicalId);
       if (!current || Number(current.current_version) !== 0 || current.lifecycle_status !== STATUS.SUBMITTED) throw new Error("Precondition failed: asset is not awaiting checkpoints.");
-    }, () => this.checkpointState(canonicalId));
+    }, async () => { const state = await this.checkpointState(canonicalId); if (!state?.asset || state.asset.asset_id !== canonicalId) throw new Error("Final state validation failed: checkpoint state was not read back."); return state; }, 0n, onStatus);
   }
-  async verifyCoingeckoIdentity(id) { return this._checkpointWrite("verify_coingecko_identity", id); }
-  async verifyCoinpaprikaIdentity(id) { return this._checkpointWrite("verify_coinpaprika_identity", id); }
-  async verifySemanticSource(id, role) {
+  async verifyCoingeckoIdentity(id, onStatus = null) { return this._checkpointWrite("verify_coingecko_identity", id, [], onStatus); }
+  async verifyCoinpaprikaIdentity(id, onStatus = null) { return this._checkpointWrite("verify_coinpaprika_identity", id, [], onStatus); }
+  async verifySemanticSource(id, role, onStatus = null) {
     const canonicalId = selectCanonicalAssetId(id, await this.assetIds());
     return this._write("verify_semantic_source", canonicalId, [canonicalId, role], async () => {
       const current = await this.asset(canonicalId);
       if (!current || Number(current.current_version) !== 0 || current.identity_status !== "VERIFIED") throw new Error("Precondition failed: dual provider identity checkpoints are incomplete.");
-    }, () => this.checkpointState(canonicalId));
+    }, () => this.checkpointState(canonicalId), 0n, onStatus);
   }
-  async refreshCoingeckoMarket(id) { return this._checkpointWrite("refresh_coingecko_market", id); }
-  async refreshCoinpaprikaMarket(id) { return this._checkpointWrite("refresh_coinpaprika_market", id); }
-  async challengeAsset(id, category, reason, evidenceUrl) {
+  async refreshCoingeckoMarket(id, onStatus = null) { return this._checkpointWrite("refresh_coingecko_market", id, [], onStatus); }
+  async refreshCoinpaprikaMarket(id, onStatus = null) { return this._checkpointWrite("refresh_coinpaprika_market", id, [], onStatus); }
+  async challengeAsset(id, category, reason, evidenceUrl, onStatus = null) {
     const current = await this.asset(id);
     if (!current || !VERDICTS.includes(current.current_verdict)) throw new Error("Precondition failed: no challengeable current verdict.");
     const args = [id, Number(current.current_version), category, reason, evidenceUrl];
     return this._write("challenge_asset", id, args, async () => {
       const fresh = await this.asset(id);
       if (!fresh || !VERDICTS.includes(fresh.current_verdict) || Number(fresh.current_version) !== args[1]) throw new Error("Precondition failed: current passport changed; review before retrying.");
-    }, () => this.asset(id), CHALLENGE_FEE_WEI);
+    }, async () => { const state = await this.asset(id); if (!state || state.asset_id !== id || state.lifecycle_status !== STATUS.CHALLENGED || Number(state.current_version) !== args[1]) throw new Error("Final state validation failed: challenged asset was not read back."); return state; }, CHALLENGE_FEE_WEI, onStatus);
   }
-  async reassessAsset(id) {
+  async reassessAsset(id, onStatus = null) {
     let nextVersion = null;
     return this._write("reassess_asset", id, [id], async () => {
       const current = await this.asset(id);
       if (!current || current.lifecycle_status !== STATUS.CHALLENGED) throw new Error("Precondition failed: asset is not challenged.");
       nextVersion = Number(current.current_version) + 1;
-    }, () => this.currentPassport(id).then((passport) => ({ ...passport, expected_version: nextVersion })));
+    }, async () => { const passport = await this.currentPassport(id); if (!passport || passport.asset_id !== id || Number(passport.version) !== nextVersion) throw new Error("Final state validation failed: reassessed Passport was not read back."); return { ...passport, expected_version: nextVersion }; }, 0n, onStatus);
   }
 }

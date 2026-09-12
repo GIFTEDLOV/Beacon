@@ -1,3 +1,5 @@
+import { CANONICAL_SEMANTIC_SOURCES } from "./beacon.js";
+
 export const VERDICTS = ["CORE", "STANDARD", "WATCH", "REJECT"];
 export const FAILURE_STATES = [
   "ASSET_IDENTITY_UNVERIFIED",
@@ -31,15 +33,16 @@ export function validateSubmissionFields(fields, step = 0) {
     if (fields.symbol && !/^[A-Za-z0-9]{1,16}$/.test(fields.symbol)) errors.push("Symbol claim must be 1-16 letters or numbers.");
   }
   if (step === 0 || step === 2) {
-    if (!/^[A-Za-z][A-Za-z0-9]{2,11}$/.test(fields.target_currency || "")) errors.push("Target currency format is invalid.");
+    if (String(fields.target_currency || "").toUpperCase() !== "USD") errors.push("Beacon V8 currently supports USD-denominated USDC checkpoints only.");
     for (const claim of [fields.market_identifier, fields.secondary_market_identifier]) {
-      if (!claim || !/^[a-z0-9][a-z0-9._:-]{1,63}$/i.test(claim)) errors.push("Both authenticated market ID claims are required and must be bounded.");
+      if (!claim || !/^[a-z0-9][a-z0-9._-]{1,63}$/i.test(claim)) errors.push("Both authenticated market ID claims are required and must be bounded.");
     }
     if (fields.market_identifier && fields.secondary_market_identifier && fields.market_identifier.toLowerCase() === fields.secondary_market_identifier.toLowerCase()) errors.push("Objective claims must be independent.");
   }
   if (step === 0 || step === 3) {
     const urls = [fields.issuer_url, fields.redemption_url, fields.reserve_backing_url, fields.security_url, fields.governance_url];
-    if (urls.some((url) => !url || url.length > 1024 || !isHttpsPublicLooking(url))) errors.push("Every evidence role needs a bounded HTTPS source.");
+    const canonicalUrls = [CANONICAL_SEMANTIC_SOURCES.ISSUER, CANONICAL_SEMANTIC_SOURCES.REDEMPTION, CANONICAL_SEMANTIC_SOURCES.BACKING, CANONICAL_SEMANTIC_SOURCES.SECURITY, CANONICAL_SEMANTIC_SOURCES.GOVERNANCE];
+    if (urls.some((url, index) => url !== canonicalUrls[index] || !isHttpsPublicLooking(url))) errors.push("Each semantic role must use its fixed authenticated Circle source.");
     const canonical = urls.map((url) => { try { const parsed = new URL(url); return `${parsed.protocol}//${parsed.host.toLowerCase()}${parsed.pathname}${parsed.search}`; } catch { return url; } });
     if (new Set(canonical).size !== canonical.length) errors.push("Evidence sources must not be reused across roles.");
   }

@@ -12,8 +12,8 @@
 import { computed } from "vue";
 const props = defineProps({ state: { type: Object, required: true } });
 defineEmits(["close", "recover"]);
-const steps = ["Preparing", "Wallet confirmation", "Submitted", "Consensus", "Finalized", "State verified"];
+const steps = ["Preparing", "Wallet confirmation", "SUBMITTED", "ACCEPTED", "FINALIZED", "FINISHED_WITH_RETURN", "FINISHED_WITH_ERROR", "State verified"];
 const current = computed(() => props.state.phase || "Preparing");
 function stepNumber(step) { return String(steps.indexOf(step) + 1).padStart(2, "0"); }
-function stepClass(step) { const currentIndex = steps.indexOf(current.value); const index = steps.indexOf(step); return { done: index < currentIndex && current.value !== "Unable to complete", active: step === current.value, failed: current.value === "Unable to complete" && step === "Wallet confirmation" }; }
+function stepClass(step) { const currentIndex = steps.indexOf(current.value); const index = steps.indexOf(step); return { done: index < currentIndex && current.value !== "Unable to complete" && current.value !== "FINISHED_WITH_ERROR", active: step === current.value, failed: current.value === "Unable to complete" || (current.value === "FINISHED_WITH_ERROR" && step === "FINISHED_WITH_ERROR") }; }
 </script>

@@ -1,0 +1,10 @@
+# Release test default: use the built-in stable Studionet definition.
+# This file intentionally contains no custom network or RPC override.
+networks:
+  default: studionet
+  studionet:
+    leader_only: false
+
+paths:
+  contracts: contracts
+  artifacts: artifacts

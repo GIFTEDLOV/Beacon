@@ -1,16 +1,16 @@
 # Known limitations
 
-- V8 has not been deployed to Studio-dev or Bradbury in this worktree because
-  the installed gltest build lacks the documented fee-profile generation
-  command, and the official current Bradbury fee-policy read reverts at
-  `messageFeeParamsBudgetFloor()`. No deployment or live Passport claim is
-  made.
+- The release is tied to the live-proven stable Studionet deployment. The
+  read-only verifier confirms the current state; it does not repeat writes.
 - Live semantic and market availability remains dependent on the contract's
-  bounded external providers. Outage is represented as unavailable/unknown;
-  it is not converted into a negative finding.
-- Provider snapshots can differ slightly. V8 uses explicit normalized fields
-  and bounded tolerance; it does not compare raw response bodies.
-- The current public production site was not changed and remains historical
-  V6 evidence until an explicitly authorized V8 release.
-- The old `deploy/deployScript.ts` remains historical and still names the V5
-  source. V8 deployment must use `deploy/v8/deploy.ts`.
+  bounded external providers. Outage is represented as unavailable/unknown,
+  not converted into a favorable finding.
+- Provider snapshots can differ slightly. V8 compares normalized decision
+  fields with bounded tolerances rather than raw response bodies.
+- `genlayer-test==0.29.2` declares an upstream dependency range that excludes
+  the required stable `genlayer-py==0.18.0`; the isolated harness installs the
+  exact pair with `--no-deps` and records the exception in `TOOLCHAIN.md`.
+- No mutation-test framework is configured: `MUTATION_TESTS = NOT_CONFIGURED`.
+- The public GitHub branch and production hosting were not changed in this
+  local release-preparation task. Historical V4/V5/V6/V7 and Bradbury/Studio-
+  dev diagnostics remain under their original history paths.

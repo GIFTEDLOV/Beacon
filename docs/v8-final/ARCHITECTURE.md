@@ -76,8 +76,8 @@ resolved; a failure leaves both the old Passport and all challenges unchanged.
 ## Frontend and finality
 
 `app/src/services/beacon.js` is the single V8 contract adapter. Reads use an
-account-free Bradbury client; writes use the connected wallet through the
-current GenLayer JS client and the exact returned fee object. Transaction IDs
-are persisted immediately and recovered by tracking the same hash. A write is
-successful only when it is `FINALIZED` and execution is
-`FINISHED_WITH_RETURN`; `ACCEPTED` is not success.
+account-free Studionet client; writes use the connected wallet through stable
+genlayer-js 1.1.8. Studionet applies network-default fee behavior, so no
+RC-only fee object is added. Transaction IDs are persisted immediately and
+recovered by tracking the same hash. A write is successful only when it is
+`FINALIZED` and execution is `FINISHED_WITH_RETURN`; `ACCEPTED` is not success.

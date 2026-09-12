@@ -22,8 +22,8 @@ test("live proof reads never fall back to another asset or static release facts"
 });
 
 const validSubmission = {
-  name: "Beacon Dollar", symbol: "BUSD", chain: "ethereum", token_address: "0x1111111111111111111111111111111111111111", target_currency: "USD", market_identifier: "beacon-dollar", secondary_market_identifier: "beacon-dollar-secondary",
-  issuer_url: "https://issuer.example.com/asset", redemption_url: "https://issuer.example.com/redeem", reserve_backing_url: "https://issuer.example.com/reserves", security_url: "https://issuer.example.com/security", governance_url: "https://issuer.example.com/governance",
+  name: "USD Coin", symbol: "USDC", chain: "ethereum", token_address: "0x1111111111111111111111111111111111111111", target_currency: "USD", market_identifier: "beacon-dollar", secondary_market_identifier: "beacon-dollar-secondary",
+  issuer_url: "https://developers.circle.com/stablecoins/usdc-contract-addresses.md", redemption_url: "https://developers.circle.com/circle-mint/concepts/how-minting-works.md", reserve_backing_url: "https://developers.circle.com/stablecoins/what-is-usdc.md", security_url: "https://developers.circle.com/cctp/references/technical-guide.md", governance_url: "https://developers.circle.com/xreserve/concepts/usdc-backed-stablecoin-specification.md",
 };
 
 test("registry presentation reads live-shaped rows and separates failures", () => {

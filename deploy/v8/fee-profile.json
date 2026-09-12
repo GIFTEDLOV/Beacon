@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "network": "studionet",
+  "rpc": "https://studio.genlayer.com/api",
+  "chainId": 61999,
+  "measuredAt": "2026-09-12",
+  "toolchain": {
+    "genlayerCli": "0.39.2",
+    "genlayerJs": "1.1.8",
+    "genlayerPy": "0.18.0",
+    "genlayerTest": "0.29.2"
+  },
+  "feeMode": "gasless_or_network_default",
+  "deploy": {
+    "fees": null,
+    "distribution": null,
+    "feeValue": "0",
+    "source": "Official genlayer-js 1.1.8 deployContract route; stable Studionet applies network defaults."
+  },
+  "coverage": {
+    "deploy": "live deployment evidence recorded in docs/v8-final/STUDIONET_LIVE_PROOF.md",
+    "writeMethods": "live reviewer lifecycle transaction IDs recorded in docs/v8-final/STUDIONET_LIVE_PROOF.md",
+    "syntheticPerMethodProfile": false
+  }
+}

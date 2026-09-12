@@ -1,0 +1,15 @@
+# Beacon V8 source freeze record
+
+This freeze records the exact source that was already deployed and proven on
+GenLayer Studionet. The source was not modified during local harness repair.
+
+- Source: `contracts/beacon_v8_studionet.py`
+- Bytes: `44394`
+- SHA-256: `698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c`
+- Network: Studionet
+- Chain ID: `61999`
+- Live contract: `0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1`
+- Deployment transaction: `0xf890b6bada92e8d42f2f8580cbdf10e39b1459d86f4f836425f8e0ab179286fc`
+
+The freeze is invalidated if the source changes. The deployment script checks
+the SHA immediately before any future official deployment call.

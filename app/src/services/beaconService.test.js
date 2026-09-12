@@ -11,11 +11,16 @@ const fields = {
 
 test("contract service sends exact configured fees and hardened argument shapes", async () => {
   const writes = [];
-  let firstAssetRead = true;
+  let assetReadCount = 0;
   const client = {
     async readContract({ functionName }) {
-      if (functionName === "asset" && firstAssetRead) { firstAssetRead = false; return {}; }
-      if (functionName === "asset") return { current_version: 1, current_verdict: "CORE", lifecycle_status: "EVALUATED" };
+      if (functionName === "asset") {
+        assetReadCount += 1;
+        if (assetReadCount === 1) return {};
+        if (assetReadCount <= 2) return { asset_id: `eip155:1:${address.toLowerCase()}`, current_version: 0, current_verdict: "", lifecycle_status: "SUBMITTED" };
+        if (assetReadCount <= 3) return { asset_id: `eip155:1:${address.toLowerCase()}`, current_version: 1, current_verdict: "CORE", lifecycle_status: "EVALUATED" };
+        return { asset_id: `eip155:1:${address.toLowerCase()}`, current_version: 1, current_verdict: "CORE", lifecycle_status: "CHALLENGED" };
+      }
       return { asset_id: "ethereum:0x1111111111111111111111111111111111111111" };
     },
     async estimateTransactionFeesForWrite() { return { distribution: { leaderTimeunitsAllocation: 1n }, feeValue: 2n }; },
@@ -33,6 +38,14 @@ test("contract service sends exact configured fees and hardened argument shapes"
 test("canonical asset selection preserves the exact ID returned by Beacon state", () => {
   const canonical = "eip155:1:0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48";
   assert.equal(selectCanonicalAssetId(canonical, [canonical]), canonical);
+});
+
+test("asset count accepts the contract's scalar read shape", async () => {
+  const registry = new BeaconRegistry({
+    address,
+    readClient: { async readContract() { return 3n; } },
+  });
+  assert.equal(await registry.assetCount(), 3n);
 });
 
 test("mixed-case reconstructed asset IDs are rejected before broadcast", () => {
@@ -57,7 +70,7 @@ test("evaluation uses the canonical asset ID returned by Beacon state", async ()
         semantic: Object.fromEntries(["ISSUER", "REDEMPTION", "BACKING", "SECURITY", "GOVERNANCE"].map((role) => [role, { authority_status: "VERIFIED", asset_binding_status: "VERIFIED" }])),
         market: { COINGECKO: { source_status: "OK" }, COINPAPRIKA: { source_status: "OK" } },
       };
-      if (functionName === "current_passport") return { version: 1, verdict: "WATCH" };
+      if (functionName === "current_passport") return { asset_id: canonical, version: 1, verdict: "WATCH" };
       return {};
     },
     async estimateTransactionFeesForWrite() { return { distribution: { leaderTimeunitsAllocation: 1n }, feeValue: 2n }; },

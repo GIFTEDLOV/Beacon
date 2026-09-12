@@ -1,4 +1,6 @@
 <template>
+    <section v-if="route.name === 'proof'" class="page-shell proof-page proof-page-live"><div class="section-heading page-heading"><div><span class="section-index">12 / PUBLIC VERIFICATION</span><h1>V8 reviewer evidence</h1><p>Only frozen V8 facts and reads from the configured Studionet contract appear here. Before deployment this page remains explicitly unpublished.</p></div><div class="heading-meta"><span class="mono">BEACON V8</span><span class="mono">CHAIN 61999</span><span class="source-tag validator">SOURCE-BOUND</span></div></div><div class="proof-banner"><span class="status-dot" :class="{ offline: !configured }"></span><strong>GENLAYER STUDIONET / V8 CONTRACT</strong><span class="mono">{{ configured ? 'CONFIGURED' : 'NOT DEPLOYED' }}</span></div><div class="proof-ledger"><div class="ledger-title"><span class="section-index">RELEASE STATUS</span><span class="mono">{{ releaseProof.deploymentStatus }}</span></div><div class="ledger-row"><span>CONTRACT</span><CopyHash :value="releaseProof.contractAddress" label="Copy V8 contract address" /></div><div class="ledger-row"><span>SOURCE SHA256</span><CopyHash :value="releaseProof.sourceSha256" label="Copy frozen V8 source SHA256" /></div><div class="ledger-row"><span>DEPLOYMENT TX</span><CopyHash :value="releaseProof.deploymentTx" label="Copy V8 deployment transaction" /></div><div class="ledger-row"><span>CANONICAL ASSET</span><strong>{{ releaseProof.assetId }}</strong></div></div><div v-if="!configured" class="notice warning">V8 is not deployed or configured. No historical state is substituted.</div><div v-else-if="loading" class="state-block">Reading frozen V8 state<span class="loading-mark">...</span></div><div v-else-if="error" class="notice error">{{ error }}</div><div v-else-if="!proofLiveAvailable" class="notice error">UNKNOWN / configured V8 contract read unavailable.</div><div v-else class="proof-observation-grid"><section class="data-section"><div class="section-heading block-heading"><div><span class="section-index">LIVE CONTRACT READ</span><h2>Current state</h2></div><span class="source-tag on-chain">ON-CHAIN</span></div><dl class="data-list"><div><dt>Asset count</dt><dd>{{ liveCount }}</dd></div><div><dt>Asset ID</dt><dd class="break-value">{{ proofAsset.asset_id }}</dd></div><div><dt>Lifecycle</dt><dd>{{ proofAsset.lifecycle_status }}</dd></div><div><dt>Passport version</dt><dd>V{{ proofPassport.version }}</dd></div><div><dt>Verdict</dt><dd :class="riskClass(proofPassport.verdict)">{{ proofPassport.verdict || 'UNKNOWN' }}</dd></div><div><dt>Max LTV</dt><dd>{{ proofPassport.max_ltv_bps ?? 'UNKNOWN' }} BPS</dd></div></dl></section><section class="data-section"><div class="section-heading block-heading"><div><span class="section-index">AUTHENTICATED PROVENANCE</span><h2>Decision inputs</h2></div><span class="source-tag validator">CONTRACT READ</span></div><dl class="data-list"><div><dt>Identity</dt><dd>{{ proofPassport.identity_status || 'UNKNOWN' }}</dd></div><div><dt>Canonical namespace</dt><dd>{{ proofPassport.canonical_namespace || 'UNKNOWN' }}</dd></div><div><dt>Token address</dt><dd class="break-value">{{ proofPassport.canonical_token_address || 'UNKNOWN' }}</dd></div><div><dt>Policy basis</dt><dd>{{ proofPassport.policy_basis || 'UNKNOWN' }}</dd></div><div><dt>Challenge count</dt><dd>{{ proofPassport.challenge_count ?? 'UNKNOWN' }}</dd></div><div><dt>Challenge set digest</dt><dd class="break-value">{{ proofPassport.challenge_set_digest || 'UNKNOWN' }}</dd></div></dl></section></div>
+    </section>
   <div class="beacon-app" :class="{ 'focus-mode': focusMode }">
     <ParticleField :dimmed="route.name !== 'landing'" />
     <div class="ambient-grain" aria-hidden="true"></div>
@@ -16,23 +18,23 @@
           <button :class="navClass('proof')" @click="navigate('/proof')"><span>03</span> Proof</button>
         </nav>
 
-        <div class="network-status" :aria-label="configured ? 'Bradbury live contract reads' : 'Bradbury not configured'">
+        <div class="network-status" :aria-label="configured ? 'Studionet live contract reads' : 'Studionet not configured'">
           <span class="status-dot" :class="{ offline: !configured }"></span>
           <div>
-            <span class="mono">BRADBURY Ã‚Â· {{ configured ? 'LIVE' : 'OFFLINE' }}</span>
-            <small>CHAIN 4221 / CONTRACT READS</small>
+            <span class="mono">STUDIONET Ã‚Â· {{ configured ? 'LIVE' : 'OFFLINE' }}</span>
+            <small>CHAIN 61999 / CONTRACT READS</small>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="site-main">
+    <main v-if="route.name !== 'proof'" class="site-main">
       <section v-if="route.name === 'landing'" class="landing-page">
         <div v-if="!focusMode" class="marquee-rail site-shell" aria-label="Beacon release notices">
           <div class="marquee-window" aria-hidden="true">
             <div class="marquee-track">
-              <span>LIVE V8 COLLATERAL PASSPORT</span><i></i><span>FINALIZED ON TESTNET BRADBURY</span><i></i><span>COLLATERAL POLICY IS DETERMINISTIC</span><i></i><span>INDEPENDENT VALIDATOR EVIDENCE</span><i></i><span>V8 IDENTITY-BOUND CONSENSUS</span><i></i>
-              <span>LIVE V8 COLLATERAL PASSPORT</span><i></i><span>FINALIZED ON TESTNET BRADBURY</span><i></i><span>COLLATERAL POLICY IS DETERMINISTIC</span><i></i><span>INDEPENDENT VALIDATOR EVIDENCE</span><i></i><span>V8 IDENTITY-BOUND CONSENSUS</span><i></i>
+              <span>LIVE V8 COLLATERAL PASSPORT</span><i></i><span>FINALIZED ON GENLAYER STUDIONET</span><i></i><span>COLLATERAL POLICY IS DETERMINISTIC</span><i></i><span>INDEPENDENT VALIDATOR EVIDENCE</span><i></i><span>V8 IDENTITY-BOUND CONSENSUS</span><i></i>
+              <span>LIVE V8 COLLATERAL PASSPORT</span><i></i><span>FINALIZED ON GENLAYER STUDIONET</span><i></i><span>COLLATERAL POLICY IS DETERMINISTIC</span><i></i><span>INDEPENDENT VALIDATOR EVIDENCE</span><i></i><span>V8 IDENTITY-BOUND CONSENSUS</span><i></i>
             </div>
           </div>
           <div class="marquee-actions"><button @click="navigate('/proof')">01 Ã‚Â· VIEW PROOF</button><button @click="navigate('/assets')">02 Ã‚Â· OPEN REGISTRY</button></div>
@@ -82,7 +84,7 @@
       </section>
 
       <section v-else-if="route.name === 'registry'" class="page-shell">
-        <div class="section-heading page-heading"><div><span class="section-index">01 / REGISTRY</span><h1>Collateral registry</h1><p>A live terminal for Beacon asset records. Every row is read from the configured contract.</p></div><div class="heading-meta"><span class="mono">TESTNET BRADBURY</span><span class="mono">{{ liveCount }} ASSET{{ liveCount === 1 ? '' : 'S' }}</span><span class="source-tag on-chain">LIVE CONTRACT</span></div></div>
+        <div class="section-heading page-heading"><div><span class="section-index">01 / REGISTRY</span><h1>Collateral registry</h1><p>A live terminal for Beacon asset records. Every row is read from the configured contract.</p></div><div class="heading-meta"><span class="mono">GENLAYER STUDIONET</span><span class="mono">{{ liveCount }} ASSET{{ liveCount === 1 ? '' : 'S' }}</span><span class="source-tag on-chain">LIVE CONTRACT</span></div></div>
           <div v-if="!configured" class="notice warning">V8 contract configuration is missing. No illustrative assets are shown.</div>
         <template v-else>
           <div class="terminal-toolbar"><div class="toolbar-count"><span class="mono">ASSET COUNT</span><strong>{{ liveCount }}</strong><span class="mono muted">ASSET_COUNT()</span></div><div class="toolbar-controls"><label class="search-field"><span class="sr-only">Search assets</span><span class="search-prefix">/</span><input v-model="search" type="search" placeholder="Search asset, symbol, chain or ID" /></label><label class="filter-field"><span class="sr-only">Filter verdict</span><select v-model="filter"><option v-for="option in filterOptions" :key="option" :value="option">{{ option === 'ALL' ? 'ALL STATES' : option.replaceAll('_', ' ') }}</option></select></label></div></div>
@@ -107,7 +109,7 @@
 
           <section class="section-block checkpoint-panel"><div class="section-heading block-heading"><div><span class="section-index">04 / CHECKPOINTS</span><h2>External evidence checkpoints</h2></div><span class="source-tag validator">ONE SOURCE / ONE WRITE</span></div><p class="form-note">Beacon verifies each provider, semantic role and market snapshot before the final Passport evaluation. A failed checkpoint remains isolated; no automatic rebroadcast is attempted.</p><div v-if="!checkpointState" class="state-block">Checkpoint state is unavailable. No staged completion is inferred.</div><div v-else class="checkpoint-grid"><div class="checkpoint-card"><span class="section-index">IDENTITY</span><div v-for="item in identityCheckpoints" :key="item.key" class="checkpoint-row"><div><strong>{{ item.label }}</strong><small>{{ checkpointValue('identity', item.key, 'status') }}</small></div><button v-if="checkpointValue('identity', item.key, 'status') !== 'VERIFIED'" class="button button-line" :disabled="writing" @click="item.run(detailAsset.asset_id)">Verify</button><span v-else class="source-tag on-chain">VERIFIED</span></div></div><div class="checkpoint-card"><span class="section-index">SEMANTIC SOURCES</span><div v-for="item in semanticCheckpoints" :key="item.key" class="checkpoint-row"><div><strong>{{ item.label }}</strong><small>{{ checkpointValue('semantic', item.key, 'binding_status') }} / {{ checkpointValue('semantic', item.key, 'authority_status') }}</small></div><button v-if="checkpointValue('semantic', item.key, 'binding_status') !== 'VERIFIED'" class="button button-line" :disabled="writing || !identityReady" @click="verifySemantic(detailAsset.asset_id, item.role)">Verify</button><span v-else class="source-tag on-chain">VERIFIED</span></div></div><div class="checkpoint-card"><span class="section-index">OBJECTIVE SNAPSHOTS</span><div v-for="item in marketCheckpoints" :key="item.key" class="checkpoint-row"><div><strong>{{ item.label }}</strong><small>{{ checkpointValue('market', item.key, 'source_status') }}</small></div><button v-if="checkpointValue('market', item.key, 'source_status') !== 'OK'" class="button button-line" :disabled="writing || !identityReady" @click="item.run(detailAsset.asset_id)">Refresh</button><span v-else class="source-tag on-chain">READY</span></div></div></div></section>
 
-          <section class="passport-artifact"><div class="passport-corner top-left"></div><div class="passport-corner top-right"></div><div class="passport-corner bottom-left"></div><div class="passport-corner bottom-right"></div><div class="passport-artifact-head"><span class="section-index">BEACON / MACHINE-READABLE RECORD</span><span class="mono">PASSPORT V{{ detailPassport?.version || 0 }}</span></div><div class="passport-artifact-title"><span>BEACON</span><h2>COLLATERAL<br />PASSPORT</h2></div><div class="passport-artifact-grid"><div><span class="section-index">ASSET ID</span><code>{{ detailAsset.asset_id }}</code></div><div><span class="section-index">VERDICT</span><strong :class="riskClass(displayState(detailPassport).label)">{{ displayState(detailPassport).label }}</strong></div><div><span class="section-index">MAX LTV</span><strong>{{ detailPassport?.max_ltv_bps ?? 0 }} BPS</strong></div><div><span class="section-index">POLICY BASIS</span><span>{{ detailPassport?.policy_basis || 'Ã¢â‚¬â€' }}</span></div><div><span class="section-index">EVIDENCE DIGEST</span><CopyHash :value="detailPassport?.evidence_digest || 'Ã¢â‚¬â€'" label="Copy evidence digest" /></div><div><span class="section-index">EVALUATION MARKER</span><span>{{ detailPassport?.evaluated_at || detailPassport?.market_timestamp || 'Ã¢â‚¬â€' }}</span></div></div><div class="passport-calibration"><span></span><span></span><span></span><span></span><small>V8 / BRADBURY / {{ detailPassport?.objective_coverage || 'UNKNOWN' }}</small></div></section>
+          <section class="passport-artifact"><div class="passport-corner top-left"></div><div class="passport-corner top-right"></div><div class="passport-corner bottom-left"></div><div class="passport-corner bottom-right"></div><div class="passport-artifact-head"><span class="section-index">BEACON / MACHINE-READABLE RECORD</span><span class="mono">PASSPORT V{{ detailPassport?.version || 0 }}</span></div><div class="passport-artifact-title"><span>BEACON</span><h2>COLLATERAL<br />PASSPORT</h2></div><div class="passport-artifact-grid"><div><span class="section-index">ASSET ID</span><code>{{ detailAsset.asset_id }}</code></div><div><span class="section-index">VERDICT</span><strong :class="riskClass(displayState(detailPassport).label)">{{ displayState(detailPassport).label }}</strong></div><div><span class="section-index">MAX LTV</span><strong>{{ detailPassport?.max_ltv_bps ?? 0 }} BPS</strong></div><div><span class="section-index">POLICY BASIS</span><span>{{ detailPassport?.policy_basis || 'Ã¢â‚¬â€' }}</span></div><div><span class="section-index">EVIDENCE DIGEST</span><CopyHash :value="detailPassport?.evidence_digest || 'Ã¢â‚¬â€'" label="Copy evidence digest" /></div><div><span class="section-index">EVALUATION MARKER</span><span>{{ detailPassport?.evaluated_at || detailPassport?.market_timestamp || 'Ã¢â‚¬â€' }}</span></div></div><div class="passport-calibration"><span></span><span></span><span></span><span></span><small>V8 / STUDIONET / {{ detailPassport?.objective_coverage || 'UNKNOWN' }}</small></div></section>
 
           <section class="section-block"><div class="section-heading block-heading"><div><span class="section-index">03 / RISK MATRIX</span><h2>Policy-critical dimensions</h2></div><span class="source-tag validator">VALIDATOR-DERIVED</span></div><div v-if="detailPassport?.version" class="risk-matrix"><RiskCell v-for="(field, index) in primaryRiskFields" :key="field.key" :index="index + 1" :label="field.label" :value="detailPassport[field.key]" :provenance="field.provenance" /></div><div v-else class="state-block">No finalized passport has been written yet.</div></section>
 
@@ -128,11 +130,10 @@
 
       <section v-else-if="route.name === 'challenge'" class="page-shell form-shell"><button class="back-link" @click="navigate(`/assets/${encodeURIComponent(route.assetId)}`)">Ã¢â€ Â Back to passport</button><div class="workflow-layout challenge-layout"><div class="workflow-intro"><span class="section-index">11 / GOVERNANCE</span><h1>Amend the<br />evidence record.</h1><p>A challenge requests reassessment of a finalized passport. It does not erase history or promise a new tier.</p><div class="fee-marker"><span class="section-index">TESTNET V1 / FIXED FEE</span><strong>0.25 GEN</strong><span>Exact, non-refundable challenge fee held by the protocol for anti-spam.</span></div></div><div class="form-surface"><div v-if="!configured" class="notice warning">V8 contract configuration is missing before using write surfaces.</div><div v-else-if="challengeLoading" class="state-block">Reading current passport<span class="loading-mark">...</span></div><div v-else-if="challengeError" class="notice error">{{ challengeError }}</div><form v-else @submit.prevent="submitChallenge"><span class="section-index">PASSPORT DISPUTE / EVIDENCE AMENDMENT</span><h2>Challenge current version.</h2><div class="challenge-target"><span class="section-index">TARGET PASSPORT</span><code>{{ challengeAssetState?.asset_id || route.assetId }}</code><strong>V{{ challengePassport?.version || 0 }} / {{ challengePassport?.verdict || challengePassport?.failure_state || 'NOT EVALUATED' }}</strong></div><div class="form-grid"><label class="field"><span class="field-label">Challenge category *</span><select v-model="challengeForm.category" class="field-input" required><option disabled value="">Choose a category</option><option v-for="category in categories" :key="category" :value="category">{{ category }}</option></select></label><Field v-model="challengeForm.evidence_url" label="New evidence URL" type="url" required /></div><Field v-model="challengeForm.reason" label="Bounded reason" type="textarea" required /><p class="form-note">V8 evaluates every open challenge for the current passport with category, reason and independently fetched asset-bound evidence. A failed reassessment leaves all challenges open.</p><div v-if="challengeErrors.length" class="notice error"><div v-for="message in challengeErrors" :key="message">{{ message }}</div></div><div v-if="writeError" class="notice error">{{ writeError }}</div><div class="form-actions"><button class="button button-accent" :disabled="writing">Challenge v{{ challengePassport?.version || '?' }} <span aria-hidden="true">Ã¢â€ â€”</span></button><button type="button" class="button button-line" :disabled="writing || !challengePassport || challengeAssetState?.lifecycle_status !== 'CHALLENGED'" @click="reassessAsset(route.assetId)">Reassess {{ openChallengeCount || 'all open' }} open challenges will be evaluated <span aria-hidden="true">Ã¢â€ â€”</span></button></div></form></div></div></section>
 
-      <section v-else-if="route.name === 'proof'" class="page-shell proof-page"><div class="section-heading page-heading"><div><span class="section-index">12 / PUBLIC VERIFICATION</span><h1>V8 reviewer remediation proof</h1><p>Frozen source, authenticated identity proofs and Bradbury receipts are shown here. The failed multi-challenge reassessment remains visible and is not presented as finalized.</p></div><div class="heading-meta"><span class="mono">BEACON V8</span><span class="mono">SOURCE FROZEN</span><span class="source-tag validator">FINALIZED RECEIPTS</span></div></div><div class="proof-banner"><span class="status-dot"></span><strong>TESTNET BRADBURY / V8 CONTRACT</strong><span class="mono">CHAIN 4221</span></div><div class="proof-ledger"><div class="ledger-title"><span class="section-index">STATIC V8 RELEASE EVIDENCE</span><span class="mono">HISTORICAL FACTS</span></div><div class="ledger-row"><span>CONTRACT</span><CopyHash :value="releaseProof.contractAddress" label="Copy V8 contract address" /></div><div class="ledger-row"><span>SOURCE SHA256</span><CopyHash :value="releaseProof.sourceSha256" label="Copy V8 source SHA256" /></div><div class="ledger-row"><span>DEPLOYMENT TX</span><CopyHash :value="releaseProof.deploymentTx" label="Copy deployment transaction" /></div><div class="ledger-row"><span>SUBMIT TX</span><CopyHash :value="releaseProof.submitTx" label="Copy submission transaction" /></div><div class="ledger-row"><span>EVALUATE TX</span><CopyHash :value="releaseProof.evaluateTx" label="Copy evaluation transaction" /></div><div class="ledger-row"><span>PASSPORT</span><strong>V{{ releaseProof.passportVersion }} / {{ releaseProof.verdict }} / {{ releaseProof.maxLtvBps }} BPS</strong></div><div class="ledger-row"><span>CONSENSUS</span><strong>{{ releaseProof.evaluateStatus }}</strong><small>{{ releaseProof.validatorSummary }}</small></div></div><div v-if="!configured" class="notice warning">V8 contract configuration is missing; no live read is shown.</div><div v-else-if="loading" class="state-block">Reading V8 registry and passport<span class="loading-mark">...</span></div><div v-else-if="error" class="notice error">{{ error }}</div><div v-else-if="!proofLiveAvailable" class="notice error">UNKNOWN / LIVE CONTRACT READ UNAVAILABLE. Static V8 release evidence remains separate above.</div><template v-else><div class="proof-observation-grid"><section class="data-section"><div class="section-heading block-heading"><div><span class="section-index">LIVE CONTRACT READ</span><h2>Current state</h2></div><span class="source-tag on-chain">ON-CHAIN</span></div><dl class="data-list"><div><dt>Asset count</dt><dd>{{ liveCount }}</dd></div><div><dt>Asset ID</dt><dd class="break-value">{{ proofAsset.asset_id }}</dd></div><div><dt>Lifecycle</dt><dd>{{ proofAsset.lifecycle_status }}</dd></div><div><dt>Passport version</dt><dd>V{{ proofPassport.version }}</dd></div><div><dt>Verdict</dt><dd :class="riskClass(proofPassport.verdict)">{{ proofPassport.verdict || 'UNKNOWN' }}</dd></div><div><dt>Max LTV</dt><dd>{{ proofPassport.max_ltv_bps ?? 'UNKNOWN' }} BPS</dd></div></dl></section><section class="data-section"><div class="section-heading block-heading"><div><span class="section-index">EVALUATION RESULT</span><h2>Fail-closed is part of the proof.</h2></div><span class="source-tag validator">VALIDATOR-DERIVED</span></div><p class="proof-explanation">Beacon recorded <strong>{{ proofPassport.verdict || 'UNKNOWN' }}</strong> at <strong>{{ proofPassport.max_ltv_bps ?? 'UNKNOWN' }} BPS</strong> after the finalized identity-bound evaluation. A later multi-challenge reassessment reached UNDETERMINED and left the prior Passport and both challenges unchanged.</p><dl class="data-list"><div><dt>Policy basis</dt><dd>{{ proofPassport.policy_basis || 'UNKNOWN' }}</dd></div><div><dt>Failure state</dt><dd>{{ proofPassport.failure_state || 'UNKNOWN' }}</dd></div><div><dt>Identity status</dt><dd>{{ proofPassport.identity_status || 'UNKNOWN' }}</dd></div><div><dt>Identity digest</dt><dd>{{ proofPassport.identity_digest || 'UNKNOWN' }}</dd></div><div><dt>Validator receipts</dt><dd>{{ releaseProof.validatorSummary || 'UNAVAILABLE' }}</dd></div></dl></section></div></template></section>
       <section v-else class="page-shell"><div class="section-heading page-heading"><div><span class="section-index">BEACON</span><h1>Surface not found</h1><p>Return to the collateral registry or Beacon home.</p></div></div><button class="button button-accent" @click="navigate('/')">Go home <span aria-hidden="true">Ã¢â€ â€”</span></button></section>
     </main>
 
-    <footer v-if="!focusMode" class="site-footer"><div class="site-shell footer-grid"><span>BEACON / COLLATERAL ADMISSION</span><span>V8 / BRADBURY / PUBLIC READS</span><span class="mono">F TO FOCUS</span></div></footer>
+    <footer v-if="!focusMode" class="site-footer"><div class="site-shell footer-grid"><span>BEACON / COLLATERAL ADMISSION</span><span>V8 / STUDIONET / PUBLIC READS</span><span class="mono">F TO FOCUS</span></div></footer>
     <button class="focus-control" :aria-pressed="focusMode" aria-label="Toggle focus mode" @click="focusMode = !focusMode"><span class="mono">{{ focusMode ? 'ESC' : 'F' }}</span><span>{{ focusMode ? 'RESTORE' : 'FOCUS' }}</span></button>
     <TransactionStatus :state="tx" @close="tx.open = false" @recover="recoverWrite" />
   </div>
@@ -338,13 +339,12 @@ async function runWrite(operation, id, fn, expected, path = "") {
   setRecovery(operation, id, expected);
   try {
     tx.phase = "Wallet confirmation";
-    const result = await fn();
-    tx.phase = "Finalized";
+    const result = await fn((phase) => { tx.phase = phase; });
     await new Promise((resolve) => setTimeout(resolve, 120));
     await finishTx(result, path);
   } catch (cause) {
     writing.value = false;
-    tx.phase = cause?.phase === "reconcile" ? "Check again" : "Unable to complete";
+    tx.phase = cause?.phase === "reconcile" ? "Check again" : (tx.phase === "FINISHED_WITH_ERROR" ? tx.phase : "Unable to complete");
     tx.error = cause.message || "The transaction did not complete; no automatic rebroadcast was attempted.";
     tx.hash = cause.hash || tx.hash;
     tx.recoverable = Boolean(cause.hash || recovery.value);
@@ -358,7 +358,7 @@ async function recoverWrite() {
   tx.error = "";
   tx.recoverable = false;
   try {
-    const result = await registry.recover(recovery.value.operation, recovery.value.id, recovery.value.expected);
+    const result = await registry.recover(recovery.value.operation, recovery.value.id, recovery.value.expected, (phase) => { tx.phase = phase; });
     tx.hash = result.hash || tx.hash;
     tx.phase = "State verified";
     if (route.value.name === "detail") await loadDetail(route.value.assetId);
@@ -377,46 +377,46 @@ function advanceSubmit() {
     return;
   }
   const id = `eip155:1:${form.token_address.startsWith("0x") ? form.token_address.toLowerCase() : form.token_address}`;
-  runWrite("submit_asset", id, () => registry.submitAsset({ ...form }), () => registry.asset(id), `/assets/${encodeURIComponent(id)}`);
+  runWrite("submit_asset", id, (onStatus) => registry.submitAsset({ ...form }, onStatus), () => registry.asset(id), `/assets/${encodeURIComponent(id)}`);
   submitStep.value = 5;
 }
 
 function evaluateAsset(id) {
-  runWrite("evaluate_asset", id, () => registry.evaluateAsset(id), () => registry.currentPassport(id), `/assets/${encodeURIComponent(id)}`);
+  runWrite("evaluate_asset", id, (onStatus) => registry.evaluateAsset(id, onStatus), () => registry.currentPassport(id), `/assets/${encodeURIComponent(id)}`);
 }
 
 function checkpointWrite(operation, id, action) {
-  runWrite(operation, id, action, () => registry.checkpointState(id), `/assets/${encodeURIComponent(id)}`);
+  runWrite(operation, id, (onStatus) => action(onStatus), () => registry.checkpointState(id), `/assets/${encodeURIComponent(id)}`);
 }
 
 function verifyCoingecko(id) {
-  checkpointWrite("verify_coingecko_identity", id, () => registry.verifyCoingeckoIdentity(id));
+  checkpointWrite("verify_coingecko_identity", id, (onStatus) => registry.verifyCoingeckoIdentity(id, onStatus));
 }
 
 function verifyCoinpaprika(id) {
-  checkpointWrite("verify_coinpaprika_identity", id, () => registry.verifyCoinpaprikaIdentity(id));
+  checkpointWrite("verify_coinpaprika_identity", id, (onStatus) => registry.verifyCoinpaprikaIdentity(id, onStatus));
 }
 
 function verifySemantic(id, role) {
-  checkpointWrite("verify_semantic_source", id, () => registry.verifySemanticSource(id, role));
+  checkpointWrite("verify_semantic_source", id, (onStatus) => registry.verifySemanticSource(id, role, onStatus));
 }
 
 function refreshCoingecko(id) {
-  checkpointWrite("refresh_coingecko_market", id, () => registry.refreshCoingeckoMarket(id));
+  checkpointWrite("refresh_coingecko_market", id, (onStatus) => registry.refreshCoingeckoMarket(id, onStatus));
 }
 
 function refreshCoinpaprika(id) {
-  checkpointWrite("refresh_coinpaprika_market", id, () => registry.refreshCoinpaprikaMarket(id));
+  checkpointWrite("refresh_coinpaprika_market", id, (onStatus) => registry.refreshCoinpaprikaMarket(id, onStatus));
 }
 
 function submitChallenge() {
   if (challengeErrors.value.length) return;
   const id = route.value.assetId;
-  runWrite("challenge_asset", id, () => registry.challengeAsset(id, challengeForm.category, challengeForm.reason, challengeForm.evidence_url), () => registry.asset(id));
+  runWrite("challenge_asset", id, (onStatus) => registry.challengeAsset(id, challengeForm.category, challengeForm.reason, challengeForm.evidence_url, onStatus), () => registry.asset(id));
 }
 
 function reassessAsset(id) {
-  runWrite("reassess_asset", id, () => registry.reassessAsset(id), () => registry.currentPassport(id));
+  runWrite("reassess_asset", id, (onStatus) => registry.reassessAsset(id, onStatus), () => registry.currentPassport(id));
 }
 
 function handleKeydown(event) {

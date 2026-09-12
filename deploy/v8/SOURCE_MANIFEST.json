@@ -1,0 +1,15 @@
+{
+  "release": "beacon-v8-studionet",
+  "sourcePath": "contracts/beacon_v8_studionet.py",
+  "sourceBytes": 44394,
+  "sourceSha256": "698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c",
+  "network": "Studionet",
+  "rpc": "https://studio.genlayer.com/api",
+  "chainId": 61999,
+  "contractAddress": "0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1",
+  "deploymentTx": "0xf890b6bada92e8d42f2f8580cbdf10e39b1459d86f4f836425f8e0ab179286fc",
+  "deploymentStatus": "FINALIZED",
+  "deploymentExecution": "FINISHED_WITH_RETURN",
+  "identityProof": "VERIFIED",
+  "reviewerProof": "docs/v8-final/STUDIONET_LIVE_PROOF.md"
+}
