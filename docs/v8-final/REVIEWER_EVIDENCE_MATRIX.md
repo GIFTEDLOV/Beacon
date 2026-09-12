@@ -1,8 +1,10 @@
 # Reviewer evidence matrix
 
-The reviewer-visible release candidate is the live-proven stable Studionet
-source `contracts/beacon_v8_studionet.py`. Read-only evidence can be rerun with
-`npm run verify:studionet`; it does not submit a transaction.
+The reviewer-visible release is the live-proven stable Studionet source
+`contracts/beacon_v8_studionet.py`. Read-only evidence can be rerun with
+`npm run verify:studionet`; it does not submit a transaction. The production
+app is `https://beacon-rho-brown.vercel.app` and reads the same Studionet
+contract recorded below.
 
 ## Sentence 1
 
@@ -30,10 +32,16 @@ source `contracts/beacon_v8_studionet.py`. Read-only evidence can be rerun with
 | Atomic ordering | Validate/evaluate all records first; store Passport V(N+1), then resolve records; exception leaves old state and all records unchanged | Forced second-challenge failure test leaves no V2 and both challenges `OPEN` |
 | Per-record resolution | Each record receives its own `evaluation_result`, `evaluation_reason_code`, and `resolution_version` | Live A: `RESOLVED`, `SUPPORTED`, `MATERIAL`, version `2`; live B: same fields independently populated, version `2` |
 
-## Stable reproducibility
+## Stable reproducibility and publication
 
-- Stable direct proof: `27 passed` under the isolated stable Studionet harness.
+- Stable contract release proof: `29 passed` in the final release test run.
+- Frontend release proof: `21 passed`, typecheck PASS, build PASS.
+- Security/dependency checks: npm audits reported 0 vulnerabilities, `pip-audit`
+  clean, bounded secret scan clean.
 - Source parity: 44,394 bytes and SHA-256
   `698d2cec03a52b66944b6ccade26dfe5886af5ae3cb65a735a30ad28568f9d1c`.
+- Live contract: `0x06F2b53C158C6e9a794607d4dB197654eFB3A9b1` on Studionet chain `61999`.
 - Live deployment: `0xf890b6bada92e8d42f2f8580cbdf10e39b1459d86f4f836425f8e0ab179286fc`.
+- Production smoke: app shell, `/proof`, compiled active configuration, canonical
+  USDC read, Passport V2, and both V2 challenge records verified.
 - Full positive ledger: [`STUDIONET_LIVE_PROOF.md`](STUDIONET_LIVE_PROOF.md).
